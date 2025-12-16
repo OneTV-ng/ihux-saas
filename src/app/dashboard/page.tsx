@@ -80,7 +80,7 @@ const DashboardPage = () => {
                 className="h-auto p-4 flex-col gap-2"
                 asChild
               >
-                <Link href="https://docs.zexa.dev" target="_blank">
+                <Link href="https://github.com/zexahq/better-auth-starter" target="_blank">
                   <Mail className="h-5 w-5" />
                   <span>Documentation</span>
                 </Link>

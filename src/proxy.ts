@@ -3,7 +3,7 @@ import { DEFAULT_LOGIN_REDIRECT } from "@/lib/config";
 import { getSessionCookie } from "better-auth/cookies";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Get authentication status for all routes
