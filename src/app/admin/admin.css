@@ -1,0 +1,10 @@
+/* removed old admin css, will use new modern styles */
+.admin-sidebar nav ul li a:hover {
+  color: #38bdf8;
+}
+.admin-main {
+  flex: 1;
+  padding: 2.5rem 3rem;
+  color: #e0e7ef;
+  background: transparent;
+}

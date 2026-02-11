@@ -1,0 +1,19 @@
+{
+  "artistId": "artist_Q6cPzSsA8OnsX5K9DcMceVJCz9OeLK24",
+  "userId": "Q6cPzSsA8OnsX5K9DcMceVJCz9OeLK24",
+  "tracks": [
+    {
+      "title": "Today Na Today",
+      "artist": "Dr. EL Hassan",
+      "isrc": "",
+      "artistId": "artist_Q6cPzSsA8OnsX5K9DcMceVJCz9OeLK24",
+      "track_number": 1
+    }
+  ],
+  "coverUrl": "/uploads/renny/cover/1770796686134.jpg",
+  "mp3Url": "/uploads/renny/audio/1770796678301.mp3",
+  "rejectionFlag": false,
+  "rejectionReasons": [],
+  "songId": 9571,
+  "productCode": "2026009571"
+}

@@ -6,13 +6,8 @@ import { updateUserRole } from "@/utils/auth";
 import { Label } from "@/components/ui/label";
 import { UserWithDetails } from "@/utils/users";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { RoleSelect } from "./role-select";
+import { authClient } from "@/lib/auth-client";
 
 interface UserRoleDialogProps {
   user: UserWithDetails;
@@ -20,13 +15,10 @@ interface UserRoleDialogProps {
   onClose: () => void;
 }
 
-const ROLE_OPTIONS = [
-  { label: "User", value: "user" },
-  { label: "Admin", value: "admin" },
-];
-
 export function UserRoleDialog({ user, isOpen, onClose }: UserRoleDialogProps) {
-  const [selectedRole, setSelectedRole] = useState(user.role || "user");
+  const { data: session } = authClient.useSession();
+  const adminRole = session?.user?.role || "admin";
+  const [selectedRole, setSelectedRole] = useState(user.role || "new");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleUpdateRole = async () => {
@@ -55,23 +47,12 @@ export function UserRoleDialog({ user, isOpen, onClose }: UserRoleDialogProps) {
     >
       <div className="grid gap-4 py-4">
         <div className="grid gap-2">
-          <Label htmlFor="role">Select Role</Label>
-          <Select value={selectedRole} onValueChange={setSelectedRole}>
-            <SelectTrigger id="role" className="w-full">
-              <SelectValue placeholder="Select role" />
-            </SelectTrigger>
-            <SelectContent>
-              {ROLE_OPTIONS.map((option) => (
-                <SelectItem
-                  key={option.value}
-                  value={option.value}
-                  className="hover:bg-muted"
-                >
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label>Select Role</Label>
+          <RoleSelect
+            value={selectedRole}
+            onValueChange={setSelectedRole}
+            assignerRole={adminRole}
+          />
         </div>
       </div>
     </ConfirmationDialog>

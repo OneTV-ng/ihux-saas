@@ -1,0 +1,19 @@
+{
+  "artistId": "artist-id-placeholder",
+  "userId": "user-id-placeholder",
+  "tracks": [
+    {
+      "title": "",
+      "artist": "",
+      "isrc": "",
+      "artistId": "artist-id-placeholder",
+      "track_number": 1
+    }
+  ],
+  "coverUrl": "",
+  "mp3Url": "",
+  "rejectionFlag": false,
+  "rejectionReasons": [],
+  "songId": 300,
+  "productCode": "2026000300"
+}

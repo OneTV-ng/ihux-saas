@@ -6,15 +6,9 @@ import { createUser } from "@/utils/auth";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
 import { Switch } from "@/components/ui/switch";
+import { RoleSelect } from "./role-select";
+import { authClient } from "@/lib/auth-client";
 
 interface UserAddDialogProps {
   isOpen: boolean;
@@ -22,24 +16,28 @@ interface UserAddDialogProps {
   onSuccess?: () => void;
 }
 
-export function UserAddDialog({
-  isOpen,
-  onClose,
-  onSuccess,
-}: UserAddDialogProps) {
+export function UserAddDialog({ isOpen, onClose, onSuccess }: UserAddDialogProps) {
+  const { data: session } = authClient.useSession();
+  const adminRole = session?.user?.role || "admin";
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
+    firstName: "",
+    lastName: "",
+    username: "",
     email: "",
     password: "",
-    role: "user" as "user" | "admin",
+    role: "member" as string,
     autoVerify: false,
   });
 
   const handleCreateUser = async () => {
     try {
       setIsLoading(true);
-      await createUser(formData);
+      await createUser({
+        ...formData,
+        role: formData.role as "user" | "admin",
+      });
       toast.success(
         formData.autoVerify
           ? "User created and verified successfully"
@@ -47,14 +45,7 @@ export function UserAddDialog({
       );
       onSuccess?.();
       onClose();
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        role: "user",
-        autoVerify: false,
-      });
+      setFormData({ name: "", firstName: "", lastName: "", username: "", email: "", password: "", role: "member", autoVerify: false });
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);
@@ -75,15 +66,41 @@ export function UserAddDialog({
     >
       <div className="grid gap-4 py-4">
         <div className="grid gap-2">
+          <Label htmlFor="firstName">First Name</Label>
+          <Input
+            id="firstName"
+            value={formData.firstName}
+            onChange={(e) => setFormData((prev) => ({ ...prev, firstName: e.target.value }))}
+            placeholder="Enter user's first name"
+            required
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="lastName">Last Name</Label>
+          <Input
+            id="lastName"
+            value={formData.lastName}
+            onChange={(e) => setFormData((prev) => ({ ...prev, lastName: e.target.value }))}
+            placeholder="Enter user's last name"
+            required
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="username">Username</Label>
+          <Input
+            id="username"
+            value={formData.username}
+            onChange={(e) => setFormData((prev) => ({ ...prev, username: e.target.value }))}
+            placeholder="Enter username"
+          />
+        </div>
+        <div className="grid gap-2">
           <Label htmlFor="name">Name</Label>
           <Input
             id="name"
             value={formData.name}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, name: e.target.value }))
-            }
-            placeholder="Enter user's name"
-            required
+            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+            placeholder="Enter user's full name"
           />
         </div>
         <div className="grid gap-2">
@@ -92,9 +109,7 @@ export function UserAddDialog({
             id="email"
             type="email"
             value={formData.email}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, email: e.target.value }))
-            }
+            onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
             placeholder="Enter user's email"
             required
           />
@@ -105,29 +120,18 @@ export function UserAddDialog({
             id="password"
             type="password"
             value={formData.password}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, password: e.target.value }))
-            }
+            onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
             placeholder="Enter user's password"
             required
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="role">Role</Label>
-          <Select
+          <Label>Role</Label>
+          <RoleSelect
             value={formData.role}
-            onValueChange={(value: "user" | "admin") =>
-              setFormData((prev) => ({ ...prev, role: value }))
-            }
-          >
-            <SelectTrigger id="role" className="w-full">
-              <SelectValue placeholder="Select role" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="user">User</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
-            </SelectContent>
-          </Select>
+            onValueChange={(v) => setFormData((prev) => ({ ...prev, role: v }))}
+            assignerRole={adminRole}
+          />
         </div>
         <div className="flex items-center justify-between">
           <Label htmlFor="autoVerify" className="cursor-pointer">

@@ -56,6 +56,9 @@ export async function revokeUserSessions(userId: string) {
 
 export async function createUser(data: {
   name: string;
+  firstName?: string;
+  lastName?: string;
+  username?: string;
   email: string;
   password: string;
   role?: "user" | "admin" | ("user" | "admin")[];
@@ -72,6 +75,11 @@ export async function createUser(data: {
       ...(autoVerify ? { emailVerified: true } : {}),
     },
   };
+
+  // Add firstName, lastName, username if present
+  if (data.firstName) createData.firstName = data.firstName;
+  if (data.lastName) createData.lastName = data.lastName;
+  if (data.username) createData.username = data.username;
 
   const res = await authClient.admin.createUser(createData);
 
@@ -96,14 +104,73 @@ export async function createUser(data: {
 }
 
 export async function updateUserRole(userId: string, role: string) {
-  const res = await authClient.admin.setRole({
-    userId,
-    role: role as "user" | "admin" | ("user" | "admin")[],
+  // Use direct API route for full 14-role system (Better Auth only supports user/admin)
+  const res = await fetch(`/api/admin/users/${userId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ role }),
   });
-
-  if (res?.error) {
-    throw new Error(res.error.message || "Failed to update user role");
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to update user role");
   }
+  return res.json();
+}
 
-  return res;
+export async function updateUserDirect(
+  userId: string,
+  data: Record<string, unknown>
+) {
+  const res = await fetch(`/api/admin/users/${userId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || "Failed to update user");
+  }
+  return res.json();
+}
+
+export async function getUserDetail(userId: string) {
+  const res = await fetch(`/api/admin/users/${userId}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || "Failed to fetch user");
+  }
+  return res.json();
+}
+
+export async function bulkUserAction(
+  action: string,
+  userIds: string[],
+  params?: Record<string, unknown>
+) {
+  const res = await fetch("/api/admin/users/bulk", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, userIds, ...params }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || "Bulk operation failed");
+  }
+  return res.json();
+}
+
+export async function updateUserVerification(
+  userId: string,
+  data: { status: string; remark?: string; rejectionReason?: string; flagReason?: string }
+) {
+  const res = await fetch(`/api/admin/users/${userId}/verification`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || "Failed to update verification");
+  }
+  return res.json();
 }

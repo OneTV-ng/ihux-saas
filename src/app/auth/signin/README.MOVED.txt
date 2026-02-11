@@ -1,0 +1,1 @@
+This route has been renamed. Please use /auth/sign/ for sign-in functionality.

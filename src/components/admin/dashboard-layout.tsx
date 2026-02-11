@@ -18,7 +18,10 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
-import { DashboardSidebar } from "@/components/admin/dashboard-sidebar";
+import DashboardSidebar from "@/components/admin/dashboard-sidebar";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
+import { MobileSidebarToggle } from "@/components/mobile-sidebar-toggle";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
@@ -28,13 +31,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     pathSegments[0] === "admin" ? pathSegments.slice(1) : pathSegments;
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={true}>
       <DashboardSidebar />
       <SidebarInset className="bg-background overflow-hidden">
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
+        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b">
+          <div className="flex items-center justify-between w-full gap-2 px-4">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger className="-ml-1" />
+              <Separator orientation="vertical" className="mr-2 h-4" />
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
@@ -67,9 +71,17 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 })}
               </BreadcrumbList>
             </Breadcrumb>
+            </div>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <MobileSidebarToggle />
+            </div>
           </div>
         </header>
-        {children}
+        <div className="flex-1 overflow-auto pb-20 md:pb-4">
+          {children}
+        </div>
+        <MobileBottomNav />
       </SidebarInset>
     </SidebarProvider>
   );

@@ -9,12 +9,14 @@ export type PasswordInputProps = {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   id?: string;
+  autoFocus?: boolean;
 };
 
 export default function PasswordInput({
   value,
   onChange,
   id: idProp,
+  autoFocus,
 }: PasswordInputProps) {
   const id = useId();
   const inputId = idProp || id;
@@ -72,6 +74,7 @@ export default function PasswordInput({
             type={isVisible ? "text" : "password"}
             value={value}
             onChange={onChange}
+            autoFocus={autoFocus}
             aria-describedby={`${inputId}-description`}
           />
           <button

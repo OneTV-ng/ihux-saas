@@ -1,0 +1,290 @@
+2026-02-11 01:52:44 +01:00: [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+2026-02-11 01:59:02 +01:00: Error fetching users: Error: Failed query: select count(*)::int from `user`
+2026-02-11 01:59:02 +01:00: params: 
+2026-02-11 01:59:02 +01:00:     at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28834)
+2026-02-11 01:59:02 +01:00:     at async sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31485)
+2026-02-11 01:59:02 +01:00:     at async E (.next/server/chunks/[root-of-the-server]__cfa5fa77._.js:1:8033)
+2026-02-11 01:59:02 +01:00:     at async k (.next/server/chunks/[root-of-the-server]__cfa5fa77._.js:1:9629)
+2026-02-11 01:59:02 +01:00:     at async u (.next/server/chunks/[root-of-the-server]__cfa5fa77._.js:1:13107)
+2026-02-11 01:59:02 +01:00:     at async l (.next/server/chunks/[root-of-the-server]__cfa5fa77._.js:1:14145) {
+2026-02-11 01:59:02 +01:00:   query: 'select count(*)::int from `user`',
+2026-02-11 01:59:02 +01:00:   params: [],
+2026-02-11 01:59:02 +01:00:   [cause]: Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '::int from `user`' at line 1
+2026-02-11 01:59:02 +01:00:       at E.query (.next/server/chunks/_ed6bfc97._.js:30:63860)
+2026-02-11 01:59:02 +01:00:       at <unknown> (.next/server/chunks/_ed6bfc97._.js:37:31536)
+2026-02-11 01:59:02 +01:00:       at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28815)
+2026-02-11 01:59:02 +01:00:       at sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31496)
+2026-02-11 01:59:02 +01:00:       at nz.execute (.next/server/chunks/_ed6bfc97._.js:37:19489)
+2026-02-11 01:59:02 +01:00:       at nz.then (.next/server/chunks/_ed6bfc97._.js:30:128219)
+2026-02-11 01:59:02 +01:00:       at async E (.next/server/chunks/[root-of-the-server]__cfa5fa77._.js:1:8033)
+2026-02-11 01:59:02 +01:00:       at async k (.next/server/chunks/[root-of-the-server]__cfa5fa77._.js:1:9629) {
+2026-02-11 01:59:02 +01:00:     code: 'ER_PARSE_ERROR',
+2026-02-11 01:59:02 +01:00:     errno: 1064,
+2026-02-11 01:59:02 +01:00:     sql: 'select count(*)::int from `user`',
+2026-02-11 01:59:02 +01:00:     sqlState: '42000',
+2026-02-11 01:59:02 +01:00:     sqlMessage: "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '::int from `user`' at line 1"
+2026-02-11 01:59:02 +01:00:   }
+2026-02-11 01:59:02 +01:00: }
+2026-02-11 01:59:10 +01:00: Error fetching users: Error: Failed query: select count(*)::int from `user`
+2026-02-11 01:59:10 +01:00: params: 
+2026-02-11 01:59:10 +01:00:     at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28834)
+2026-02-11 01:59:10 +01:00:     at async sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31485)
+2026-02-11 01:59:10 +01:00:     at async E (.next/server/chunks/[root-of-the-server]__cfa5fa77._.js:1:8033)
+2026-02-11 01:59:10 +01:00:     at async k (.next/server/chunks/[root-of-the-server]__cfa5fa77._.js:1:9629)
+2026-02-11 01:59:10 +01:00:     at async u (.next/server/chunks/[root-of-the-server]__cfa5fa77._.js:1:13107)
+2026-02-11 01:59:10 +01:00:     at async l (.next/server/chunks/[root-of-the-server]__cfa5fa77._.js:1:14145) {
+2026-02-11 01:59:10 +01:00:   query: 'select count(*)::int from `user`',
+2026-02-11 01:59:10 +01:00:   params: [],
+2026-02-11 01:59:10 +01:00:   [cause]: Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '::int from `user`' at line 1
+2026-02-11 01:59:10 +01:00:       at E.query (.next/server/chunks/_ed6bfc97._.js:30:63860)
+2026-02-11 01:59:10 +01:00:       at <unknown> (.next/server/chunks/_ed6bfc97._.js:37:31536)
+2026-02-11 01:59:10 +01:00:       at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28815)
+2026-02-11 01:59:10 +01:00:       at sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31496)
+2026-02-11 01:59:10 +01:00:       at nz.execute (.next/server/chunks/_ed6bfc97._.js:37:19489)
+2026-02-11 01:59:10 +01:00:       at nz.then (.next/server/chunks/_ed6bfc97._.js:30:128219)
+2026-02-11 01:59:10 +01:00:       at async E (.next/server/chunks/[root-of-the-server]__cfa5fa77._.js:1:8033)
+2026-02-11 01:59:10 +01:00:       at async k (.next/server/chunks/[root-of-the-server]__cfa5fa77._.js:1:9629) {
+2026-02-11 01:59:10 +01:00:     code: 'ER_PARSE_ERROR',
+2026-02-11 01:59:10 +01:00:     errno: 1064,
+2026-02-11 01:59:10 +01:00:     sql: 'select count(*)::int from `user`',
+2026-02-11 01:59:10 +01:00:     sqlState: '42000',
+2026-02-11 01:59:10 +01:00:     sqlMessage: "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '::int from `user`' at line 1"
+2026-02-11 01:59:10 +01:00:   }
+2026-02-11 01:59:10 +01:00: }
+2026-02-11 01:59:35 +01:00: Error fetching users: Error: Failed query: select count(*)::int from `user`
+2026-02-11 01:59:35 +01:00: params: 
+2026-02-11 01:59:35 +01:00:     at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28834)
+2026-02-11 01:59:35 +01:00:     at async sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31485)
+2026-02-11 01:59:35 +01:00:     at async E (.next/server/chunks/[root-of-the-server]__cfa5fa77._.js:1:8033)
+2026-02-11 01:59:35 +01:00:     at async k (.next/server/chunks/[root-of-the-server]__cfa5fa77._.js:1:9629)
+2026-02-11 01:59:35 +01:00:     at async u (.next/server/chunks/[root-of-the-server]__cfa5fa77._.js:1:13107)
+2026-02-11 01:59:35 +01:00:     at async l (.next/server/chunks/[root-of-the-server]__cfa5fa77._.js:1:14145) {
+2026-02-11 01:59:35 +01:00:   query: 'select count(*)::int from `user`',
+2026-02-11 01:59:35 +01:00:   params: [],
+2026-02-11 01:59:35 +01:00:   [cause]: Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '::int from `user`' at line 1
+2026-02-11 01:59:35 +01:00:       at E.query (.next/server/chunks/_ed6bfc97._.js:30:63860)
+2026-02-11 01:59:35 +01:00:       at <unknown> (.next/server/chunks/_ed6bfc97._.js:37:31536)
+2026-02-11 01:59:35 +01:00:       at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28815)
+2026-02-11 01:59:35 +01:00:       at sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31496)
+2026-02-11 01:59:35 +01:00:       at nz.execute (.next/server/chunks/_ed6bfc97._.js:37:19489)
+2026-02-11 01:59:35 +01:00:       at nz.then (.next/server/chunks/_ed6bfc97._.js:30:128219)
+2026-02-11 01:59:35 +01:00:       at async E (.next/server/chunks/[root-of-the-server]__cfa5fa77._.js:1:8033)
+2026-02-11 01:59:35 +01:00:       at async k (.next/server/chunks/[root-of-the-server]__cfa5fa77._.js:1:9629) {
+2026-02-11 01:59:35 +01:00:     code: 'ER_PARSE_ERROR',
+2026-02-11 01:59:35 +01:00:     errno: 1064,
+2026-02-11 01:59:35 +01:00:     sql: 'select count(*)::int from `user`',
+2026-02-11 01:59:35 +01:00:     sqlState: '42000',
+2026-02-11 01:59:35 +01:00:     sqlMessage: "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '::int from `user`' at line 1"
+2026-02-11 01:59:35 +01:00:   }
+2026-02-11 01:59:35 +01:00: }
+2026-02-11 02:03:07 +01:00: [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+2026-02-11 06:55:44 +01:00: [2m2026-02-11T05:55:44.433Z[0m [31mERROR[0m [1m[Better Auth]:[0m INTERNAL_SERVER_ERROR Error: Failed query: select `id`, `expires_at`, `token`, `created_at`, `updated_at`, `ip_address`, `user_agent`, `user_id`, `impersonated_by` from `session` where `session`.`token` = ?
+2026-02-11 06:55:44 +01:00: params: GGKn8M4sWAmyzgq5b7KtENDhwauqgidK
+2026-02-11 06:55:44 +01:00:     at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28834)
+2026-02-11 06:55:44 +01:00:     at async sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31485)
+2026-02-11 06:55:44 +01:00:     at async Object.findOne (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:10463)
+2026-02-11 06:55:44 +01:00:     at async Object.findSession (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:65:13967)
+2026-02-11 06:55:44 +01:00:     at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:74:17333)
+2026-02-11 06:55:44 +01:00:     at async o (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:63:175347)
+2026-02-11 06:55:44 +01:00:     at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:420:22363)
+2026-02-11 06:55:44 +01:00:     at async n (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:3037) {
+2026-02-11 06:55:44 +01:00:   query: 'select `id`, `expires_at`, `token`, `created_at`, `updated_at`, `ip_address`, `user_agent`, `user_id`, `impersonated_by` from `session` where `session`.`token` = ?',
+2026-02-11 06:55:44 +01:00:   params: [Array],
+2026-02-11 06:55:44 +01:00:   [cause]: Error: getaddrinfo EAI_AGAIN onetv.ng
+2026-02-11 06:55:44 +01:00:       at E.query (.next/server/chunks/_ed6bfc97._.js:30:63860)
+2026-02-11 06:55:44 +01:00:       at <unknown> (.next/server/chunks/_ed6bfc97._.js:37:31536)
+2026-02-11 06:55:44 +01:00:       at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28815)
+2026-02-11 06:55:44 +01:00:       at sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31496)
+2026-02-11 06:55:44 +01:00:       at nz.execute (.next/server/chunks/_ed6bfc97._.js:37:19489)
+2026-02-11 06:55:44 +01:00:       at nz.then (.next/server/chunks/_ed6bfc97._.js:30:128219)
+2026-02-11 06:55:44 +01:00:       at async Object.findOne (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:10463)
+2026-02-11 06:55:44 +01:00:       at async Object.findSession (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:65:13967)
+2026-02-11 06:55:44 +01:00:       at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:74:17333) {
+2026-02-11 06:55:44 +01:00:     code: 'EAI_AGAIN',
+2026-02-11 06:55:44 +01:00:     errno: -3001,
+2026-02-11 06:55:44 +01:00:     sql: undefined,
+2026-02-11 06:55:44 +01:00:     sqlState: undefined,
+2026-02-11 06:55:44 +01:00:     sqlMessage: undefined
+2026-02-11 06:55:44 +01:00:   }
+2026-02-11 06:55:44 +01:00: }
+2026-02-11 06:55:44 +01:00: [2m2026-02-11T05:55:44.536Z[0m [31mERROR[0m [1m[Better Auth]:[0m INTERNAL_SERVER_ERROR Error: Failed query: select `id`, `expires_at`, `token`, `created_at`, `updated_at`, `ip_address`, `user_agent`, `user_id`, `impersonated_by` from `session` where `session`.`token` = ?
+2026-02-11 06:55:44 +01:00: params: GGKn8M4sWAmyzgq5b7KtENDhwauqgidK
+2026-02-11 06:55:44 +01:00:     at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28834)
+2026-02-11 06:55:44 +01:00:     at async sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31485)
+2026-02-11 06:55:44 +01:00:     at async Object.findOne (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:10463)
+2026-02-11 06:55:44 +01:00:     at async Object.findSession (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:65:13967)
+2026-02-11 06:55:44 +01:00:     at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:74:17333)
+2026-02-11 06:55:44 +01:00:     at async o (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:63:175347)
+2026-02-11 06:55:44 +01:00:     at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:420:22363)
+2026-02-11 06:55:44 +01:00:     at async n (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:3037) {
+2026-02-11 06:55:44 +01:00:   query: 'select `id`, `expires_at`, `token`, `created_at`, `updated_at`, `ip_address`, `user_agent`, `user_id`, `impersonated_by` from `session` where `session`.`token` = ?',
+2026-02-11 06:55:44 +01:00:   params: [Array],
+2026-02-11 06:55:44 +01:00:   [cause]: Error: getaddrinfo EAI_AGAIN onetv.ng
+2026-02-11 06:55:44 +01:00:       at E.query (.next/server/chunks/_ed6bfc97._.js:30:63860)
+2026-02-11 06:55:44 +01:00:       at <unknown> (.next/server/chunks/_ed6bfc97._.js:37:31536)
+2026-02-11 06:55:44 +01:00:       at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28815)
+2026-02-11 06:55:44 +01:00:       at sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31496)
+2026-02-11 06:55:44 +01:00:       at nz.execute (.next/server/chunks/_ed6bfc97._.js:37:19489)
+2026-02-11 06:55:44 +01:00:       at nz.then (.next/server/chunks/_ed6bfc97._.js:30:128219)
+2026-02-11 06:55:44 +01:00:       at async Object.findOne (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:10463)
+2026-02-11 06:55:44 +01:00:       at async Object.findSession (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:65:13967)
+2026-02-11 06:55:44 +01:00:       at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:74:17333) {
+2026-02-11 06:55:44 +01:00:     code: 'EAI_AGAIN',
+2026-02-11 06:55:44 +01:00:     errno: -3001,
+2026-02-11 06:55:44 +01:00:     sql: undefined,
+2026-02-11 06:55:44 +01:00:     sqlState: undefined,
+2026-02-11 06:55:44 +01:00:     sqlMessage: undefined
+2026-02-11 06:55:44 +01:00:   }
+2026-02-11 06:55:44 +01:00: }
+2026-02-11 06:56:16 +01:00: [2m2026-02-11T05:56:16.637Z[0m [31mERROR[0m [1m[Better Auth]:[0m INTERNAL_SERVER_ERROR Error: Failed query: select `id`, `expires_at`, `token`, `created_at`, `updated_at`, `ip_address`, `user_agent`, `user_id`, `impersonated_by` from `session` where `session`.`token` = ?
+2026-02-11 06:56:16 +01:00: params: GGKn8M4sWAmyzgq5b7KtENDhwauqgidK
+2026-02-11 06:56:16 +01:00:     at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28834)
+2026-02-11 06:56:16 +01:00:     at async sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31485)
+2026-02-11 06:56:16 +01:00:     at async Object.findOne (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:10463)
+2026-02-11 06:56:16 +01:00:     at async Object.findSession (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:65:13967)
+2026-02-11 06:56:16 +01:00:     at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:74:17333)
+2026-02-11 06:56:16 +01:00:     at async o (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:63:175347)
+2026-02-11 06:56:16 +01:00:     at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:420:22363)
+2026-02-11 06:56:16 +01:00:     at async n (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:3037) {
+2026-02-11 06:56:16 +01:00:   query: 'select `id`, `expires_at`, `token`, `created_at`, `updated_at`, `ip_address`, `user_agent`, `user_id`, `impersonated_by` from `session` where `session`.`token` = ?',
+2026-02-11 06:56:16 +01:00:   params: [Array],
+2026-02-11 06:56:16 +01:00:   [cause]: Error: getaddrinfo EAI_AGAIN onetv.ng
+2026-02-11 06:56:16 +01:00:       at E.query (.next/server/chunks/_ed6bfc97._.js:30:63860)
+2026-02-11 06:56:16 +01:00:       at <unknown> (.next/server/chunks/_ed6bfc97._.js:37:31536)
+2026-02-11 06:56:16 +01:00:       at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28815)
+2026-02-11 06:56:16 +01:00:       at sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31496)
+2026-02-11 06:56:16 +01:00:       at nz.execute (.next/server/chunks/_ed6bfc97._.js:37:19489)
+2026-02-11 06:56:16 +01:00:       at nz.then (.next/server/chunks/_ed6bfc97._.js:30:128219)
+2026-02-11 06:56:16 +01:00:       at async Object.findOne (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:10463)
+2026-02-11 06:56:16 +01:00:       at async Object.findSession (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:65:13967)
+2026-02-11 06:56:16 +01:00:       at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:74:17333) {
+2026-02-11 06:56:16 +01:00:     code: 'EAI_AGAIN',
+2026-02-11 06:56:16 +01:00:     errno: -3001,
+2026-02-11 06:56:16 +01:00:     sql: undefined,
+2026-02-11 06:56:16 +01:00:     sqlState: undefined,
+2026-02-11 06:56:16 +01:00:     sqlMessage: undefined
+2026-02-11 06:56:16 +01:00:   }
+2026-02-11 06:56:16 +01:00: }
+2026-02-11 06:56:16 +01:00: [2m2026-02-11T05:56:16.696Z[0m [31mERROR[0m [1m[Better Auth]:[0m INTERNAL_SERVER_ERROR Error: Failed query: select `id`, `expires_at`, `token`, `created_at`, `updated_at`, `ip_address`, `user_agent`, `user_id`, `impersonated_by` from `session` where `session`.`token` = ?
+2026-02-11 06:56:16 +01:00: params: GGKn8M4sWAmyzgq5b7KtENDhwauqgidK
+2026-02-11 06:56:16 +01:00:     at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28834)
+2026-02-11 06:56:16 +01:00:     at async sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31485)
+2026-02-11 06:56:16 +01:00:     at async Object.findOne (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:10463)
+2026-02-11 06:56:16 +01:00:     at async Object.findSession (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:65:13967)
+2026-02-11 06:56:16 +01:00:     at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:74:17333)
+2026-02-11 06:56:16 +01:00:     at async o (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:63:175347)
+2026-02-11 06:56:16 +01:00:     at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:420:22363)
+2026-02-11 06:56:16 +01:00:     at async n (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:3037) {
+2026-02-11 06:56:16 +01:00:   query: 'select `id`, `expires_at`, `token`, `created_at`, `updated_at`, `ip_address`, `user_agent`, `user_id`, `impersonated_by` from `session` where `session`.`token` = ?',
+2026-02-11 06:56:16 +01:00:   params: [Array],
+2026-02-11 06:56:16 +01:00:   [cause]: Error: getaddrinfo EAI_AGAIN onetv.ng
+2026-02-11 06:56:16 +01:00:       at E.query (.next/server/chunks/_ed6bfc97._.js:30:63860)
+2026-02-11 06:56:16 +01:00:       at <unknown> (.next/server/chunks/_ed6bfc97._.js:37:31536)
+2026-02-11 06:56:16 +01:00:       at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28815)
+2026-02-11 06:56:16 +01:00:       at sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31496)
+2026-02-11 06:56:16 +01:00:       at nz.execute (.next/server/chunks/_ed6bfc97._.js:37:19489)
+2026-02-11 06:56:16 +01:00:       at nz.then (.next/server/chunks/_ed6bfc97._.js:30:128219)
+2026-02-11 06:56:16 +01:00:       at async Object.findOne (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:10463)
+2026-02-11 06:56:16 +01:00:       at async Object.findSession (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:65:13967)
+2026-02-11 06:56:16 +01:00:       at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:74:17333) {
+2026-02-11 06:56:16 +01:00:     code: 'EAI_AGAIN',
+2026-02-11 06:56:16 +01:00:     errno: -3001,
+2026-02-11 06:56:16 +01:00:     sql: undefined,
+2026-02-11 06:56:16 +01:00:     sqlState: undefined,
+2026-02-11 06:56:16 +01:00:     sqlMessage: undefined
+2026-02-11 06:56:16 +01:00:   }
+2026-02-11 06:56:16 +01:00: }
+2026-02-11 07:00:58 +01:00: [2m2026-02-11T06:00:58.139Z[0m [31mERROR[0m [1m[Better Auth]:[0m INTERNAL_SERVER_ERROR Error: Failed query: select `id`, `expires_at`, `token`, `created_at`, `updated_at`, `ip_address`, `user_agent`, `user_id`, `impersonated_by` from `session` where `session`.`token` = ?
+2026-02-11 07:00:58 +01:00: params: GGKn8M4sWAmyzgq5b7KtENDhwauqgidK
+2026-02-11 07:00:58 +01:00:     at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28834)
+2026-02-11 07:00:58 +01:00:     at async sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31485)
+2026-02-11 07:00:58 +01:00:     at async Object.findOne (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:10463)
+2026-02-11 07:00:58 +01:00:     at async Object.findSession (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:65:13967)
+2026-02-11 07:00:58 +01:00:     at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:74:17333)
+2026-02-11 07:00:58 +01:00:     at async o (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:63:175347)
+2026-02-11 07:00:58 +01:00:     at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:420:22363)
+2026-02-11 07:00:58 +01:00:     at async n (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:3037) {
+2026-02-11 07:00:58 +01:00:   query: 'select `id`, `expires_at`, `token`, `created_at`, `updated_at`, `ip_address`, `user_agent`, `user_id`, `impersonated_by` from `session` where `session`.`token` = ?',
+2026-02-11 07:00:58 +01:00:   params: [Array],
+2026-02-11 07:00:58 +01:00:   [cause]: Error: read ECONNRESET
+2026-02-11 07:00:58 +01:00:       at E.query (.next/server/chunks/_ed6bfc97._.js:30:63860)
+2026-02-11 07:00:58 +01:00:       at <unknown> (.next/server/chunks/_ed6bfc97._.js:37:31536)
+2026-02-11 07:00:58 +01:00:       at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28815)
+2026-02-11 07:00:58 +01:00:       at sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31496)
+2026-02-11 07:00:58 +01:00:       at nz.execute (.next/server/chunks/_ed6bfc97._.js:37:19489)
+2026-02-11 07:00:58 +01:00:       at nz.then (.next/server/chunks/_ed6bfc97._.js:30:128219)
+2026-02-11 07:00:58 +01:00:       at async Object.findOne (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:10463)
+2026-02-11 07:00:58 +01:00:       at async Object.findSession (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:65:13967)
+2026-02-11 07:00:58 +01:00:       at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:74:17333) {
+2026-02-11 07:00:58 +01:00:     code: 'ECONNRESET',
+2026-02-11 07:00:58 +01:00:     errno: -104,
+2026-02-11 07:00:58 +01:00:     sql: undefined,
+2026-02-11 07:00:58 +01:00:     sqlState: undefined,
+2026-02-11 07:00:58 +01:00:     sqlMessage: undefined
+2026-02-11 07:00:58 +01:00:   }
+2026-02-11 07:00:58 +01:00: }
+2026-02-11 07:01:18 +01:00: [2m2026-02-11T06:01:18.700Z[0m [31mERROR[0m [1m[Better Auth]:[0m INTERNAL_SERVER_ERROR Error: Failed query: select `id`, `expires_at`, `token`, `created_at`, `updated_at`, `ip_address`, `user_agent`, `user_id`, `impersonated_by` from `session` where `session`.`token` = ?
+2026-02-11 07:01:18 +01:00: params: GGKn8M4sWAmyzgq5b7KtENDhwauqgidK
+2026-02-11 07:01:18 +01:00:     at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28834)
+2026-02-11 07:01:18 +01:00:     at async sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31485)
+2026-02-11 07:01:18 +01:00:     at async Object.findOne (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:10463)
+2026-02-11 07:01:18 +01:00:     at async Object.findSession (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:65:13967)
+2026-02-11 07:01:18 +01:00:     at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:74:17333)
+2026-02-11 07:01:18 +01:00:     at async o (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:63:175347)
+2026-02-11 07:01:18 +01:00:     at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:420:22363)
+2026-02-11 07:01:18 +01:00:     at async n (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:3037) {
+2026-02-11 07:01:18 +01:00:   query: 'select `id`, `expires_at`, `token`, `created_at`, `updated_at`, `ip_address`, `user_agent`, `user_id`, `impersonated_by` from `session` where `session`.`token` = ?',
+2026-02-11 07:01:18 +01:00:   params: [Array],
+2026-02-11 07:01:18 +01:00:   [cause]: Error: read ECONNRESET
+2026-02-11 07:01:18 +01:00:       at E.query (.next/server/chunks/_ed6bfc97._.js:30:63860)
+2026-02-11 07:01:18 +01:00:       at <unknown> (.next/server/chunks/_ed6bfc97._.js:37:31536)
+2026-02-11 07:01:18 +01:00:       at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28815)
+2026-02-11 07:01:18 +01:00:       at sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31496)
+2026-02-11 07:01:18 +01:00:       at nz.execute (.next/server/chunks/_ed6bfc97._.js:37:19489)
+2026-02-11 07:01:18 +01:00:       at nz.then (.next/server/chunks/_ed6bfc97._.js:30:128219)
+2026-02-11 07:01:18 +01:00:       at async Object.findOne (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:10463)
+2026-02-11 07:01:18 +01:00:       at async Object.findSession (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:65:13967)
+2026-02-11 07:01:18 +01:00:       at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:74:17333) {
+2026-02-11 07:01:18 +01:00:     code: 'ECONNRESET',
+2026-02-11 07:01:18 +01:00:     errno: -104,
+2026-02-11 07:01:18 +01:00:     sql: undefined,
+2026-02-11 07:01:18 +01:00:     sqlState: undefined,
+2026-02-11 07:01:18 +01:00:     sqlMessage: undefined
+2026-02-11 07:01:18 +01:00:   }
+2026-02-11 07:01:18 +01:00: }
+2026-02-11 07:06:56 +01:00: [2m2026-02-11T06:06:56.963Z[0m [31mERROR[0m [1m[Better Auth]:[0m INTERNAL_SERVER_ERROR Error: Failed query: select `id`, `expires_at`, `token`, `created_at`, `updated_at`, `ip_address`, `user_agent`, `user_id`, `impersonated_by` from `session` where `session`.`token` = ?
+2026-02-11 07:06:56 +01:00: params: GGKn8M4sWAmyzgq5b7KtENDhwauqgidK
+2026-02-11 07:06:56 +01:00:     at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28834)
+2026-02-11 07:06:56 +01:00:     at async sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31485)
+2026-02-11 07:06:56 +01:00:     at async Object.findOne (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:10463)
+2026-02-11 07:06:56 +01:00:     at async Object.findSession (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:65:13967)
+2026-02-11 07:06:56 +01:00:     at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:74:17333)
+2026-02-11 07:06:56 +01:00:     at async o (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:63:175347)
+2026-02-11 07:06:56 +01:00:     at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:420:22363)
+2026-02-11 07:06:56 +01:00:     at async n (.next/server/chunks/[root-of-the-server]__c70d0d71._.js:1:6588) {
+2026-02-11 07:06:56 +01:00:   query: 'select `id`, `expires_at`, `token`, `created_at`, `updated_at`, `ip_address`, `user_agent`, `user_id`, `impersonated_by` from `session` where `session`.`token` = ?',
+2026-02-11 07:06:56 +01:00:   params: [Array],
+2026-02-11 07:06:56 +01:00:   [cause]: Error: 
+2026-02-11 07:06:56 +01:00:       at E.query (.next/server/chunks/_ed6bfc97._.js:30:63860)
+2026-02-11 07:06:56 +01:00:       at <unknown> (.next/server/chunks/_ed6bfc97._.js:37:31536)
+2026-02-11 07:06:56 +01:00:       at sl.queryWithCache (.next/server/chunks/_ed6bfc97._.js:37:28815)
+2026-02-11 07:06:56 +01:00:       at sl.execute (.next/server/chunks/_ed6bfc97._.js:37:31496)
+2026-02-11 07:06:56 +01:00:       at nz.execute (.next/server/chunks/_ed6bfc97._.js:37:19489)
+2026-02-11 07:06:56 +01:00:       at nz.then (.next/server/chunks/_ed6bfc97._.js:30:128219)
+2026-02-11 07:06:56 +01:00:       at async Object.findOne (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:456:10463)
+2026-02-11 07:06:56 +01:00:       at async Object.findSession (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:65:13967)
+2026-02-11 07:06:56 +01:00:       at async (.next/server/chunks/src_lib_auth_ts_f5ef5b5b._.js:74:17333) {
+2026-02-11 07:06:56 +01:00:     code: 'ETIMEDOUT',
+2026-02-11 07:06:56 +01:00:     errno: undefined,
+2026-02-11 07:06:56 +01:00:     sql: undefined,
+2026-02-11 07:06:56 +01:00:     sqlState: undefined,
+2026-02-11 07:06:56 +01:00:     sqlMessage: undefined
+2026-02-11 07:06:56 +01:00:   }
+2026-02-11 07:06:56 +01:00: }
+2026-02-11 07:06:56 +01:00: Failed to get server session: [Error [APIError]: Failed to get session] {
+2026-02-11 07:06:56 +01:00:   status: 'INTERNAL_SERVER_ERROR',
+2026-02-11 07:06:56 +01:00:   body: [Object],
+2026-02-11 07:06:56 +01:00:   headers: {},
+2026-02-11 07:06:56 +01:00:   statusCode: 500
+2026-02-11 07:06:56 +01:00: }
+2026-02-11 07:07:34 +01:00: [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`

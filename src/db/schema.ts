@@ -1,66 +1,137 @@
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+// TypeScript interfaces for User and Song
+export interface User {
+  id: string;
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  gender?: string;
+  email: string;
+  username?: string;
+  thumbnail?: string;
+  provider?: string;
+  emailVerified: boolean;
+  image?: string | null;
+  tenant?: string;
+  profilePicture?: string;
+  headerBackground?: string;
+  phone?: string;
+  whatsapp?: string;
+  dateOfBirth?: Date;
+  address?: string;
+  recordLabel?: string;
+  socialMedia?: any;
+  bankDetails?: any;
+  settings?: any;
+  createdAt: Date;
+  updatedAt: Date;
+  role: string;
+  apiClass?: string;
+  banned?: boolean | null;
+  banReason?: string | null;
+  banExpires?: Date | null;
+  isUserVerified?: boolean;
+  isVerified?: boolean|null;
+}
 
-export const user = pgTable("user", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull().unique(),
-  emailVerified: boolean("email_verified")
+export interface Song {
+  id: string;
+  title: string;
+  artistDisplayName: string;
+  genre?: string | undefined;
+  cover?: string | undefined;
+  numberOfTracks?: number | undefined;
+}
+// src/db/schema.ts
+import { mysqlTable as table, text as textType, timestamp as timestampType, boolean as booleanType, date as dateType, json as jsonType, int as intType } from 'drizzle-orm/mysql-core';
+
+export const user = table("users", {
+  id: textType("id").primaryKey(),
+  name: textType("name").notNull(),
+  firstName: textType("first_name"),
+  lastName: textType("last_name"),
+  gender: textType("gender", { enum: ["male", "female", "other", "prefer_not_to_say"] }),
+  email: textType("email").notNull().unique(),
+  username: textType("username").unique(),
+    thumbnail: textType("thumbnail"),
+provider: textType("provider"),
+ isVerified: booleanType("verified")
+    .$defaultFn(() => false)
+    .notNull(), 
+  emailVerified: booleanType("email_verified")
     .$defaultFn(() => false)
     .notNull(),
-  image: text("image"),
-  createdAt: timestamp("created_at")
+  image: textType("image"),
+  tenant: textType("tenant"),
+  profilePicture: textType("profile_picture"),
+  headerBackground: textType("header_background"),
+  phone: textType("phone"),
+  whatsapp: textType("whatsapp"),
+  dateOfBirth: dateType("date_of_birth"),
+  address: textType("address"),
+  recordLabel: textType("record_label"),
+  socialMedia: jsonType("social_media"),
+  bankDetails: jsonType("bank_details"),
+  settings: jsonType("settings"),
+  createdAt: timestampType("created_at")
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
-  updatedAt: timestamp("updated_at")
+  updatedAt: timestampType("updated_at")
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
-  role: text("role"),
-  banned: boolean("banned"),
-  banReason: text("ban_reason"),
-  banExpires: timestamp("ban_expires"),
+  role: textType("role", { enum: ["guest", "new", "member", "artist", "band", "studio", "choir", "group", "community", "label", "editor", "manager", "admin", "sadmin"] })
+    .$defaultFn(() => "member")
+    .notNull(),
+  apiClass: textType("api_class", { enum: ["5", "10", "20", "50"] })
+    .$defaultFn(() => "5")
+    .notNull(),
+  banned: booleanType("banned")
+    .$defaultFn(() => false)
+    .notNull(),
+  banReason: textType("ban_reason"),
+  banExpires: timestampType("ban_expires"),
 });
 
-export const session = pgTable("session", {
-  id: text("id").primaryKey(),
-  expiresAt: timestamp("expires_at").notNull(),
-  token: text("token").notNull().unique(),
-  createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-  userId: text("user_id")
+export const session = table("session", {
+  id: textType("id").primaryKey(),
+  expiresAt: timestampType("expires_at").notNull(),
+  token: textType("token").notNull().unique(),
+  createdAt: timestampType("created_at").notNull(),
+  updatedAt: timestampType("updated_at").notNull(),
+  ipAddress: textType("ip_address"),
+  userAgent: textType("user_agent"),
+  userId: textType("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  impersonatedBy: text("impersonated_by"),
+  impersonatedBy: textType("impersonated_by"),
 });
 
-export const account = pgTable("account", {
-  id: text("id").primaryKey(),
-  accountId: text("account_id").notNull(),
-  providerId: text("provider_id").notNull(),
-  userId: text("user_id")
+export const account = table("account", {
+  id: textType("id").primaryKey(),
+  accountId: textType("account_id").notNull(),
+  providerId: textType("provider_id").notNull(),
+  userId: textType("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  accessToken: text("access_token"),
-  refreshToken: text("refresh_token"),
-  idToken: text("id_token"),
-  accessTokenExpiresAt: timestamp("access_token_expires_at"),
-  refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
-  scope: text("scope"),
-  password: text("password"),
-  createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
+  accessToken: textType("access_token"),
+  refreshToken: textType("refresh_token"),
+  idToken: textType("id_token"),
+  accessTokenExpiresAt: timestampType("access_token_expires_at"),
+  refreshTokenExpiresAt: timestampType("refresh_token_expires_at"),
+  scope: textType("scope"),
+  password: textType("password"),
+  createdAt: timestampType("created_at").notNull(),
+  updatedAt: timestampType("updated_at").notNull(),
 });
 
-export const verification = pgTable("verification", {
-  id: text("id").primaryKey(),
-  identifier: text("identifier").notNull(),
-  value: text("value").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").$defaultFn(
+export const verification = table("verification", {
+  id: textType("id").primaryKey(),
+  identifier: textType("identifier").notNull(),
+  value: textType("value").notNull(),
+  expiresAt: timestampType("expires_at").notNull(),
+  createdAt: timestampType("created_at").$defaultFn(
     () => /* @__PURE__ */ new Date(),
   ),
-  updatedAt: timestamp("updated_at").$defaultFn(
+  updatedAt: timestampType("updated_at").$defaultFn(
     () => /* @__PURE__ */ new Date(),
   ),
   type: textType("type"),
@@ -344,9 +415,9 @@ export const artistProfiles = table("artist_profiles", {
   fanNews: jsonType("fan_news"),
   isPublic: booleanType("is_public").$defaultFn(() => false),
   isVerified: booleanType("is_verified").$defaultFn(() => false),
-  totalSongs: textType("total_songs"),
-  totalPlays: textType("total_plays"),
-  totalFollowers: textType("total_followers"),
+  totalSongs: intType("total_songs").$defaultFn(() => 0),
+  totalPlays: intType("total_plays").$defaultFn(() => 0),
+  totalFollowers: intType("total_followers").$defaultFn(() => 0),
   createdAt: timestampType("created_at").$defaultFn(() => new Date()).notNull(),
   updatedAt: timestampType("updated_at").$defaultFn(() => new Date()).notNull(),
 });

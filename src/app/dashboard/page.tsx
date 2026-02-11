@@ -1,4 +1,6 @@
 import Navbar from "@/components/landing/navbar";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
+import { PageBreadcrumb } from "@/components/page-breadcrumb";
 import {
   Card,
   CardContent,
@@ -8,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Shield, Users, Mail, Settings, Code } from "lucide-react";
+import { Shield, Users, Mail, Settings, Code, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 
 const DashboardPage = () => {
@@ -27,8 +29,9 @@ const DashboardPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      <PageBreadcrumb />
 
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="container mx-auto px-4 py-8 pb-24 md:pb-8 max-w-6xl">
         {/* Quick Actions */}
         <Card className="mb-12">
           <CardHeader>
@@ -47,7 +50,17 @@ const DashboardPage = () => {
                 className="h-auto p-4 flex-col gap-2"
                 asChild
               >
-                <Link href="/auth/register">
+                <Link href="/desk">
+                  <LayoutDashboard className="h-5 w-5" />
+                  <span>Member Dashboard</span>
+                </Link>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex-col gap-2"
+                asChild
+              >
+                <Link href="/auth/signup">
                   <Users className="h-5 w-5" />
                   <span>Create Account</span>
                 </Link>
@@ -114,15 +127,16 @@ const DashboardPage = () => {
           <p className="text-muted-foreground">
             Built with ❤️ by{" "}
             <Link
-              href="https://zexa.dev"
+              href="https://dxl.music"
               target="_blank"
               className="text-primary hover:underline font-medium"
             >
-              Zexa
+              DXL
             </Link>
           </p>
         </div>
       </div>
+      <MobileBottomNav />
     </div>
   );
 };

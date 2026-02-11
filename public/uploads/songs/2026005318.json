@@ -1,0 +1,21 @@
+{
+  "artistId": "artist-id-placeholder",
+  "userId": "user-id-placeholder",
+  "tracks": [
+    {
+      "title": "Today Na Today",
+      "artist": "",
+      "isrc": "",
+      "artistId": "artist-id-placeholder",
+      "track_number": 1
+    }
+  ],
+  "coverUrl": "/uploads/renny/cover/1770772903860.jpg",
+  "mp3Url": "/uploads/renny/audio/1770772438017.mp3",
+  "rejectionFlag": true,
+  "rejectionReasons": [
+    "Cover art must be at least 300 dpi."
+  ],
+  "songId": 5318,
+  "productCode": "2026005318"
+}

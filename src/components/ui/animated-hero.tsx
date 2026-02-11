@@ -40,9 +40,10 @@ function Hero() {
                   alt="Zexa"
                   width={16}
                   height={16}
+                  loading="eager"
                   className="w-4 h-4"
                 />
-                Built by Zexa <MoveRight className="w-4 h-4" />
+                Built by DXL <MoveRight className="w-4 h-4" />
               </a>
             </Button>
           </div>
@@ -57,7 +58,7 @@ function Hero() {
                   <motion.span
                     key={index}
                     className="absolute font-semibold"
-                    initial={{ opacity: 0, y: "-100" }}
+                    initial={{ opacity: 0, y: -100 }}
                     transition={{ type: "spring", stiffness: 50 }}
                     animate={
                       titleNumber === index

@@ -1,0 +1,1 @@
+This folder is deprecated. Use /auth/sign/ for all login-related actions and pages.

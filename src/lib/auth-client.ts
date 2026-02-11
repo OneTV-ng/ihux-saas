@@ -13,6 +13,13 @@ export const signInWithGithub = async () => {
   });
 };
 
+export const signInWithSpotify = async () => {
+  await authClient.signIn.social({
+    provider: "spotify",
+    callbackURL: DEFAULT_LOGIN_REDIRECT,
+  });
+};
+
 export const signInWithGoogle = async () => {
   await authClient.signIn.social({
     provider: "google",

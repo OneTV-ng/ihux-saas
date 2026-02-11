@@ -1,0 +1,19 @@
+{
+  "artistId": "artist_Q6cPzSsA8OnsX5K9DcMceVJCz9OeLK24",
+  "userId": "Q6cPzSsA8OnsX5K9DcMceVJCz9OeLK24",
+  "tracks": [
+    {
+      "title": "Today Na Today",
+      "artist": "Emi F Moto",
+      "isrc": "",
+      "artistId": "artist_Q6cPzSsA8OnsX5K9DcMceVJCz9OeLK24",
+      "track_number": 1
+    }
+  ],
+  "coverUrl": "/uploads/renny/cover/1770791797839.jpg",
+  "mp3Url": "/uploads/renny/audio/1770791750723.mp3",
+  "rejectionFlag": false,
+  "rejectionReasons": [],
+  "songId": 6138,
+  "productCode": "2026006138"
+}

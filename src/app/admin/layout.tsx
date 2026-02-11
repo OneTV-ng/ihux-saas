@@ -1,20 +1,15 @@
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { notFound } from "next/navigation";
-import DashboardLayout from "@/components/admin/dashboard-layout";
+import DashboardSidebar from '@/components/admin/dashboard-sidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
-export default async function AdminLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session || session.user.role !== "admin") {
-    return notFound();
-  }
-
-  return <DashboardLayout>{children}</DashboardLayout>;
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+	return (
+		<SidebarProvider>
+			<div className="flex min-h-screen bg-background">
+				<DashboardSidebar />
+				<main className="flex-1 p-4 md:p-8 bg-background overflow-y-auto">
+					{children}
+				</main>
+			</div>
+		</SidebarProvider>
+	);
 }

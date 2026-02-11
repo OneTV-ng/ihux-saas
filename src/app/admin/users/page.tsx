@@ -1,15 +1,10 @@
-import type { Metadata } from "next";
-import { UsersTable } from "@/components/admin/users-table";
+import { UsersManagementClient } from "@/components/admin/users-management-client";
+import { Suspense } from "react";
 
-export const metadata: Metadata = {
-  title: "Users | Admin Dashboard",
-  description: "Manage users in the admin dashboard",
-};
-
-export default function UsersPage() {
+export default function AdminUsersPage() {
   return (
-    <div className="flex flex-col gap-4 p-4 md:p-6">
-      <UsersTable />
-    </div>
+    <Suspense fallback={<div>Loading users...</div>}>
+      <UsersManagementClient />
+    </Suspense>
   );
 }

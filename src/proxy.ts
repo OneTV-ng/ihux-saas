@@ -21,7 +21,7 @@ export async function proxy(request: NextRequest) {
 
   // For protected paths, check authentication
   if (!sessionCookie) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
+    return NextResponse.redirect(new URL("/auth/sign", request.url));
   }
 
   return NextResponse.next();

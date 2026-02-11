@@ -1,0 +1,24 @@
+                           Table "public.user_verification"
+        Column         |            Type             | Collation | Nullable | Default 
+-----------------------+-----------------------------+-----------+----------+---------
+ id                    | text                        |           | not null | 
+ user_id               | text                        |           | not null | 
+ status                | text                        |           | not null | 
+ submitted_at          | timestamp without time zone |           |          | 
+ processed_at          | timestamp without time zone |           |          | 
+ verified_at           | timestamp without time zone |           |          | 
+ remark                | text                        |           |          | 
+ rejection_reason      | text                        |           |          | 
+ flag_reason           | text                        |           |          | 
+ reviewed_by           | text                        |           |          | 
+ government_id_url     | text                        |           |          | 
+ signature_url         | text                        |           |          | 
+ completion_percentage | text                        |           |          | 
+ created_at            | timestamp without time zone |           | not null | 
+ updated_at            | timestamp without time zone |           | not null | 
+Indexes:
+    "user_verification_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "user_verification_reviewed_by_user_id_fk" FOREIGN KEY (reviewed_by) REFERENCES "user"(id)
+    "user_verification_user_id_user_id_fk" FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE
+

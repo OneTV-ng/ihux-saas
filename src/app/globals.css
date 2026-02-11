@@ -1,3 +1,18 @@
+@keyframes zoom {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-zoom {
+  animation: zoom 8s ease-in-out infinite;
+}
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -149,4 +164,44 @@ body {
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--muted) transparent;
+}
+
+/* Mobile responsive utilities */
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .px-safe {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Mobile bottom nav spacing */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Sidebar improvements */
+[data-sidebar] {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Better mobile sidebar overlay */
+@media (max-width: 768px) {
+  [data-sidebar="sidebar"] {
+    z-index: 100;
+  }
 }

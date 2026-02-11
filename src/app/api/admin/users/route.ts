@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUsers } from "@/utils/users";
+import { requireAdmin } from "@/lib/auth-server";
 
 export async function GET(request: NextRequest) {
   try {
+    await requireAdmin();
+
     const searchParams = request.nextUrl.searchParams;
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
@@ -16,8 +19,8 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status") || undefined;
     const email = searchParams.get("email") || undefined;
     const name = searchParams.get("name") || undefined;
+    const search = searchParams.get("search") || undefined;
 
-    // Pass all filters and sort to getUsers
     const { users, total } = await getUsers({
       limit,
       offset,
@@ -27,6 +30,7 @@ export async function GET(request: NextRequest) {
       status,
       email,
       name,
+      search,
     });
 
     return NextResponse.json({
@@ -38,9 +42,11 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error fetching users:", error);
+    const message = error instanceof Error ? error.message : "Failed to fetch users";
+    const statusCode = message.includes("Forbidden") || message.includes("Unauthorized") || message.includes("Admin") ? 403 : 500;
     return NextResponse.json(
-      { error: "Failed to fetch users" },
-      { status: 500 },
+      { error: message },
+      { status: statusCode },
     );
   }
 }

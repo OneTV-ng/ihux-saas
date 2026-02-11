@@ -1,12 +1,13 @@
 import { db } from "@/db";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { user as userTable, account as accountTable, session as sessionTable, userVerification, User } from "@/db/schema";
+import { eq, like, or, sql, desc, asc, and, inArray } from "drizzle-orm";
 
 export interface UserWithDetails {
   id: string;
   name: string;
   email: string;
-  verified: boolean;
+  emailVerified: boolean;
+  verificationStatus: string | null;
   banned: boolean;
   banReason?: string;
   banExpires?: Date | null;
@@ -26,120 +27,135 @@ export interface GetUsersOptions {
   status?: string;
   email?: string;
   name?: string;
+  search?: string;
 }
 
 export async function getUsers(
   options: GetUsersOptions = {},
 ): Promise<{ users: UserWithDetails[]; total: number }> {
-  // Build query for Better Auth
-  const query: Record<string, any> = {
-    limit: options.limit ?? 10,
-    offset: options.offset ?? 0,
-  };
+  const limit = options.limit ?? 10;
+  const offset = options.offset ?? 0;
 
-  // Sorting
-  if (options.sortBy) query.sortBy = options.sortBy;
-  if (options.sortDirection) query.sortDirection = options.sortDirection;
+  // Build WHERE conditions
+  const conditions = [];
 
-  // Filtering by role
+  // Role filter
   if (options.role) {
-    query.filterField = "role";
-    query.filterOperator = "eq";
-    query.filterValue = options.role;
+    conditions.push(eq(userTable.role, options.role as typeof userTable.role.enumValues[number]));
   }
 
-  // Filtering by status (active/banned)
-  if (options.status) {
-    query.filterField = "banned";
-    query.filterOperator = "eq";
-    query.filterValue = options.status === "banned" ? true : false;
+  // Status filter (active/banned)
+  if (options.status === "banned") {
+    conditions.push(eq(userTable.banned, true));
+  } else if (options.status === "active") {
+    conditions.push(eq(userTable.banned, false));
   }
 
-  // Filtering by email
-  if (options.email) {
-    query.searchField = "email";
-    query.searchOperator = "contains";
-    query.searchValue = options.email;
+  // Combined search (name OR email)
+  if (options.search) {
+    conditions.push(
+      or(
+        like(userTable.name, `%${options.search}%`),
+        like(userTable.email, `%${options.search}%`)
+      )!
+    );
+  } else {
+    // Individual field searches
+    if (options.email) {
+      conditions.push(like(userTable.email, `%${options.email}%`));
+    }
+    if (options.name) {
+      conditions.push(like(userTable.name, `%${options.name}%`));
+    }
   }
 
-  // Filtering by name
-  if (options.name) {
-    query.searchField = "name";
-    query.searchOperator = "contains";
-    query.searchValue = options.name;
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+  // Determine sort column
+  const sortCol =
+    options.sortBy === "email" ? userTable.email :
+    options.sortBy === "role" ? userTable.role :
+    options.sortBy === "createdAt" ? userTable.createdAt :
+    userTable.createdAt;
+
+  const orderFn = options.sortDirection === "asc" ? asc : desc;
+
+  // Count total
+  const countResult = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(userTable)
+    .where(whereClause);
+  const total = countResult[0]?.count ?? 0;
+
+  // Fetch users
+  const usersResult = await db
+    .select()
+    .from(userTable)
+    .where(whereClause)
+    .orderBy(orderFn(sortCol))
+    .limit(limit)
+    .offset(offset);
+
+  if (usersResult.length === 0) {
+    return { users: [], total };
   }
 
-  // Get users from Better Auth
-  const result = await auth.api.listUsers({
-    headers: await headers(),
-    query,
-  });
+  const userIds = usersResult.map((u: User) => u.id);
 
-  if (!result.users) {
-    return { users: [], total: 0 };
+  // Fetch accounts for these users only
+  const accountsResult = await db
+    .select({ userId: accountTable.userId, providerId: accountTable.providerId })
+    .from(accountTable)
+    .where(inArray(accountTable.userId, userIds));
+
+  // Fetch latest session per user
+  const sessionsResult = await db
+    .select({ userId: sessionTable.userId, createdAt: sessionTable.createdAt })
+    .from(sessionTable)
+    .where(inArray(sessionTable.userId, userIds));
+
+  // Fetch verification status per user
+  const verificationResult = await db
+    .select({ userId: userVerification.userId, status: userVerification.status })
+    .from(userVerification)
+    .where(inArray(userVerification.userId, userIds));
+
+  // Group accounts by user
+  const accountsByUser: Record<string, string[]> = {};
+  for (const acc of accountsResult) {
+    if (!accountsByUser[acc.userId]) accountsByUser[acc.userId] = [];
+    accountsByUser[acc.userId].push(acc.providerId);
   }
 
-  // Query separate tables to get accounts information
-  const accountsQuery = await db.query.account.findMany({
-    columns: {
-      userId: true,
-      providerId: true,
-    },
-  });
+  // Get last sign-in per user
+  const lastSignInByUser: Record<string, Date> = {};
+  for (const sess of sessionsResult) {
+    if (!lastSignInByUser[sess.userId] || sess.createdAt > lastSignInByUser[sess.userId]) {
+      lastSignInByUser[sess.userId] = sess.createdAt;
+    }
+  }
 
-  // Query session information
-  const sessionsQuery = await db.query.session.findMany({
-    columns: {
-      userId: true,
-      createdAt: true,
-    },
-    orderBy: (session) => [session.createdAt],
-  });
+  // Map verification status by user
+  const verificationByUser: Record<string, string> = {};
+  for (const v of verificationResult) {
+    verificationByUser[v.userId] = v.status;
+  }
 
-  // Group accounts by user ID
-  const accountsByUser = accountsQuery.reduce(
-    (acc, account) => {
-      if (!acc[account.userId]) {
-        acc[account.userId] = [];
-      }
-      acc[account.userId].push(account.providerId);
-      return acc;
-    },
-    {} as Record<string, string[]>,
-  );
+  const users: UserWithDetails[] = usersResult.map((u: any) => ({
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    emailVerified: u.emailVerified,
+    verificationStatus: verificationByUser[u.id] || null,
+    role: u.role,
+    banned: u.banned,
+    banReason: u.banReason || "",
+    banExpires: u.banExpires || null,
+    accounts: accountsByUser[u.id] || [],
+    lastSignIn: lastSignInByUser[u.id] || null,
+    createdAt: u.createdAt,
+    avatarUrl: u.image || "",
+  }));
 
-  // Get last sign in date by user ID
-  const lastSignInByUser = sessionsQuery.reduce(
-    (acc, session) => {
-      if (!acc[session.userId] || session.createdAt > acc[session.userId]) {
-        acc[session.userId] = session.createdAt;
-      }
-      return acc;
-    },
-    {} as Record<string, Date>,
-  );
-
-  // Transform the raw data into the format expected by the UsersTable component
-  const users: UserWithDetails[] = result.users.map((user) => {
-    const accounts = accountsByUser[user.id] || [];
-    const banned = user.banned ?? false;
-    const banReason = user.banReason || "";
-    const banExpires = user.banExpires || null;
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      verified: user.emailVerified,
-      role: user.role,
-      banned,
-      banReason,
-      banExpires,
-      accounts,
-      lastSignIn: lastSignInByUser[user.id] || null,
-      createdAt: user.createdAt,
-      avatarUrl: user.image || "",
-    };
-  });
-
-  return { users, total: result.total ?? users.length };
+  return { users, total };
 }

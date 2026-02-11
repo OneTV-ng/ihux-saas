@@ -15,6 +15,34 @@
       "when": 1748003205524,
       "tag": "0001_superb_kid_colt",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770618795723,
+      "tag": "0002_daffy_stark_industries",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1770623562030,
+      "tag": "0003_deep_zombie",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1770658173554,
+      "tag": "0004_flimsy_shotgun",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1770676303403,
+      "tag": "0005_condemned_shotgun",
+      "breakpoints": true
     }
   ]
 }
