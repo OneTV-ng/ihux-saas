@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { songs } from "@/db/music-schema";
-import { eq, and, or, sql, desc } from "drizzle-orm";
+import { eq, and, or, sql, desc, like, SQL } from "drizzle-orm";
 
 // GET - Public songs for listening (basic info only)
 export async function GET(request: NextRequest) {
@@ -11,16 +11,16 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
 
-    const whereClause: any[] = [eq(songs.status, "approved")];
+    const whereClause: SQL[] = [eq(songs.status, "approved") as SQL];
 
     if (search) {
-      const searchTerm = `%${search.toLowerCase()}%`;
+      const searchPattern = `%${search.toLowerCase()}%`;
       whereClause.push(
         or(
-          sql`LOWER(${songs.title}) LIKE ${searchTerm}`,
-          sql`LOWER(${songs.artistName}) LIKE ${searchTerm}`,
-          sql`LOWER(${songs.genre}) LIKE ${searchTerm}`
-        )
+          like(songs.title, searchPattern),
+          like(songs.artistName, searchPattern),
+          like(songs.genre, searchPattern)
+        ) as SQL
       );
     }
     const offset = (page - 1) * pageSize;
