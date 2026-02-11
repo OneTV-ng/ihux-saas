@@ -11,8 +11,8 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
 
-    let whereClause = [eq(songs.status, "approved")];
-    
+    const whereClause: any[] = [eq(songs.status, "approved")];
+
     if (search) {
       const searchTerm = `%${search.toLowerCase()}%`;
       whereClause.push(
