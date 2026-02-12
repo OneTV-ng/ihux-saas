@@ -1,16 +1,17 @@
 "use client";
-
 import { z } from "zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
+//import { Button } from "@/components/ui/button";
+
 import { Label } from "@/components/ui/label";
 import React, { useId, useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Button  } from "@/components/ui/button";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginUser } from "../../app/auth/--sign/action";
+import { loginUser } from "@/app/auth/signin/action";
 import { FormSuccess, FormError } from "../ui/form-messages";
 import { useAuth } from "@/contexts/auth-context";
 
@@ -129,20 +130,20 @@ const LoginForm = () => {
             className="pe-9"
             {...register("password")}
           />
-          <button
-            className="text-muted-foreground/80 hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-md transition-[color,box-shadow] outline-none focus:z-10 focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+          <Button
             type="button"
+            className="text-muted-foreground/80 hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-md transition-[color,box-shadow] outline-none focus:z-10 focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
             onClick={toggleVisibility}
             aria-label={isVisible ? "Hide password" : "Show password"}
             aria-pressed={isVisible}
-            aria-controls="password"
+            aria-controls={id}
           >
             {isVisible ? (
               <EyeOffIcon size={16} aria-hidden="true" />
             ) : (
               <EyeIcon size={16} aria-hidden="true" />
             )}
-          </button>
+          </Button>
         </div>
         {errors.password && (
           <span className="text-xs text-red-500">

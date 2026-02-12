@@ -27,21 +27,15 @@ export class FileUploadService {
   /**
    * Upload a file without progress tracking
    */
-  async uploadFile(file: File, type: "audio" | "cover" | "document", userId: string): Promise<UploadResult> {
+  async uploadFile(file: File, type: "audio" | "cover" | "document"): Promise<UploadResult> {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("type", type);
 
     try {
-      const headers: Record<string, string> = {};
-      if (userId) {
-        headers["x-user-id"] = userId;
-      }
-
       const response = await fetch("/api/upload/file", {
         method: "POST",
         body: formData,
-        headers,
       });
 
       if (!response.ok) {
@@ -63,8 +57,7 @@ export class FileUploadService {
   async uploadFileWithProgress(
     file: File,
     type: "audio" | "cover" | "document",
-    onProgress: (percent: number) => void,
-    userId: string
+    onProgress: (percent: number) => void
   ): Promise<UploadResult> {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -122,9 +115,6 @@ export class FileUploadService {
         });
 
         xhr.open("POST", "/api/upload/file");
-        if (userId) {
-          xhr.setRequestHeader("x-user-id", userId);
-        }
         xhr.send(formData);
       };
 
@@ -138,8 +128,7 @@ export class FileUploadService {
   uploadFileWithCancel(
     file: File,
     type: "audio" | "cover" | "document",
-    onProgress: (percent: number) => void,
-    userId: string
+    onProgress: (percent: number) => void
   ): {
     promise: Promise<UploadResult>;
     cancel: () => void;
@@ -181,9 +170,6 @@ export class FileUploadService {
       });
 
       xhr.open("POST", "/api/upload/file");
-      if (userId) {
-        xhr.setRequestHeader("x-user-id", userId);
-      }
       xhr.send(formData);
     });
 

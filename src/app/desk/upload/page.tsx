@@ -212,8 +212,7 @@ const IncrementalMusicUpload = () => {
         "cover",
         (percent) => {
           setCoverProgress(percent);
-        },
-        user?.id
+        }
       );
 
       setCoverUploadId(result.id);
@@ -261,8 +260,7 @@ const IncrementalMusicUpload = () => {
         "audio",
         (percent) => {
           setTrackProgress(percent);
-        },
-        user?.id
+        }
       );
 
       // Add track to song

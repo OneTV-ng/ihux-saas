@@ -8,8 +8,20 @@ import { GoogleIcon, GithubIcon , SpotifyIcon} from "@/components/ui/icons";
 import { signInWithGithub, signInWithSpotify ,signInWithGoogle } from "@/lib/auth-client";
 import { GalleryVerticalEnd } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useAuth } from "@/contexts/auth-context";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const RegisterPage = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.push("/dashboard");
+    }
+  }, [isAuthenticated, isLoading, router]);
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="absolute top-4 right-4">

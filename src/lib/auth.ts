@@ -88,8 +88,8 @@ export const auth = betterAuth({
         admin: adminRole,
         sadmin: sadminRole,
       },
-      defaultRole: "member",
-      adminRoles: ["manager","admin", "sadmin"],
+      defaultRole: "new",
+      adminRoles: ["admin", "sadmin"],
     }),
   ],
 });

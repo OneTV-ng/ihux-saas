@@ -34,7 +34,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
-  ],
+, "src/lib/auth.ts", "src/lib/auth.ts"  ],
   "exclude": [
     "node_modules"
   ]

@@ -1,0 +1,43 @@
+{
+  "artistId": "artist_ZWlbbongvLB6je2MLMpn8biSOkFtIwbU",
+  "userId": "ZWlbbongvLB6je2MLMpn8biSOkFtIwbU",
+  "tracks": [
+    {
+      "title": "Today Na Today",
+      "artist": "olacci",
+      "isrc": "",
+      "artistId": "artist_ZWlbbongvLB6je2MLMpn8biSOkFtIwbU",
+      "track_number": 1
+    }
+  ],
+  "coverUrl": "/uploads/favour/cover/1770861376101.jpg",
+  "mp3Url": "/uploads/favour/audio/1770861371700.mp3",
+  "rejectionFlag": false,
+  "rejectionReasons": [],
+  "producer": "Dr. EL",
+  "songwriter": "Reginald Richmen",
+  "studio": "",
+  "language": "English",
+  "country": "Nigeria",
+  "city": "Lagos",
+  "genre": "Hipop",
+  "subGenre": "",
+  "recordLabel": "mStudios",
+  "explicit": "no",
+  "upc": "",
+  "writer": "",
+  "releaseDate": "2026-02-12",
+  "info": "",
+  "lyrics": "",
+  "mediaLinks": {
+    "appleMusic": "",
+    "spotify": "",
+    "youtube": "",
+    "soundcloud": "",
+    "tidal": "",
+    "deezer": "",
+    "amazonMusic": ""
+  },
+  "songId": 396,
+  "productCode": "2026000396"
+}

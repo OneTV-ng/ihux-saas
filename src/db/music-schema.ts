@@ -1,5 +1,6 @@
 // src/db/music-schema.ts
-
+import { mysqlTable as table, text, timestamp, boolean, int as integer, decimal as numeric, json, varchar, index } from 'drizzle-orm/mysql-core';
+import { user } from './schema';
 // --- Types generated from schema definitions below ---
 export type Song = {
   id: string;
@@ -49,11 +50,6 @@ export type Track = {
   updatedAt: Date;
 };
 
-import { mysqlTable as table, text, timestamp, boolean, int as integer, decimal as numeric, json, varchar, index } from 'drizzle-orm/mysql-core';
-import { user } from "./schema";
-
-
-
 export const songs = table("songs", {
   id: varchar("id", { length: 36 }).primaryKey(),
   title: text("title").notNull(),
@@ -89,13 +85,13 @@ export const songs = table("songs", {
 export const tracks = table("tracks", {
   id: varchar("id", { length: 36 }).primaryKey(),
   songId: varchar("song_id", { length: 36 }).notNull().references(() => songs.id, { onDelete: "cascade" }),
-  trackNumber: integer("track_number"),
+  trackNumber: integer("track_number").notNull(),
+  title: text("title").notNull(),
   isrc: text("isrc"),
   mp3: text("mp3").notNull(), // URL or upload_id
   explicit: text("explicit").default("no"), // 'no', 'yes', 'covered'
   lyrics: text("lyrics"),
   leadVocal: text("lead_vocal"),
-  featured: text("featured"),
   producer: text("producer"),
   writer: text("writer"),
   duration: integer("duration"), // in seconds
@@ -104,7 +100,6 @@ export const tracks = table("tracks", {
 }, (table) => ({
   songIdx: index("tracks_song_idx").on(table.songId),
   isrcIdx: index("tracks_isrc_idx").on(table.isrc),
-  trackNumberIdx: index("tracks_track_number_idx").on(table.trackNumber),
 }));
 
 // Uploads table (file upload management)
@@ -147,18 +142,18 @@ export const royalties = table("royalties", {
   deductionsPercent: numeric("deductions_percent", { precision: 5, scale: 2 }).default("0"),
   deductionsUsd: numeric("deductions_usd", { precision: 10, scale: 2 }).default("0"),
   netAmountUsd: numeric("net_amount_usd", { precision: 10, scale: 2 }).notNull(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" }),
+  paymentStatus: text("payment_status").notNull().default("pending"), // 'pending', 'processing', 'paid'
   songId: varchar("song_id", { length: 36 }).references(() => songs.id),
   trackId: varchar("track_id", { length: 36 }).references(() => tracks.id),
-  artistId: varchar("artist_id", { length: 36 }).references(() => user.id),
-  managerId: varchar("manager_id", { length: 36 }).references(() => user.id),
+  artistId: text("artist_id").references(() => user.id),
+  userId: text("user_id").references(() => user.id),
+  managerId: text("manager_id").references(() => user.id),
   matchStatus: text("match_status").default("unmatched"), // 'matched', 'partial', 'unmatched'
-  matchedBy: varchar("matched_by", { length: 36 }).references(() => user.id),
+  matchedBy: text("matched_by").references(() => user.id),
   matchedAt: timestamp("matched_at"),
-  approvedBy: varchar("approved_by", { length: 36 }).references(() => user.id),
+  approvedBy: text("approved_by").references(() => user.id),
   approvedAt: timestamp("approved_at"),
   paidAt: timestamp("paid_at"),
-  paymentStatus: text("payment_status"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({
@@ -169,7 +164,6 @@ export const royalties = table("royalties", {
   isrcIdx: index("royalties_isrc_idx").on(table.isrc),
 }));
 
-
 // Admin tasks table
 export const adminTasks = table("admin_tasks", {
   id: varchar("id", { length: 36 }).primaryKey(),
@@ -177,13 +171,11 @@ export const adminTasks = table("admin_tasks", {
   description: text("description"),
   priority: text("priority").default("medium"), // 'low', 'medium', 'high', 'urgent'
   status: text("status").notNull().default("pending"), // 'pending', 'in_progress', 'completed', 'cancelled'
-  assignedTo: varchar("assigned_to", { length: 36 }).references(() => user.id),
-  createdBy: varchar("created_by", { length: 36 }).notNull().references(() => user.id),
+  assignedTo: text("assigned_to").references(() => user.id),
+  createdBy: text("created_by").notNull().references(() => user.id),
   dueDate: timestamp("due_date"),
   completedAt: timestamp("completed_at"),
   metadata: json("metadata"), // task-specific data
-  artistId: varchar("artist_id", { length: 36 }).references(() => user.id),
-  userId: varchar("user_id", { length: 36 }).references(() => user.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({
@@ -196,15 +188,13 @@ export const adminTasks = table("admin_tasks", {
 export const adminAlerts = table("admin_alerts", {
   id: varchar("id", { length: 36 }).primaryKey(),
   type: text("type").notNull(), // 'flag', 'copyright', 'user_report', 'system'
+  severity: text("severity").notNull().default("info"), // 'info', 'warning', 'error', 'critical'
   title: text("title").notNull(),
   message: text("message").notNull(),
   entityType: text("entity_type"), // 'song', 'user', 'upload', 'royalty'
-  entityId: varchar("entity_id", { length: 36 }),
+  entityId: text("entity_id"),
   status: text("status").notNull().default("active"), // 'active', 'resolved', 'dismissed'
-  severity: text("severity"),
-  matchedBy: varchar("matched_by", { length: 36 }).references(() => user.id),
-  approvedBy: varchar("approved_by", { length: 36 }).references(() => user.id),
-  resolvedBy: varchar("resolved_by", { length: 36 }).references(() => user.id),
+  resolvedBy: text("resolved_by").references(() => user.id),
   resolvedAt: timestamp("resolved_at"),
   metadata: json("metadata"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -212,15 +202,14 @@ export const adminAlerts = table("admin_alerts", {
 }, (table) => ({
   statusIdx: index("admin_alerts_status_idx").on(table.status),
   typeIdx: index("admin_alerts_type_idx").on(table.type),
+  severityIdx: index("admin_alerts_severity_idx").on(table.severity),
 }));
 
 // API keys table
 export const apiKeys = table("api_keys", {
   id: varchar("id", { length: 36 }).primaryKey(),
-  assignedTo: varchar("assigned_to", { length: 36 }).references(() => user.id),
-  createdBy: varchar("created_by", { length: 36 }).notNull().references(() => user.id),
-  userId: varchar("user_id", { length: 36 }).references(() => user.id),
-  key: text("key").unique(),
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  key: text("key").notNull().unique(),
   name: text("name").notNull(),
   apiClass: integer("api_class").notNull().default(5), // 5, 10, 20, 50
   rateLimit: integer("rate_limit").notNull().default(60), // requests per minute
@@ -242,6 +231,7 @@ export const userProfiles = table("user_profiles", {
   firstname: text("firstname"),
   lastname: text("lastname"),
   bio: text("bio"),
+  language: text("language").default("en"),
   platform: text("platform").default("web"), // 'web', 'mobile', 'desktop'
   socials: json("socials"), // { instagram: '', twitter: '', tiktok: '' }
   preferences: json("preferences"), // user settings
@@ -284,7 +274,6 @@ export const artists = table("artists", {
 export const artistProfiles = table("artist_profiles", {
   id: varchar("id", { length: 36 }).primaryKey(),
   artistId: varchar("artist_id", { length: 36 }).notNull().references(() => artists.id, { onDelete: "cascade" }),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" }),
   picture: text("picture"),
   thumbnails: json("thumbnails"),
   gallery: json("gallery"),
@@ -292,7 +281,9 @@ export const artistProfiles = table("artist_profiles", {
   socialMedia: json("social_media"),
   fanNews: json("fan_news"),
   press: json("press"),
+  // Added fields for richer artist profile
   team: json("team"),
+  preference: json("preference"),
   producer: text("producer"),
   songwriter: text("songwriter"),
   studio: text("studio"),

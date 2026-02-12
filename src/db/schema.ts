@@ -1,4 +1,6 @@
-// TypeScript interfaces for User and Song
+// src/db/schema.ts
+import { mysqlTable as table, text as textType, timestamp as timestampType, boolean as booleanType, date as dateType, json as jsonType } from 'drizzle-orm/mysql-core';
+
 export interface User {
   id: string;
   name: string;
@@ -33,16 +35,7 @@ export interface User {
   isVerified?: boolean|null;
 }
 
-export interface Song {
-  id: string;
-  title: string;
-  artistDisplayName: string;
-  genre?: string | undefined;
-  cover?: string | undefined;
-  numberOfTracks?: number | undefined;
-}
-// src/db/schema.ts
-import { mysqlTable as table, text as textType, timestamp as timestampType, boolean as booleanType, date as dateType, json as jsonType, int as intType } from 'drizzle-orm/mysql-core';
+
 
 export const user = table("users", {
   id: textType("id").primaryKey(),
@@ -54,9 +47,6 @@ export const user = table("users", {
   username: textType("username").unique(),
     thumbnail: textType("thumbnail"),
 provider: textType("provider"),
- isVerified: booleanType("verified")
-    .$defaultFn(() => false)
-    .notNull(), 
   emailVerified: booleanType("email_verified")
     .$defaultFn(() => false)
     .notNull(),
@@ -79,7 +69,7 @@ provider: textType("provider"),
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
   role: textType("role", { enum: ["guest", "new", "member", "artist", "band", "studio", "choir", "group", "community", "label", "editor", "manager", "admin", "sadmin"] })
-    .$defaultFn(() => "member")
+    .$defaultFn(() => "new")
     .notNull(),
   apiClass: textType("api_class", { enum: ["5", "10", "20", "50"] })
     .$defaultFn(() => "5")
@@ -415,9 +405,9 @@ export const artistProfiles = table("artist_profiles", {
   fanNews: jsonType("fan_news"),
   isPublic: booleanType("is_public").$defaultFn(() => false),
   isVerified: booleanType("is_verified").$defaultFn(() => false),
-  totalSongs: intType("total_songs").$defaultFn(() => 0),
-  totalPlays: intType("total_plays").$defaultFn(() => 0),
-  totalFollowers: intType("total_followers").$defaultFn(() => 0),
+  totalSongs: textType("total_songs"),
+  totalPlays: textType("total_plays"),
+  totalFollowers: textType("total_followers"),
   createdAt: timestampType("created_at").$defaultFn(() => new Date()).notNull(),
   updatedAt: timestampType("updated_at").$defaultFn(() => new Date()).notNull(),
 });

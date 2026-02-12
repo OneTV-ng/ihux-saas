@@ -1,14 +1,14 @@
 {
-  "name": "next-better-auth-starter",
-  "version": "2.0.0",
+  "name": "singflex-dxl",
+  "version": "3.0.0",
   "description": "A modern Next.js boilerplate with authentication, admin dashboard, and user management built with Better Auth, Drizzle ORM, and PostgreSQL",
   "private": true,
   "author": "Zexa",
   "license": "MIT",
-  "homepage": "https://zexa.app",
+  "homepage": "https:/imediaport.com/dlx-music-hub",
   "repository": {
     "type": "git",
-    "url": "https://github.com/zexahq/better-auth-starter"
+    "url": "https://github.com/zexahq/singflex-dxl.git"
   },
   "scripts": {
     "dev": "next dev --turbopack",
@@ -57,6 +57,7 @@
     "swr": "^2.3.3",
     "tailwind-merge": "^3.3.0",
     "tailwindcss": "^4.1.7",
+    "uuid": "^13.0.0",
     "zod": "^4.2.1"
   },
   "devDependencies": {

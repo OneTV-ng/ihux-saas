@@ -14,7 +14,7 @@ const drizzleDialect = normalizeDrizzleDialect(process.env.DB_DIALECT);
 
 export default defineConfig({
   out: './drizzle',
-  schema: ['./src/db/schema.ts', './src/db/music-schema.ts'],
+  schema: ['./src/db/schema.ts', './src/db/music-schema.ts', './src/db/upload-jobs-schema.ts'],
   dialect: drizzleDialect,
   dbCredentials: {
     url: process.env.DATABASE_URL!,

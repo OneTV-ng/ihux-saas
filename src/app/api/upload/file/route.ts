@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { uploads } from "@/db/music-schema";
+import { user as userTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import * as fs from "fs";
 import * as path from "path";
 import * as crypto from "crypto";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 // Helper to generate UUID
 function generateId(): string {
@@ -156,13 +159,35 @@ export async function POST(req: NextRequest) {
   console.log("📤 [FILE UPLOAD] Endpoint called");
 
   try {
-    // Get user from session or headers (assumes auth middleware sets userId)
-    const userId = req.headers.get("x-user-id");
-    if (!userId) {
+    // Get authenticated user from session
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      console.error("❌ [FILE UPLOAD] No active session");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = session.user.id;
     console.log(`✅ [FILE UPLOAD] User authenticated: ${userId}`);
+
+    // Verify user exists in database
+    const userRecord = await db
+      .select()
+      .from(userTable)
+      .where(eq(userTable.id, userId))
+      .limit(1);
+
+    if (!userRecord || userRecord.length === 0) {
+      console.error("❌ [FILE UPLOAD] User not found in database:", userId);
+      return NextResponse.json(
+        { error: "User not found. Please log in again." },
+        { status: 401 }
+      );
+    }
+
+    console.log(`✅ [FILE UPLOAD] User verified in database`);
 
     // Parse multipart form data
     const formData = await req.formData();
@@ -230,28 +255,39 @@ export async function POST(req: NextRequest) {
     const baseUrl = process.env.NEXT_CLIENT_URL || "http://localhost:3000";
     const publicUrl = `${baseUrl}/uploads/${userId}/${fileType}/${filename}`;
 
-    await db
-      .insert(uploads)
-      .values({
-        id: uploadId,
-        userId,
-        filename,
-        originalName: file.name,
-        mimeType: file.type || "application/octet-stream",
-        size: file.size,
-        status: "complete",
-        path: filePath,
-        url: publicUrl,
-        checksum,
-        chunkSize: 1048576,
-        totalChunks: 1,
-        uploadedChunks: 1,
-        progress: 100,
-        metadata: JSON.stringify(metadata),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        completedAt: new Date(),
-      });
+    try {
+      await db
+        .insert(uploads)
+        .values({
+          id: uploadId,
+          userId,
+          filename,
+          originalName: file.name,
+          mimeType: file.type || "application/octet-stream",
+          size: file.size,
+          status: "complete",
+          path: filePath,
+          url: publicUrl,
+          checksum,
+          chunkSize: 1048576,
+          totalChunks: 1,
+          uploadedChunks: 1,
+          progress: 100,
+          metadata: metadata as any,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          completedAt: new Date(),
+        });
+
+      console.log("✅ [FILE UPLOAD] Database insert successful");
+    } catch (dbError) {
+      console.error("❌ [FILE UPLOAD] Database insert error details:");
+      if (dbError instanceof Error) {
+        console.error("Message:", dbError.message);
+        console.error("Stack:", dbError.stack);
+      }
+      throw dbError;
+    }
 
     // Fetch the created record
     const uploadRecords = await db

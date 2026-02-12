@@ -490,7 +490,7 @@ function SingleUploadContent() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className={labelClass}>Explicit</label>
-                  <select value={explicit} onChange={e => setExplicit(e.target.value)} className={inputClass}>
+                  <select title={"explicit"} value={explicit} onChange={e => setExplicit(e.target.value)} className={inputClass}>
                     <option value="no">No</option>
                     <option value="yes">Yes</option>
                     <option value="covered">Covered</option>
@@ -519,7 +519,7 @@ function SingleUploadContent() {
               </div>
               <div>
                 <label className={labelClass}>Release Date <span className="text-zinc-400 font-normal normal-case">(optional)</span></label>
-                <input type="date" value={releaseDate} onChange={e => setReleaseDate(e.target.value)} className={inputClass} />
+                <input type="date" id={"releadeDate"} placeholder={""} value={releaseDate} onChange={e => setReleaseDate(e.target.value)} className={inputClass} />
           
               </div>
               <div>

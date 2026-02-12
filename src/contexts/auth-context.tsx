@@ -142,6 +142,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fetch session on mount and hydration (force refresh)
   useEffect(() => {
     // Always force refresh on hydration to sync with server session
+    // Initialize with loading state true to ensure proper hydration
+    setIsLoading(true);
     refreshUser();
   }, []);
 
@@ -157,18 +159,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchSession = async () => {
     try {
       setIsLoading(true);
+      // Use Better Auth default session endpoint
       const { data, error } = await authClient.getSession();
-
+      // No custom endpoint, just rely on authClient.getSession()
       if (error || !data) {
         setUser(null);
         setSession(null);
         setDefaultArtist(null);
         return;
       }
-
       setSession(data as Session);
       const user = data.user as unknown as User;
-      // Add isUserVerified and isEmailVerified from backend or fallback
       setUser({
         ...user,
         isUserVerified:
@@ -182,8 +183,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         tenant:
           user.tenant || DEFAULT_TENANT,
       });
-
-      // Fetch default artist if user is authenticated
       if (user) {
         await fetchDefaultArtist(user.id);
       }

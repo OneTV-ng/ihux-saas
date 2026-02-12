@@ -134,7 +134,9 @@ const Navbar = () => {
         {/* Right Side */}
         <div className="flex items-center gap-4">
           <ThemeToggle />
-          {!isAuthenticated ? (
+          {isLoading ? (
+            <div className="h-9 w-20 bg-muted rounded animate-pulse" />
+          ) : !isAuthenticated ? (
             <div className="flex items-center gap-2">
               <Link href="/auth/signup">
                 <Button variant="ghost" size="sm">
