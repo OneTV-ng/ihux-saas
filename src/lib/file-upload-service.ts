@@ -27,29 +27,15 @@ export class FileUploadService {
   /**
    * Upload a file without progress tracking
    */
-  async uploadFile(file: File, type: "audio" | "cover" | "document", userId?: string): Promise<UploadResult> {
+  async uploadFile(file: File, type: "audio" | "cover" | "document", userId: string): Promise<UploadResult> {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("type", type);
 
     try {
-      // Get userId if not provided
-      let finalUserId = userId;
-      if (!finalUserId) {
-        try {
-          const response = await fetch("/api/auth/me");
-          if (response.ok) {
-            const data = await response.json();
-            finalUserId = data.user?.id;
-          }
-        } catch (error) {
-          console.error("Failed to get user ID:", error);
-        }
-      }
-
       const headers: Record<string, string> = {};
-      if (finalUserId) {
-        headers["x-user-id"] = finalUserId;
+      if (userId) {
+        headers["x-user-id"] = userId;
       }
 
       const response = await fetch("/api/upload/file", {
@@ -78,30 +64,16 @@ export class FileUploadService {
     file: File,
     type: "audio" | "cover" | "document",
     onProgress: (percent: number) => void,
-    userId?: string
+    userId: string
   ): Promise<UploadResult> {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       let attempt = 0;
 
-      const attemptUpload = async () => {
+      const attemptUpload = () => {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("type", type);
-
-        // Get userId if not provided
-        let finalUserId = userId;
-        if (!finalUserId) {
-          try {
-            const response = await fetch("/api/auth/me");
-            if (response.ok) {
-              const data = await response.json();
-              finalUserId = data.user?.id;
-            }
-          } catch (error) {
-            console.error("Failed to get user ID:", error);
-          }
-        }
 
         // Track progress
         xhr.upload.addEventListener("progress", (e) => {
@@ -163,30 +135,16 @@ export class FileUploadService {
   /**
    * Upload file with cancellation support
    */
-  async uploadFileWithCancel(
+  uploadFileWithCancel(
     file: File,
     type: "audio" | "cover" | "document",
     onProgress: (percent: number) => void,
-    userId?: string
-  ): Promise<{
+    userId: string
+  ): {
     promise: Promise<UploadResult>;
     cancel: () => void;
-  }> {
+  } {
     let xhr: XMLHttpRequest | null = null;
-
-    // Get userId if not provided
-    let finalUserId = userId;
-    if (!finalUserId) {
-      try {
-        const response = await fetch("/api/auth/me");
-        if (response.ok) {
-          const data = await response.json();
-          finalUserId = data.user?.id;
-        }
-      } catch (error) {
-        console.error("Failed to get user ID:", error);
-      }
-    }
 
     const promise = new Promise<UploadResult>((resolve, reject) => {
       xhr = new XMLHttpRequest();
@@ -223,8 +181,8 @@ export class FileUploadService {
       });
 
       xhr.open("POST", "/api/upload/file");
-      if (finalUserId) {
-        xhr.setRequestHeader("x-user-id", finalUserId);
+      if (userId) {
+        xhr.setRequestHeader("x-user-id", userId);
       }
       xhr.send(formData);
     });
