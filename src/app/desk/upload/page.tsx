@@ -411,9 +411,18 @@ const IncrementalMusicUpload = () => {
                 </div>
               )}
 
-              <Button onClick={handleMetadataSubmit} className="w-full">
-                Next: Add Cover Image
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => router.push("/desk")}
+                  className="flex-1"
+                >
+                  ✕ Cancel
+                </Button>
+                <Button onClick={handleMetadataSubmit} className="flex-1">
+                  Next: Add Cover Image →
+                </Button>
+              </div>
             </CardContent>
           </Card>
         );
