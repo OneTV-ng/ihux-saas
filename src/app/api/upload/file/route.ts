@@ -244,7 +244,7 @@ export async function POST(req: NextRequest) {
         url: publicUrl,
         checksum,
         progress: 100,
-        metadata: metadata as any,
+        metadata: JSON.stringify(metadata),
         createdAt: new Date(),
         updatedAt: new Date(),
         completedAt: new Date(),
@@ -286,7 +286,12 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("\n" + "=".repeat(80));
     console.error("❌ [ERROR] File upload failed!");
-    console.error("📋 Error:", error instanceof Error ? error.message : String(error));
+    if (error instanceof Error) {
+      console.error("📋 Error Message:", error.message);
+      console.error("📋 Error Stack:", error.stack);
+    } else {
+      console.error("📋 Error:", String(error));
+    }
     console.error("=".repeat(80) + "\n");
 
     return NextResponse.json({ error: "Failed to upload file" }, { status: 500 });
