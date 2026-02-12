@@ -227,7 +227,8 @@ export async function POST(req: NextRequest) {
     console.log(`🔐 [FILE UPLOAD] Checksum: ${checksum}`);
 
     // Save to database
-    const publicUrl = `/uploads/${userId}/${fileType}/${filename}`;
+    const baseUrl = process.env.NEXT_CLIENT_URL || "http://localhost:3000";
+    const publicUrl = `${baseUrl}/uploads/${userId}/${fileType}/${filename}`;
 
     await db
       .insert(uploads)
