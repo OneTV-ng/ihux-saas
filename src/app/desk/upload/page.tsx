@@ -202,9 +202,14 @@ const IncrementalMusicUpload = () => {
   const handleCoverUpload = async (file: File) => {
     try {
       setError(null);
-      const result = await uploadService.uploadFileWithProgress(file, "cover", (percent) => {
-        console.log(`Cover upload: ${percent}%`);
-      });
+      const result = await uploadService.uploadFileWithProgress(
+        file,
+        "cover",
+        (percent) => {
+          console.log(`Cover upload: ${percent}%`);
+        },
+        user?.id
+      );
 
       setCoverUploadId(result.id);
       setCoverUrl(result.url);
@@ -243,9 +248,14 @@ const IncrementalMusicUpload = () => {
       }
 
       // Upload audio file
-      const uploadResult = await uploadService.uploadFileWithProgress(selectedTrackFile, "audio", (percent) => {
-        setTrackProgress(percent);
-      });
+      const uploadResult = await uploadService.uploadFileWithProgress(
+        selectedTrackFile,
+        "audio",
+        (percent) => {
+          setTrackProgress(percent);
+        },
+        user?.id
+      );
 
       // Add track to song
       const res = await fetch(`/api/songs/${finalSongId}/tracks`, {
