@@ -135,14 +135,20 @@ export async function POST(
     console.log("\n💾 [STAGE 6] Submitting song...");
 
     const now = new Date();
-    const updatedSongResult = await db
+    await db
       .update(songs)
       .set({
         status: "submitted",
         updatedAt: now,
       })
+      .where(eq(songs.id, songId));
+
+    // Fetch updated song
+    const updatedSongResult = await db
+      .select()
+      .from(songs)
       .where(eq(songs.id, songId))
-      .returning();
+      .limit(1);
 
     if (!updatedSongResult || updatedSongResult.length === 0) {
       console.error("❌ [STAGE 6] Failed to update song status");

@@ -203,20 +203,35 @@ export async function POST(
 
     try {
       // Insert track
-      const createdTrack = await db.insert(tracks).values(trackInsertData).returning();
+      await db.insert(tracks).values(trackInsertData);
 
+      // Fetch the created track
+      const createdTrackResult = await db
+        .select()
+        .from(tracks)
+        .where(eq(tracks.id, trackId))
+        .limit(1);
+
+      const createdTrack = createdTrackResult || [trackInsertData];
       console.log("✅ [STAGE 8a] Track created successfully");
 
       // Update song numberOfTracks
-      const updatedSong = await db
+      await db
         .update(songs)
         .set({
           numberOfTracks: songRecord.numberOfTracks + 1,
           updatedAt: now,
         })
-        .where(eq(songs.id, songId))
-        .returning();
+        .where(eq(songs.id, songId));
 
+      // Fetch updated song
+      const updatedSongResult = await db
+        .select()
+        .from(songs)
+        .where(eq(songs.id, songId))
+        .limit(1);
+
+      const updatedSong = updatedSongResult || [{ numberOfTracks: songRecord.numberOfTracks + 1 }];
       console.log("✅ [STAGE 8b] Song updated with new track count");
 
       // Fetch updated song with all tracks
