@@ -122,8 +122,8 @@ export class FileUploadService {
         });
 
         xhr.open("POST", "/api/upload/file");
-        if (finalUserId) {
-          xhr.setRequestHeader("x-user-id", finalUserId);
+        if (userId) {
+          xhr.setRequestHeader("x-user-id", userId);
         }
         xhr.send(formData);
       };
