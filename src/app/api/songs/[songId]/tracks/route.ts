@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { db } from "@/db";
 import { songs, tracks, uploads } from "@/db/music-schema";
-import { eq, max } from "drizzle-orm";
-import { getServerSession } from "@/lib/auth-server";
+import { eq } from "drizzle-orm";
 
 // Helper to generate UUID
 function generateId(): string {
@@ -15,275 +16,216 @@ function generateId(): string {
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ songId: string }> }
+  { params }: { params: { songId: string } }
 ) {
-  const startTime = Date.now();
-  const { songId } = await params;
-
   console.log("\n" + "=".repeat(80));
-  console.log("🎼 [ADD TRACK] Endpoint called");
-  console.log("📌 [ADD TRACK] Song ID:", songId);
-  console.log("⏰ [ADD TRACK] Request time:", new Date().toISOString());
-  console.log("=".repeat(80));
+  console.log("🎵 [ADD TRACK] Endpoint called");
+  console.log(`📌 Song ID: ${params.songId}`);
 
   try {
-    // Stage 1: Authenticate user
-    console.log("\n👤 [STAGE 1] Authenticating user...");
-    const session = await getServerSession();
+    // Get authenticated user
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
 
-    if (!session?.user?.email) {
-      console.error("❌ [STAGE 1] User not authenticated");
+    if (!session) {
+      console.error("❌ [ADD TRACK] No active session");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = session.user.email;
-    console.log("✅ [STAGE 1] User authenticated:", userId);
+    const userId = session.user.id;
+    console.log(`✅ [ADD TRACK] User authenticated: ${userId}`);
 
-    // Stage 2: Parse request body
-    console.log("\n📥 [STAGE 2] Parsing request body...");
+    // Parse request body
     const body = await req.json();
-    console.log("✅ [STAGE 2] Request parsed successfully");
-
     const {
       title,
       audioFileUploadId,
-      isrc,
+      duration,
       explicit,
+      isrc,
       lyrics,
       leadVocal,
       featured,
       producer,
       writer,
-      duration,
     } = body;
 
-    console.log("📋 [STAGE 2] Extracted fields:", {
+    console.log(`📋 [ADD TRACK] Request body:`, {
       title,
       audioFileUploadId,
-      isrc,
-      explicit,
       duration,
     });
 
-    // Stage 3: Validate required fields
-    console.log("\n✔️ [STAGE 3] Validating required fields...");
-
-    if (!title || !title.trim()) {
-      console.error("❌ [STAGE 3] Track title is required");
+    // Validate required fields
+    if (!title || !audioFileUploadId) {
+      console.error("❌ [ADD TRACK] Missing required fields");
       return NextResponse.json(
-        { error: "Track title is required" },
+        { error: "Missing required fields: title, audioFileUploadId" },
         { status: 400 }
       );
     }
 
-    if (!audioFileUploadId || !audioFileUploadId.trim()) {
-      console.error("❌ [STAGE 3] Audio file upload ID is required");
-      return NextResponse.json(
-        { error: "Audio file upload ID is required" },
-        { status: 400 }
-      );
-    }
-
-    console.log("✅ [STAGE 3] All required fields valid");
-
-    // Stage 4: Verify song exists and user owns it
-    console.log("\n🔍 [STAGE 4] Verifying song ownership...");
-
-    const song = await db
+    // Verify song exists and user owns it
+    const songRecords = await db
       .select()
       .from(songs)
-      .where(eq(songs.id, songId))
+      .where(eq(songs.id, params.songId))
       .limit(1);
 
-    if (!song || song.length === 0) {
-      console.error("❌ [STAGE 4] Song not found");
+    if (!songRecords || songRecords.length === 0) {
+      console.error("❌ [ADD TRACK] Song not found:", params.songId);
       return NextResponse.json({ error: "Song not found" }, { status: 404 });
     }
 
-    const songRecord = song[0];
-    console.log("✅ [STAGE 4] Song found:", songId);
+    const song = songRecords[0];
 
     // Verify user owns the song
-    if (songRecord.createdBy !== userId) {
-      console.error("❌ [STAGE 4] User doesn't own this song");
+    if (song.createdBy !== userId) {
+      console.error("❌ [ADD TRACK] Unauthorized - user doesn't own song");
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // Verify song status is 'new'
+    if (song.status !== "new") {
+      console.error("❌ [ADD TRACK] Cannot add tracks to submitted song");
       return NextResponse.json(
-        { error: "Forbidden - song doesn't belong to you" },
-        { status: 403 }
+        { error: "Cannot add tracks to submitted song" },
+        { status: 400 }
       );
     }
 
-    console.log("✅ [STAGE 4] User owns this song");
-
-    // Stage 5: Verify song status is "new"
-    console.log("\n⚠️ [STAGE 5] Checking song status...");
-
-    if (songRecord.status !== "new") {
-      console.error("❌ [STAGE 5] Cannot add tracks to submitted/approved songs");
-      return NextResponse.json(
-        {
-          error: `Cannot add tracks to a song with status "${songRecord.status}". Song must have status "new"`,
-        },
-        { status: 409 }
-      );
-    }
-
-    console.log("✅ [STAGE 5] Song status is 'new' - can add tracks");
-
-    // Stage 6: Verify audio file upload exists
-    console.log("\n📤 [STAGE 6] Verifying audio file upload...");
-
-    const upload = await db
+    // Verify upload exists
+    const uploadRecords = await db
       .select()
       .from(uploads)
       .where(eq(uploads.id, audioFileUploadId))
       .limit(1);
 
-    if (!upload || upload.length === 0) {
-      console.error("❌ [STAGE 6] Upload not found");
-      return NextResponse.json(
-        { error: "Audio file upload not found" },
-        { status: 404 }
-      );
+    if (!uploadRecords || uploadRecords.length === 0) {
+      console.error("❌ [ADD TRACK] Upload not found:", audioFileUploadId);
+      return NextResponse.json({ error: "Upload not found" }, { status: 404 });
     }
 
-    const uploadRecord = upload[0];
-    console.log("✅ [STAGE 6] Upload found:", audioFileUploadId);
+    const upload = uploadRecords[0];
+    console.log("✅ [ADD TRACK] Upload verified");
 
-    if (uploadRecord.status !== "complete") {
-      console.error("❌ [STAGE 6] Upload status is not complete");
-      return NextResponse.json(
-        { error: "Upload must be complete before adding as track" },
-        { status: 400 }
-      );
-    }
-
-    console.log("✅ [STAGE 6] Upload is complete and ready");
-
-    // Stage 7: Get next track number
-    console.log("\n🔢 [STAGE 7] Calculating track number...");
-
+    // Get next track number
     const maxTrackResult = await db
-      .select({ maxTrackNumber: max(tracks.trackNumber) })
+      .select({
+        maxTrackNumber: tracks.trackNumber,
+      })
       .from(tracks)
-      .where(eq(tracks.songId, songId));
+      .where(eq(tracks.songId, params.songId));
 
-    const currentMaxTrack = maxTrackResult[0]?.maxTrackNumber || 0;
-    const nextTrackNumber = currentMaxTrack + 1;
+    const maxTrackNumber =
+      maxTrackResult && maxTrackResult.length > 0
+        ? Math.max(...maxTrackResult.map((r) => r.maxTrackNumber || 0))
+        : 0;
 
-    console.log(`✅ [STAGE 7] Next track number: ${nextTrackNumber}`);
+    const nextTrackNumber = maxTrackNumber + 1;
+    console.log(`🔢 [ADD TRACK] Next track number: ${nextTrackNumber}`);
 
-    // Stage 8: Create track (in transaction with song update)
-    console.log("\n🎬 [STAGE 8] Creating track and updating song...");
-
+    // Create track
     const trackId = generateId();
     const now = new Date();
 
-    // Build track insert data with conditional optional fields
-    const trackInsertData: any = {
-      id: trackId,
-      songId,
-      trackNumber: nextTrackNumber,
-      title: title.trim(),
-      mp3: uploadRecord.url,
-      explicit: explicit && ["no", "yes", "covered"].includes(explicit) ? explicit : "no",
-      duration: duration && typeof duration === "number" ? duration : null,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    // Add optional fields only if they have values
-    if (isrc && isrc.trim()) trackInsertData.isrc = isrc.trim();
-    if (lyrics && lyrics.trim()) trackInsertData.lyrics = lyrics.trim();
-    if (leadVocal && leadVocal.trim()) trackInsertData.leadVocal = leadVocal.trim();
-    if (featured && featured.trim()) trackInsertData.featured = featured.trim();
-    if (producer && producer.trim()) trackInsertData.producer = producer.trim();
-    if (writer && writer.trim()) trackInsertData.writer = writer.trim();
-
-    console.log("📊 [STAGE 8] Track insert data:", trackInsertData);
-
     try {
-      // Insert track
-      await db.insert(tracks).values(trackInsertData);
+      await db.insert(tracks).values({
+        id: trackId,
+        songId: params.songId,
+        trackNumber: nextTrackNumber,
+        title: title.trim(),
+        mp3: upload.url || "",
+        duration: duration || undefined,
+        explicit: explicit || "no",
+        isrc: isrc || undefined,
+        lyrics: lyrics || undefined,
+        leadVocal: leadVocal || undefined,
+        featured: featured || undefined,
+        producer: producer || undefined,
+        writer: writer || undefined,
+        createdAt: now,
+        updatedAt: now,
+      });
 
-      // Fetch the created track
-      const createdTrackResult = await db
-        .select()
-        .from(tracks)
-        .where(eq(tracks.id, trackId))
-        .limit(1);
+      console.log("✅ [ADD TRACK] Track created in database");
+    } catch (dbError) {
+      console.error("❌ [ADD TRACK] Database error:");
+      if (dbError instanceof Error) {
+        console.error("Message:", dbError.message);
+      }
+      throw dbError;
+    }
 
-      const createdTrack = createdTrackResult || [trackInsertData];
-      console.log("✅ [STAGE 8a] Track created successfully");
-
-      // Update song numberOfTracks
+    // Update song numberOfTracks
+    try {
       await db
         .update(songs)
         .set({
-          numberOfTracks: songRecord.numberOfTracks + 1,
+          numberOfTracks: song.numberOfTracks + 1,
           updatedAt: now,
         })
-        .where(eq(songs.id, songId));
+        .where(eq(songs.id, params.songId));
 
-      // Fetch updated song
-      const updatedSongResult = await db
-        .select()
-        .from(songs)
-        .where(eq(songs.id, songId))
-        .limit(1);
-
-      const updatedSong = updatedSongResult || [{ numberOfTracks: songRecord.numberOfTracks + 1 }];
-      console.log("✅ [STAGE 8b] Song updated with new track count");
-
-      // Fetch updated song with all tracks
-      const songWithTracks = await db
-        .select()
-        .from(songs)
-        .where(eq(songs.id, songId))
-        .limit(1);
-
-      const allTracks = await db.select().from(tracks).where(eq(tracks.songId, songId));
-
-      const totalTime = Date.now() - startTime;
-      console.log("\n" + "=".repeat(80));
-      console.log("✨ [SUCCESS] Track added successfully!");
-      console.log("📌 [RESULT] Track ID:", trackId);
-      console.log("🔢 [RESULT] Track Number:", nextTrackNumber);
-      console.log("📊 [RESULT] Total tracks now:", updatedSong[0].numberOfTracks);
-      console.log("⏱️ [RESULT] Total processing time:", totalTime, "ms");
-      console.log("=".repeat(80) + "\n");
-
-      return NextResponse.json({
-        success: true,
-        track: createdTrack[0],
-        song: {
-          id: songWithTracks[0].id,
-          title: songWithTracks[0].title,
-          numberOfTracks: songWithTracks[0].numberOfTracks,
-          status: songWithTracks[0].status,
-          tracks: allTracks,
-        },
-        processingTime: totalTime,
-      });
-    } catch (err: any) {
-      console.error("❌ [STAGE 8] Track creation failed!");
-      console.error("📋 Error message:", err instanceof Error ? err.message : String(err));
-      console.error("🔍 Error code:", err?.code);
-      console.error("📄 Full error:", err);
-      throw err;
+      console.log("✅ [ADD TRACK] Song updated with new track count");
+    } catch (updateError) {
+      console.error("❌ [ADD TRACK] Failed to update song:");
+      if (updateError instanceof Error) {
+        console.error("Message:", updateError.message);
+      }
+      throw updateError;
     }
-  } catch (error) {
-    const totalTime = Date.now() - startTime;
-    console.error("\n" + "=".repeat(80));
-    console.error("❌ [ERROR] Adding track failed!");
-    console.error("⏱️ [ERROR] Time before failure:", totalTime, "ms");
-    console.error("📋 [ERROR] Error details:", {
-      message: error instanceof Error ? error.message : String(error),
-      type: error instanceof Error ? error.constructor.name : typeof error,
+
+    // Fetch updated song with all tracks
+    const updatedSongRecords = await db
+      .select()
+      .from(songs)
+      .where(eq(songs.id, params.songId))
+      .limit(1);
+
+    const updatedSong = updatedSongRecords[0];
+
+    const allTracks = await db
+      .select()
+      .from(tracks)
+      .where(eq(tracks.songId, params.songId));
+
+    console.log("\n" + "=".repeat(80));
+    console.log("✨ [SUCCESS] Track added successfully");
+    console.log("📌 [RESULT] Track ID:", trackId);
+    console.log("📌 [RESULT] Track Number:", nextTrackNumber);
+    console.log("=".repeat(80) + "\n");
+
+    return NextResponse.json({
+      success: true,
+      track: {
+        id: trackId,
+        songId: params.songId,
+        trackNumber: nextTrackNumber,
+        title: title.trim(),
+        mp3: upload.url,
+        duration: duration || undefined,
+        createdAt: now,
+      },
+      song: {
+        id: updatedSong.id,
+        title: updatedSong.title,
+        numberOfTracks: updatedSong.numberOfTracks,
+        tracks: allTracks,
+      },
     });
+  } catch (error) {
+    console.error("\n" + "=".repeat(80));
+    console.error("❌ [ERROR] Failed to add track!");
+    if (error instanceof Error) {
+      console.error("📋 Error Message:", error.message);
+      console.error("📋 Error Stack:", error.stack);
+    }
     console.error("=".repeat(80) + "\n");
 
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to add track" },
+      { error: "Failed to add track" },
       { status: 500 }
     );
   }
