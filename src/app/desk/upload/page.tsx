@@ -26,7 +26,7 @@ import { SidebarProvider, Sidebar } from "@/components/ui/sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 
 interface UploadStep {
-  step: "metadata" | "cover" | "tracks" | "review" | "submit" | "complete";
+  step: "cover" | "typeSelect" | "metadata" | "tracks" | "submit" | "complete";
   label: string;
 }
 
@@ -63,10 +63,10 @@ const GENRES = ["Pop", "Rock", "Hip-Hop", "R&B", "Jazz", "Classical", "Country",
 const LANGUAGES = ["English", "Spanish", "French", "German", "Chinese", "Japanese", "Korean", "Other"];
 
 const STEPS: UploadStep[] = [
-  { step: "cover", label: "Cover Image" },
-  { step: "metadata", label: "Song Details" },
+  { step: "cover", label: "Upload Cover" },
+  { step: "typeSelect", label: "Select Type" },
+  { step: "metadata", label: "Song Info" },
   { step: "tracks", label: "Add Tracks" },
-  { step: "review", label: "Review" },
   { step: "submit", label: "Submit" },
   { step: "complete", label: "Complete" },
 ];
@@ -80,9 +80,11 @@ const IncrementalMusicUpload = () => {
   const typeParam = (searchParams.get("type") || "single") as "single" | "album" | "medley";
 
   // State
-  const [currentStep, setCurrentStep] = useState<"metadata" | "cover" | "tracks" | "review" | "submit" | "complete">(
+  const [currentStep, setCurrentStep] = useState<"cover" | "typeSelect" | "metadata" | "tracks" | "submit" | "complete">(
     "cover"
   );
+  const [copyrightAcknowledgedAtType, setCopyrightAcknowledgedAtType] = useState(false);
+  const [copyrightAcknowledgedAtSubmit, setCopyrightAcknowledgedAtSubmit] = useState(false);
   const [metadata, setMetadata] = useState<SongMetadata>({
     title: "",
     type: typeParam,
@@ -207,6 +209,16 @@ const IncrementalMusicUpload = () => {
       setCoverUploadId(result.id);
       setCoverUrl(result.url);
       setCoverFile(file);
+
+      // Extract filename without extension as default title
+      const filename = file.name.replace(/\.[^/.]+$/, "");
+      setMetadata((prev) => ({
+        ...prev,
+        title: filename,
+      }));
+
+      // Move to type selection
+      setCurrentStep("typeSelect");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to upload cover");
     }
@@ -331,6 +343,111 @@ const IncrementalMusicUpload = () => {
   // Render current step
   const renderStep = () => {
     switch (currentStep) {
+      case "typeSelect":
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Select Release Type</CardTitle>
+              <CardDescription>What type of release are you uploading?</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Cover preview */}
+              {coverUrl && (
+                <div className="flex gap-4 p-4 bg-gray-50 rounded-lg">
+                  <img src={coverUrl} alt="Cover preview" className="w-20 h-20 rounded-lg object-cover" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Default Title: {metadata.title}</p>
+                    <p className="text-xs text-gray-600 mt-1">{coverFile?.name}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Type selection buttons */}
+              <div className="grid grid-cols-1 gap-3">
+                <Button
+                  variant={metadata.type === "single" ? "default" : "outline"}
+                  onClick={() => setMetadata({ ...metadata, type: "single" })}
+                  className="h-auto py-4 text-left"
+                >
+                  <div>
+                    <p className="font-semibold">Single</p>
+                    <p className="text-sm opacity-75">One track release</p>
+                  </div>
+                </Button>
+                <Button
+                  variant={metadata.type === "medley" ? "default" : "outline"}
+                  onClick={() => setMetadata({ ...metadata, type: "medley" })}
+                  className="h-auto py-4 text-left"
+                >
+                  <div>
+                    <p className="font-semibold">Medley</p>
+                    <p className="text-sm opacity-75">2-4 tracks merged into one release</p>
+                  </div>
+                </Button>
+                <Button
+                  variant={metadata.type === "album" ? "default" : "outline"}
+                  onClick={() => setMetadata({ ...metadata, type: "album" })}
+                  className="h-auto py-4 text-left"
+                >
+                  <div>
+                    <p className="font-semibold">Album / EP</p>
+                    <p className="text-sm opacity-75">5 or more tracks</p>
+                  </div>
+                </Button>
+              </div>
+
+              {/* Copyright acknowledgement */}
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg space-y-2">
+                <p className="text-sm font-semibold text-amber-900">⚠️ Copyright Notice</p>
+                <p className="text-sm text-amber-900">
+                  By proceeding, you confirm that you own or have the rights to distribute this music.
+                </p>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="copyright-type"
+                    checked={copyrightAcknowledgedAtType}
+                    onChange={(e) => setCopyrightAcknowledgedAtType(e.target.checked)}
+                  />
+                  <label htmlFor="copyright-type" className="text-sm text-amber-900">
+                    I acknowledge the copyright notice
+                  </label>
+                </div>
+              </div>
+
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm flex gap-2">
+                  <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  {error}
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentStep("cover")}
+                  className="flex-1"
+                >
+                  ← Back
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (!copyrightAcknowledgedAtType) {
+                      setError("Please acknowledge the copyright notice");
+                      return;
+                    }
+                    setError(null);
+                    setCurrentStep("metadata");
+                  }}
+                  className="flex-1"
+                >
+                  Continue →
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
       case "metadata":
         return (
           <Card>
@@ -452,13 +569,13 @@ const IncrementalMusicUpload = () => {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => setCurrentStep("cover")}
+                  onClick={() => setCurrentStep("typeSelect")}
                   className="flex-1"
                 >
                   ← Back
                 </Button>
                 <Button onClick={handleMetadataSubmit} className="flex-1">
-                  Next: Add Tracks →
+                  Create Song & Add Tracks →
                 </Button>
               </div>
             </CardContent>
@@ -527,8 +644,8 @@ const IncrementalMusicUpload = () => {
                 >
                   ✕ Cancel
                 </Button>
-                <Button onClick={() => setCurrentStep("metadata")} className="flex-1">
-                  Next: Song Details →
+                <Button onClick={() => setCurrentStep("typeSelect")} className="flex-1">
+                  Next: Select Type →
                 </Button>
               </div>
             </CardContent>
@@ -596,7 +713,17 @@ const IncrementalMusicUpload = () => {
                     <input
                       type="file"
                       accept="audio/*"
-                      onChange={(e) => e.target.files && setSelectedTrackFile(e.target.files[0])}
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          const file = e.target.files[0];
+                          setSelectedTrackFile(file);
+                          // Auto-populate title from filename if not already set
+                          if (!trackInput.title) {
+                            const filename = file.name.replace(/\.[^/.]+$/, "");
+                            setTrackInput((prev) => ({ ...prev, title: filename }));
+                          }
+                        }
+                      }}
                       className="hidden"
                       id="track-input"
                     />
@@ -767,14 +894,33 @@ const IncrementalMusicUpload = () => {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Submit Your Song</CardTitle>
-              <CardDescription>Send to admin for review</CardDescription>
+              <CardTitle>Submit Your Song for Publishing</CardTitle>
+              <CardDescription>Final confirmation before submission</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-900">
                   Your song will be reviewed by our team. You'll be notified once it's approved or if any changes are needed.
                 </p>
+              </div>
+
+              {/* Copyright warning - second time */}
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg space-y-2">
+                <p className="text-sm font-semibold text-amber-900">⚠️ Copyright Notice</p>
+                <p className="text-sm text-amber-900">
+                  You confirm that you own or have the necessary rights to distribute this music.
+                </p>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="copyright-submit"
+                    checked={copyrightAcknowledgedAtSubmit}
+                    onChange={(e) => setCopyrightAcknowledgedAtSubmit(e.target.checked)}
+                  />
+                  <label htmlFor="copyright-submit" className="text-sm text-amber-900">
+                    I confirm copyright ownership and have the right to distribute
+                  </label>
+                </div>
               </div>
 
               {error && (
@@ -794,8 +940,14 @@ const IncrementalMusicUpload = () => {
                   ← Back
                 </Button>
                 <Button
-                  onClick={handleSubmitSong}
-                  disabled={submitting}
+                  onClick={() => {
+                    if (!copyrightAcknowledgedAtSubmit) {
+                      setError("Please confirm copyright ownership");
+                      return;
+                    }
+                    handleSubmitSong();
+                  }}
+                  disabled={submitting || !copyrightAcknowledgedAtSubmit}
                   className="flex-1"
                 >
                   {submitting ? (
