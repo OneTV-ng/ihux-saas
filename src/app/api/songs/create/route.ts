@@ -146,7 +146,6 @@ export async function POST(req: NextRequest) {
           cover: cover ? cover.trim() : null,
           numberOfTracks: 0,
           isFeatured: false,
-          plays: 0,
           status: "new",
           createdBy: userId,
           createdAt: now,
