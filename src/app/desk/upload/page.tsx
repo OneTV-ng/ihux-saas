@@ -63,8 +63,8 @@ const GENRES = ["Pop", "Rock", "Hip-Hop", "R&B", "Jazz", "Classical", "Country",
 const LANGUAGES = ["English", "Spanish", "French", "German", "Chinese", "Japanese", "Korean", "Other"];
 
 const STEPS: UploadStep[] = [
-  { step: "metadata", label: "Song Details" },
   { step: "cover", label: "Cover Image" },
+  { step: "metadata", label: "Song Details" },
   { step: "tracks", label: "Add Tracks" },
   { step: "review", label: "Review" },
   { step: "submit", label: "Submit" },
@@ -81,7 +81,7 @@ const IncrementalMusicUpload = () => {
 
   // State
   const [currentStep, setCurrentStep] = useState<"metadata" | "cover" | "tracks" | "review" | "submit" | "complete">(
-    "metadata"
+    "cover"
   );
   const [metadata, setMetadata] = useState<SongMetadata>({
     title: "",
@@ -145,16 +145,27 @@ const IncrementalMusicUpload = () => {
   };
 
   // ====== METADATA STEP ======
-  const handleMetadataSubmit = async () => {
+  const handleMetadataSubmit = () => {
     if (!metadata.title || !metadata.type) {
       setError("Please fill in all required fields");
       return;
     }
 
-    setError(null);
-    setSongId("");
+    if (!metadata.copyrightAcknowledged) {
+      setError("Please acknowledge that you own or have the rights to this music");
+      return;
+    }
 
+    setError(null);
+    setCurrentStep("tracks");
+  };
+
+  // ====== CREATE SONG BEFORE ADDING TRACKS ======
+  const handleCreateSong = async () => {
     try {
+      setError(null);
+      setSongId("");
+
       const res = await fetch("/api/songs/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -166,6 +177,7 @@ const IncrementalMusicUpload = () => {
           genre: metadata.genre || undefined,
           language: metadata.language || "English",
           upc: metadata.upc || undefined,
+          cover: coverUploadId || undefined,
           copyrightAcknowledged: metadata.copyrightAcknowledged,
         }),
       });
@@ -177,9 +189,10 @@ const IncrementalMusicUpload = () => {
 
       const data = await res.json();
       setSongId(data.songId);
-      setCurrentStep("cover");
+      return data.songId;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create song");
+      throw err;
     }
   };
 
@@ -211,13 +224,19 @@ const IncrementalMusicUpload = () => {
     setTrackProgress(0);
 
     try {
+      // Create song if not already created
+      let finalSongId = songId;
+      if (!finalSongId) {
+        finalSongId = await handleCreateSong();
+      }
+
       // Upload audio file
       const uploadResult = await uploadService.uploadFileWithProgress(selectedTrackFile, "audio", (percent) => {
         setTrackProgress(percent);
       });
 
       // Add track to song
-      const res = await fetch(`/api/songs/${songId}/tracks`, {
+      const res = await fetch(`/api/songs/${finalSongId}/tracks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -320,11 +339,30 @@ const IncrementalMusicUpload = () => {
               <CardDescription>Tell us about your song</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Show cover preview if uploaded */}
+              {coverUrl && (
+                <div className="flex gap-4 p-4 bg-gray-50 rounded-lg">
+                  <img src={coverUrl} alt="Cover preview" className="w-24 h-24 rounded-lg object-cover" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Cover Preview</p>
+                    <p className="text-xs text-gray-600 mt-1">{coverFile?.name}</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentStep("cover")}
+                      className="mt-2"
+                    >
+                      Change Cover
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               <div>
-                <label className="text-sm font-medium">Song Title *</label>
+                <label className="text-sm font-medium">Song / Album Title *</label>
                 <input
                   type="text"
-                  placeholder="Enter song title"
+                  placeholder="Enter song or album title"
                   className="w-full mt-1 px-3 py-2 border rounded-lg"
                   value={metadata.title}
                   onChange={(e) => setMetadata({ ...metadata, title: e.target.value })}
@@ -414,13 +452,13 @@ const IncrementalMusicUpload = () => {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => router.push("/desk")}
+                  onClick={() => setCurrentStep("cover")}
                   className="flex-1"
                 >
-                  ✕ Cancel
+                  ← Back
                 </Button>
                 <Button onClick={handleMetadataSubmit} className="flex-1">
-                  Next: Add Cover Image →
+                  Next: Add Tracks →
                 </Button>
               </div>
             </CardContent>
@@ -484,13 +522,13 @@ const IncrementalMusicUpload = () => {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => setCurrentStep("metadata")}
+                  onClick={() => router.push("/desk")}
                   className="flex-1"
                 >
-                  ← Back
+                  ✕ Cancel
                 </Button>
-                <Button onClick={() => setCurrentStep("tracks")} className="flex-1">
-                  Next: Add Tracks →
+                <Button onClick={() => setCurrentStep("metadata")} className="flex-1">
+                  Next: Song Details →
                 </Button>
               </div>
             </CardContent>
