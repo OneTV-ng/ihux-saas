@@ -114,6 +114,9 @@ const IncrementalMusicUpload = () => {
   const [trackProgress, setTrackProgress] = useState(0);
   const [selectedTrackFile, setSelectedTrackFile] = useState<File | null>(null);
 
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [coverProgress, setCoverProgress] = useState(0);
+
   const [songId, setSongId] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -202,11 +205,13 @@ const IncrementalMusicUpload = () => {
   const handleCoverUpload = async (file: File) => {
     try {
       setError(null);
+      setUploadingCover(true);
+      setCoverProgress(0);
       const result = await uploadService.uploadFileWithProgress(
         file,
         "cover",
         (percent) => {
-          console.log(`Cover upload: ${percent}%`);
+          setCoverProgress(percent);
         },
         user?.id
       );
@@ -226,6 +231,9 @@ const IncrementalMusicUpload = () => {
       setCurrentStep("typeSelect");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to upload cover");
+    } finally {
+      setUploadingCover(false);
+      setCoverProgress(0);
     }
   };
 
@@ -623,19 +631,46 @@ const IncrementalMusicUpload = () => {
                   </div>
                 </div>
               ) : (
-                <div className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => e.target.files && handleCoverUpload(e.target.files[0])}
-                    className="hidden"
-                    id="cover-input"
-                  />
-                  <label htmlFor="cover-input" className="cursor-pointer">
-                    <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                    <p className="text-sm font-medium">Click to upload cover image</p>
-                    <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 10MB</p>
-                  </label>
+                <div>
+                  <div className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => e.target.files && handleCoverUpload(e.target.files[0])}
+                      disabled={uploadingCover}
+                      className="hidden"
+                      id="cover-input"
+                    />
+                    <label htmlFor="cover-input" className={`cursor-pointer ${uploadingCover ? 'opacity-50' : ''}`}>
+                      {uploadingCover ? (
+                        <>
+                          <Loader className="w-8 h-8 mx-auto text-blue-500 mb-2 animate-spin" />
+                          <p className="text-sm font-medium">Uploading cover...</p>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                          <p className="text-sm font-medium">Click to upload cover image</p>
+                          <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 10MB</p>
+                        </>
+                      )}
+                    </label>
+                  </div>
+
+                  {coverProgress > 0 && coverProgress < 100 && (
+                    <div className="space-y-2 mt-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-700">Uploading Cover</span>
+                        <span className="text-sm font-semibold text-blue-600">{coverProgress}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${coverProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -814,14 +849,17 @@ const IncrementalMusicUpload = () => {
                 />
 
                 {trackProgress > 0 && trackProgress < 100 && (
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span>Uploading...</span>
-                      <span>{trackProgress}%</span>
+                  <div className="space-y-2 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Loader className="w-4 h-4 text-blue-600 animate-spin" />
+                        <span className="text-sm font-medium text-blue-900">Uploading Track...</span>
+                      </div>
+                      <span className="text-sm font-semibold text-blue-600">{trackProgress}%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-blue-200 rounded-full h-2.5 overflow-hidden">
                       <div
-                        className="bg-blue-500 h-2 rounded-full transition-all"
+                        className="bg-gradient-to-r from-blue-400 to-blue-600 h-2.5 rounded-full transition-all duration-300"
                         style={{ width: `${trackProgress}%` }}
                       />
                     </div>
