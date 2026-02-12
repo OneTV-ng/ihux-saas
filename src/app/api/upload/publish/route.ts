@@ -137,6 +137,9 @@ export async function POST(req: NextRequest) {
     }
     console.log("✅ [STAGE 6] Song record created successfully");
 
+    // Setup base URL for file paths
+    const baseUrl = process.env.NEXT_CLIENT_URL || "http://localhost:3000";
+
     // Stage 7: Process tracks (now that song exists)
     console.log("\n🎼 [STAGE 7] Processing tracks (total: " + tracksList.length + ")...");
     const trackIds: string[] = [];
@@ -169,7 +172,7 @@ export async function POST(req: NextRequest) {
           size: 0,
           status: "complete",
           path: `/uploads/songs/${trackId}.mp3`,
-          url: `/uploads/songs/${trackId}.mp3`,
+          url: `${baseUrl}/uploads/songs/${trackId}.mp3`,
           progress: 100,
           metadata: JSON.stringify({
             trackNumber: trackData.trackNumber || i + 1,
@@ -191,7 +194,7 @@ export async function POST(req: NextRequest) {
         songId,
         trackNumber: trackData.trackNumber || i + 1,
         title: trackData.title || `Track ${i + 1}`,
-        mp3: `/uploads/songs/${trackId}.mp3`,
+        mp3: `${baseUrl}/uploads/songs/${trackId}.mp3`,
         explicit: trackData.explicit || "no",
         duration: trackData.duration || 0,
       };

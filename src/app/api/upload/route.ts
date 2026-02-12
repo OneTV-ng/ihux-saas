@@ -121,8 +121,9 @@ export async function POST(request: NextRequest) {
     // Save file
     await writeFile(filepath, buffer);
 
-    // Return the URL path
-    const url = `/uploads/${username}/${type || "files"}/${filename}`;
+    // Return the URL path with full client URL
+    const baseUrl = process.env.NEXT_CLIENT_URL || "http://localhost:3000";
+    const url = `${baseUrl}/uploads/${username}/${type || "files"}/${filename}`;
 
     // If image, return details
     let imageDetails = undefined;
