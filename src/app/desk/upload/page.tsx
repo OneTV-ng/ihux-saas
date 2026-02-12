@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -73,7 +73,11 @@ const STEPS: UploadStep[] = [
 
 const IncrementalMusicUpload = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, defaultArtist, isLoading: authLoading } = useAuth();
+
+  // Get type from query parameter (from selector page)
+  const typeParam = (searchParams.get("type") || "single") as "single" | "album" | "medley";
 
   // State
   const [currentStep, setCurrentStep] = useState<"metadata" | "cover" | "tracks" | "review" | "submit" | "complete">(
@@ -81,7 +85,7 @@ const IncrementalMusicUpload = () => {
   );
   const [metadata, setMetadata] = useState<SongMetadata>({
     title: "",
-    type: "single",
+    type: typeParam,
     artistId: "",
     artistName: "",
     genre: "",

@@ -136,25 +136,27 @@ export default function UploadSelector() {
     );
   }
   const options = [
-      {
-      title: "Multi-Track Album / EP",
-      description: "Upload multiple tracks as an album",
-      icon: Disc3,
-      link: "/desk/artist/upload/album"
-    },
     {
       title: "Music Single",
       description: "Upload and distribute one song",
       icon: Music,
-      link: "/desk/artist/upload/single"
+      type: "single",
+      link: "/desk/upload?type=single"
     },
     {
       title: "Music Medley",
-      description: "Multiple songs merged into one release",
+      description: "Multiple songs merged into one release (2-4 tracks)",
       icon: Layers,
-      link: "/desk/artist/upload/medley"
+      type: "medley",
+      link: "/desk/upload?type=medley"
     },
-  
+    {
+      title: "Multi-Track Album / EP",
+      description: "Upload multiple tracks as an album (5+ tracks)",
+      icon: Disc3,
+      type: "album",
+      link: "/desk/upload?type=album"
+    },
     {
       title: "Music Video",
       description: "Upload and distribute your music video",
