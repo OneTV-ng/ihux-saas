@@ -31,11 +31,8 @@ interface Song {
   upc?: string;
   cover?: string;
   numberOfTracks: number;
-  isFeatured: boolean;
-  plays: number;
   status: string;
   duration: number;
-  releaseDate?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -77,7 +74,7 @@ const SongDisplay: React.FC<SongDisplayProps> = ({ songId, playbackMode = "conte
 
         const data = await response.json();
         setSong(data.song);
-        setTracks(data.tracks);
+        setTracks(data.tracks || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load song");
       } finally {
@@ -330,10 +327,6 @@ const SongDisplay: React.FC<SongDisplayProps> = ({ songId, playbackMode = "conte
               <div className="text-sm text-gray-900">{song.upc}</div>
             </div>
           )}
-          <div>
-            <div className="text-xs text-gray-600 font-semibold">Plays</div>
-            <div className="text-sm text-gray-900">{song.plays.toLocaleString()}</div>
-          </div>
           <div>
             <div className="text-xs text-gray-600 font-semibold">Added</div>
             <div className="text-sm text-gray-900">
