@@ -423,10 +423,24 @@ export class DxlApiClient {
   }
 
   /**
+   * Verify PIN for password reset
+   */
+  async verifyPin(email: string, pin: string) {
+    return this.post("auth.verify_pin", { email, pin });
+  }
+
+  /**
    * Resend verification code
    */
   async resendVerificationCode(email: string) {
     return this.post("auth.resend_code", { email });
+  }
+
+  /**
+   * Resend password reset PIN
+   */
+  async resendResetPin(email: string) {
+    return this.post("auth.resend_reset_pin", { email });
   }
 }
 

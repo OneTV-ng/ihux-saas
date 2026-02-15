@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { db } from "@/db";
-import { userVerification } from "@/db/schema";
+import { usersVerification } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export type VerificationStatus = 
@@ -36,8 +36,8 @@ export interface UserVerificationData {
 export async function getUserVerification(userId: string): Promise<UserVerificationData | null> {
   const records = await db
     .select()
-    .from(userVerification)
-    .where(eq(userVerification.userId, userId))
+    .from(usersVerification)
+    .where(eq(usersVerification.userId, userId))
     .limit(1);
 
   return (records[0] as UserVerificationData) || null;
@@ -57,7 +57,7 @@ export async function createUserVerification(
   const id = randomUUID();
 
   await db
-    .insert(userVerification)
+    .insert(usersVerification)
     .values({
       id,
       userId,
@@ -71,8 +71,8 @@ export async function createUserVerification(
 
   const [record] = await db
     .select()
-    .from(userVerification)
-    .where(eq(userVerification.id, id));
+    .from(usersVerification)
+    .where(eq(usersVerification.id, id));
 
   return record as UserVerificationData;
 }
@@ -115,14 +115,14 @@ export async function updateVerificationStatus(
   if (options?.reviewedBy) updateData.reviewedBy = options.reviewedBy;
 
   await db
-    .update(userVerification)
+    .update(usersVerification)
     .set(updateData)
-    .where(eq(userVerification.userId, userId));
+    .where(eq(usersVerification.userId, userId));
 
   const [updated] = await db
     .select()
-    .from(userVerification)
-    .where(eq(userVerification.userId, userId));
+    .from(usersVerification)
+    .where(eq(usersVerification.userId, userId));
 
   return (updated as UserVerificationData) || null;
 }
@@ -139,17 +139,17 @@ export async function updateVerificationDocuments(
   }
 ): Promise<UserVerificationData | null> {
   await db
-    .update(userVerification)
+    .update(usersVerification)
     .set({
       ...data,
       updatedAt: new Date(),
     })
-    .where(eq(userVerification.userId, userId));
+    .where(eq(usersVerification.userId, userId));
 
   const [updated] = await db
     .select()
-    .from(userVerification)
-    .where(eq(userVerification.userId, userId));
+    .from(usersVerification)
+    .where(eq(usersVerification.userId, userId));
 
   return (updated as UserVerificationData) || null;
 }
@@ -209,7 +209,7 @@ export async function suspendVerification(
  * Get verification statistics
  */
 export async function getVerificationStats() {
-  const allRecords = await db.select().from(userVerification);
+  const allRecords = await db.select().from(usersVerification);
   
   const stats = {
     total: allRecords.length,

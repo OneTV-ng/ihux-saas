@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/db";
-import { songs, artists, artistProfiles } from "@/db/music-schema";
+import { songs, artists, artistProfiles } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import React from "react";
 

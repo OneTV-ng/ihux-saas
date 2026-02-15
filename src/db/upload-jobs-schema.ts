@@ -1,38 +1,54 @@
-import { mysqlTable as table, text, timestamp, json, varchar, int as integer, boolean } from 'drizzle-orm/mysql-core';
-import { user } from './schema';
+import {
+  mysqlTable as table,
+  varchar,
+  timestamp,
+  json,
+  int,
+  text,
+  index,
+} from "drizzle-orm/mysql-core";
+import { users } from "./schema/user.schema";
 
-// Upload Jobs table - tracks user's upload progress for recovery
-export const uploadJobs = table("upload_jobs", {
-  id: varchar("id", { length: 36 }).primaryKey(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" }),
+export const uploadJobs = table(
+  "upload_jobs",
+  {
+    id: varchar("id", { length: 36 }).primaryKey(),
+    userId: varchar("user_id", { length: 36 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
 
-  // Song metadata
-  songTitle: text("song_title").notNull(),
-  songType: text("song_type").notNull(), // 'single', 'album', 'medley'
-  genre: text("genre"),
-  language: text("language").default("en"),
-  upc: text("upc"),
-  artistId: varchar("artist_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" }),
-  artistName: text("artist_name").notNull(),
+    // Song Metadata
+    songTitle: varchar("song_title", { length: 255 }).notNull(),
+    songType: varchar("song_type", { length: 100 }),
+    genre: varchar("genre", { length: 100 }),
+    language: varchar("language", { length: 50 }),
+    upc: varchar("upc", { length: 50 }),
 
-  // Cover image upload
-  coverUploadId: varchar("cover_upload_id", { length: 36 }),
+    // Artist Info
+    artistId: varchar("artist_id", { length: 36 }),
+    artistName: varchar("artist_name", { length: 255 }),
 
-  // Tracks data (JSON to store multiple track info)
-  tracks: json("tracks"), // Array of track objects with metadata
+    // Tracks
+    tracks: json("tracks"), // JSON array of track data
 
-  // Progress tracking
-  status: text("status").notNull().default("in_progress"), // 'in_progress', 'completed', 'failed', 'cancelled'
-  currentStep: text("current_step").default("metadata"), // 'metadata', 'cover', 'tracks', 'review', 'publishing'
-  progress: integer("progress").default(0), // 0-100
+    // Copyright
+    copyrightAcknowledged: text("copyright_acknowledged"),
 
-  // Copyright acknowledgement
-  copyrightAcknowledged: boolean("copyright_acknowledged").default(false).notNull(),
-  copyrightWarningAcknowledgedAt: timestamp("copyright_warning_acknowledged_at"),
+    // Job Progress
+    status: varchar("status", { length: 50 }).default("in_progress"), // in_progress, completed, failed
+    currentStep: varchar("current_step", { length: 100 }),
+    progress: int("progress").default(0), // 0-100
 
-  // Timestamps
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  completedAt: timestamp("completed_at"),
-  expiresAt: timestamp("expires_at"), // auto-delete after 30 days if incomplete
-});
+    // Timestamps
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+    expiresAt: timestamp("expires_at"),
+  },
+  (t) => ({
+    userIdx: index("upload_jobs_user_idx").on(t.userId),
+    statusIdx: index("upload_jobs_status_idx").on(t.status),
+  })
+);
+
+export type UploadJob = typeof uploadJobs.$inferSelect;
+export type NewUploadJob = typeof uploadJobs.$inferInsert;

@@ -2,7 +2,7 @@
 import { z } from "zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 //import { Button } from "@/components/ui/button";
 
@@ -24,6 +24,9 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const LoginForm = () => {
+  const searchParams = useSearchParams();
+  const emailParam = searchParams.get("email") || "";
+
   const {
     register,
     handleSubmit,
@@ -31,7 +34,7 @@ const LoginForm = () => {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { emailOrUsername: "", password: "", rememberMe: false },
+    defaultValues: { emailOrUsername: emailParam, password: "", rememberMe: false },
   });
 
   const [isVisible, setIsVisible] = useState(false);

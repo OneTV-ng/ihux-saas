@@ -168,5 +168,7 @@ export const sendVerificationLinkEmail = async ({
 };
 
 export const generatePin = (): string => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  const pin = Math.floor(100000 + Math.random() * 900000).toString();
+  console.log(`[PIN_GENERATED] New 6-digit PIN: ${pin}`);
+  return pin;
 };

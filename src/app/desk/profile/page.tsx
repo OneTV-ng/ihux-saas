@@ -269,6 +269,8 @@ const UserProfilePage = () => {
   };
 
   const handleSave = async () => {
+
+    
     if (!formData.name.trim()) {
       toast({
         title: "Validation Error",
@@ -604,7 +606,7 @@ const UserProfilePage = () => {
                 </Avatar>
                 {isEditing && (
                   <>
-                    <input
+                    <input name="file" label="Upload Profile Picture"
                       type="file"
                       ref={fileInputRef}
                       onChange={handleFileUpload}
@@ -754,6 +756,7 @@ const UserProfilePage = () => {
                                     </Button>
                                     {!isFileField && (
                                       <Button
+                                      name={item.field};
                                         size="sm"
                                         variant="ghost"
                                         className="h-7 w-7 p-0 text-green-600"
@@ -796,7 +799,7 @@ const UserProfilePage = () => {
                                 ) : item.field === 'dateOfBirth' ? (
                                   <Input
                                     type="date"
-                                    value={editValue}
+                                    value={editValue ? new Date(editValue).toISOString().split('T')[0] : ''}
                                     onChange={(e) => setEditValue(e.target.value)}
                                     onClick={(e) => e.stopPropagation()}
                                     placeholder={`Enter ${item.label.toLowerCase()}`}

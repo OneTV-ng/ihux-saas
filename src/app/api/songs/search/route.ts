@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { songs,Song, artists, artistProfiles } from "@/db/music-schema";
+import { songs,Song, artists, artistProfiles } from "@/db/schema";
 import { eq, and, or, sql, desc } from "drizzle-orm";
 
 // GET - Search for songs

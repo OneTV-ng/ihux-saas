@@ -1,4 +1,5 @@
 import "./globals.css";
+import Footer from "@/components/landing/footer";
 import type { Metadata } from "next";
 import { Toaster as HotToaster } from "react-hot-toast";
 import { Toaster } from "@/components/ui/sonner";
@@ -35,6 +36,8 @@ export default function RootLayout({
           <AuthProvider>
             <AlertProvider>
               {children}
+              {/* Branded Footer */}
+              <Footer />
               <AlertContainer />
               <HotToaster />
               <Toaster />

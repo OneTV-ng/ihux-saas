@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { db } from "@/db";
-import { artists, artistProfiles } from "@/db/music-schema";
+import { artists, artistProfiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 // POST - Suspend/unsuspend an artist

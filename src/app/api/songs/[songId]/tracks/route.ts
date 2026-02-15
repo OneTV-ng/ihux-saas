@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { db } from "@/db";
-import { songs, tracks, uploads } from "@/db/music-schema";
+import { songs, tracks, uploads } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 // Helper to generate UUID

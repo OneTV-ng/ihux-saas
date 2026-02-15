@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { songs, tracks, uploads } from "@/db/music-schema";
+import { songs, tracks, uploads } from "@/db/schema";
 import { uploadJobs } from "@/db/upload-jobs-schema";
 import { eq } from "drizzle-orm";
 

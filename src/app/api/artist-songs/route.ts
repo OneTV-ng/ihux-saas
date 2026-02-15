@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { songs,Song  } from "@/db/music-schema";
+import { songs,Song  } from "@/db/schema";
 import { eq, and, or, sql, desc } from "drizzle-orm";
 
 function slugify(str: string) {

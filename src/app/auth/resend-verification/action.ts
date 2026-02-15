@@ -58,12 +58,12 @@ export async function verifyEmailWithCode(
 
     // Mark email as verified in database
     await db
-      .update(user)
+      .update(users)
       .set({ 
         emailVerified: true,
         updatedAt: new Date()
       })
-      .where(eq(user.email, email));
+      .where(eq(users.email, email));
 
     return {
       success: { reason: "Email verified successfully!" },

@@ -5,7 +5,7 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 import { db } from "@/db";
-import { user } from "@/db/schema";
+import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function POST(request: NextRequest) {
@@ -20,10 +20,14 @@ export async function POST(request: NextRequest) {
 
     // Get user's username
     const userData = await db
-      .select({ username: user.username })
-      .from(user)
-      .where(eq(user.id, session.user.id))
+      .select({ username: users.username })
+      .from(users)
+      .where(eq(users.id, session.user.id))
       .limit(1);
+
+    if (!userData || userData.length === 0) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
     const username = userData[0]?.username || session.user.id;
 
@@ -117,7 +121,6 @@ export async function POST(request: NextRequest) {
     const extension = file.name.split(".").pop();
     const filename = `${timestamp}.${extension}`;
     const filepath = join(uploadDir, filename);
-
     // Save file
     await writeFile(filepath, buffer);
 
@@ -138,7 +141,9 @@ export async function POST(request: NextRequest) {
           dpi: metadata.density,
           format: metadata.format,
         };
-      } catch {}
+      } catch (err) {
+        console.error("Error retrieving image metadata:", err);
+      }
     }
     return NextResponse.json({
       success: true,
@@ -151,7 +156,9 @@ export async function POST(request: NextRequest) {
       imageDetails,
       message: rejectionFlag ? "File uploaded with issues" : "File uploaded successfully",
     });
-  } catch (error) {
+
+  
+  } catch (error:  any) {
     console.error("Error uploading file:", error);
     return NextResponse.json(
       { error: "Failed to upload file" },

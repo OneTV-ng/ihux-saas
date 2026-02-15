@@ -1,26 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { songs, tracks } from "@/db/music-schema";
+import { songs, tracks } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { songId: string } }
+  { params }: { params: Promise<{ songId: string }> }
 ) {
+  const { songId } = await params;
   console.log("\n" + "=".repeat(80));
   console.log("📖 [GET SONG] Endpoint called");
-  console.log(`📌 Song ID: ${params.songId}`);
+  console.log(`📌 Song ID: ${songId}`);
 
   try {
     // Fetch song
     const songRecords = await db
       .select()
       .from(songs)
-      .where(eq(songs.id, params.songId))
+      .where(eq(songs.id, songId))
       .limit(1);
 
     if (!songRecords || songRecords.length === 0) {
-      console.error("❌ [GET SONG] Song not found:", params.songId);
+      console.error("❌ [GET SONG] Song not found:", songId);
       return NextResponse.json({ error: "Song not found" }, { status: 404 });
     }
 
@@ -30,7 +31,7 @@ export async function GET(
     const allTracks = await db
       .select()
       .from(tracks)
-      .where(eq(tracks.songId, params.songId));
+      .where(eq(tracks.songId, songId));
 
     // Calculate total duration
     const totalDuration = allTracks.reduce((sum, track) => {

@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { artists, artistProfiles } from "@/db/music-schema";
+import { artists, artistProfiles } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import Navbar from "@/components/landing/navbar";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";

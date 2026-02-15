@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { songs } from "@/db/music-schema";
+import { songs } from "@/db/schema";
 import { eq, and, or, sql, desc, like, SQL } from "drizzle-orm";
 
 // GET - Public songs for listening (basic info only)

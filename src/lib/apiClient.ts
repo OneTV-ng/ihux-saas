@@ -19,3 +19,4 @@ export async function fetchUserSongs({ search = "", page = 1, pageSize = 10 }) {
   if (!res.ok) throw new Error("Failed to fetch user songs");
   return res.json();
 }
+

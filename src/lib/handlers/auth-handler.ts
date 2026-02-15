@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import { NextRequest } from "next/server";
 import { db } from "@/db";
-import { user, userProfiles } from "@/db/schema";
+import { users, userProfiles, User, account } from "@/db/schema";
 import { eq, or, like } from "drizzle-orm";
 import { DxlApiHandler, DxlApiContext, DxlApiResponse } from "@/lib/dxl-api-handler";
 import { createAndSendPin, verifyPin } from "@/lib/pin-service";
@@ -24,8 +24,12 @@ export class AuthHandler extends DxlApiHandler {
         return this.sendVerificationCode(request);
       case "verify_email":
         return this.verifyEmail(request);
+      case "verify_pin":
+        return this.verifyPin(request);
       case "resend_code":
         return this.resendVerificationCode(request);
+      case "resend_reset_pin":
+        return this.resendResetPin(request);
       default:
         return this.errorResponse(
           `auth.${operation}`,
@@ -59,10 +63,10 @@ export class AuthHandler extends DxlApiHandler {
       }
 
       // Check if email exists
-      const existingUser = await db
-        .select({ id: user.id })
-        .from(user)
-        .where(eq(user.email, email.toLowerCase()))
+      const existingUser: User[] = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.email, email.toLowerCase()))
         .limit(1);
 
       const available = existingUser.length === 0;
@@ -110,11 +114,12 @@ export class AuthHandler extends DxlApiHandler {
         );
       }
 
+
       // Check if email exists and get verification status
-      const existingUser = await db
-        .select({ id: user.id, emailVerified: user.emailVerified })
-        .from(user)
-        .where(eq(user.email, email.toLowerCase()))
+      const existingUser: User[]= await db
+        .select({ id: users.id, emailVerified: users.emailVerified })
+        .from(users)
+        .where(eq(users.email, email.toLowerCase()))
         .limit(1);
 
       const exists = existingUser.length > 0;
@@ -177,9 +182,9 @@ export class AuthHandler extends DxlApiHandler {
 
       // Check if username exists (case-insensitive)
       const existingUser = await db
-        .select({ id: user.id })
-        .from(user)
-        .where(like(user.username, username))
+        .select({ id: users.id })
+        .from(users)
+        .where(like(users.username, username))
         .limit(1);
 
       const available = existingUser.length === 0;
@@ -213,32 +218,74 @@ export class AuthHandler extends DxlApiHandler {
   private async register(request: NextRequest): Promise<DxlApiResponse> {
     try {
       const body = await request.json();
-      const { email, password, firstname, lastname, username, gender, ref_code } = body;
+      var { email, password, firstname, lastname, username, tenant, gender, ref_code } = body;
+
       // Get tenant from env or util
-      let tenant = process.env.TENANT;
+   //   if(!tenant) tenant  = process.env.TENANT;
+      
       try {
         // Try to use util if available
         const { getTenant } = await import("@/lib/tenant");
-        tenant = getTenant();
+      if(!tenant) {
+            tenant =(process.env.TENANT)?process.env.TENANT: getTenant();
+      }
+
       } catch {}
 
       // Validation
-      if (!email || !password || !firstname || !lastname) {
+      if (!email || !password || !firstname || !lastname || !username) {
+        console.log("[REGISTER] Missing required fields:", { email: !!email, password: !!password, firstname: !!firstname, lastname: !!lastname, username: !!username });
         return this.errorResponse(
           "auth.register",
           "auth",
-          "Email, password, firstname, and lastname are required",
+          "Email, password, firstname, lastname, and username are required",
           422,
           "ValidationError",
-          { required: ["email", "password", "firstname", "lastname"] }
+          { required: ["email", "password", "firstname", "lastname", "username"] }
+        );
+      }
+
+      // Validate password
+      if (password.length < 8) {
+        console.log(`[REGISTER] Password too short: ${password.length} chars (min 8)`);
+        return this.errorResponse(
+          "auth.register",
+          "auth",
+          "Password must be at least 8 characters",
+          422,
+          "ValidationError",
+          { field: "password" }
+        );
+      }
+
+      // Validate username
+      if (username.trim() === "") {
+        return this.errorResponse(
+          "auth.register",
+          "auth",
+          "Username cannot be empty",
+          422,
+          "ValidationError",
+          { field: "username" }
+        );
+      }
+
+      if (username.length < 3 || username.length > 20) {
+        return this.errorResponse(
+          "auth.register",
+          "auth",
+          "Username must be between 3 and 20 characters",
+          422,
+          "ValidationError",
+          { field: "username" }
         );
       }
 
       // Check if email already exists
       const existingUser = await db
-        .select({ id: user.id })
-        .from(user)
-        .where(eq(user.email, email.toLowerCase()))
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.email, email.toLowerCase()))
         .limit(1);
 
       if (existingUser.length > 0) {
@@ -252,71 +299,90 @@ export class AuthHandler extends DxlApiHandler {
         );
       }
 
-      // Check username availability if provided
-      if (username) {
-        const existingUsernameCheck = await db
-          .select({ id: user.id })
-          .from(user)
-          .where(like(user.username, username))
-          .limit(1);
+      // Check username availability (now always have a username)
+      const existingUsernameCheck = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(like(users.username, username))
+        .limit(1);
 
-        if (existingUsernameCheck.length > 0) {
-          return this.errorResponse(
-            "auth.register",
-            "auth",
-            "Username is already taken",
-            422,
-            "ValidationError",
-            { field: "username" }
-          );
-        }
+      if (existingUsernameCheck.length > 0) {
+        return this.errorResponse(
+          "auth.register",
+          "auth",
+          "Username is already taken",
+          422,
+          "ValidationError",
+          { field: "username" }
+        );
       }
 
-      // Create user using Better Auth
+      // Create user using Better Auth - it handles password hashing internally
+      console.log("[REGISTER] Creating user with Better Auth:", {
+        email: email.toLowerCase(),
+        name: `${firstname} ${lastname}`,
+        password_length: password.length
+      });
+
       const { user: newUser } = await auth.api.signUpEmail({
         body: {
           email: email.toLowerCase(),
-          password,
+          password: password,
           name: `${firstname} ${lastname}`
-      
         },
       });
 
-      // Update user with username and emailVerified based on EMAIL_VERIFICATION setting
+      console.log("[REGISTER] User created successfully:", { userId: newUser.id, email: newUser.email });
+
+      // Copy password from account table to users table
+      console.log("[REGISTER] Copying password from account to users table");
+      const emailAccount = await db
+        .select({ password: account.password })
+        .from(account)
+        .where(eq(account.userId, newUser.id))
+        .limit(1);
+
+      if (emailAccount.length > 0 && emailAccount[0].password) {
+        console.log("[REGISTER] Found account password, copying to users.passwordHash");
+        await db
+          .update(users)
+          .set({ passwordHash: emailAccount[0].password })
+          .where(eq(users.id, newUser.id));
+      }
+
+      // Update user with username and email verification
       const emailVerificationMode = process.env.EMAIL_VERIFICATION || "BEFORE";
       const updateData: any = {};
-      
+
       if (username) {
         updateData.username = username;
       }
 
-       if (tenant) {
+      if (tenant) {
         updateData.tenant = tenant;
       }
-      
-      if (firstname) updateData.firstName = firstname;
-      if (lastname) updateData.lastName = lastname; 
-      if(ref_code) updateData.ref_code = ref_code;
-      
-      // Set emailVerified based on mode
-      if (emailVerificationMode === "NO" || emailVerificationMode === "BEFORE") {
+
+      // Set emailVerified based on mode or if ref_code is provided
+      // If ref_code is provided, always verify email automatically
+      if (ref_code || emailVerificationMode === "NO" || emailVerificationMode === "BEFORE") {
         updateData.emailVerified = true;
       }
-      
+
       if (Object.keys(updateData).length > 0) {
+        console.log(`[REGISTER] Updating user ${newUser.id} with:`, updateData);
         await db
-          .update(user)
+          .update(users)
           .set(updateData)
-          .where(eq(user.id, newUser.id));
+          .where(eq(users.id, newUser.id));
       }
 
-      // Create user profile with additional fields (without username, it's in user table)
+      // Create user profile with additional fields
+      console.log("[REGISTER] Creating user profile for user:", newUser.id);
       await db.insert(userProfiles).values({
         id: randomUUID(),
         userId: newUser.id,
         firstname,
         lastname,
-        language: "en",
         platform: "web",
         metadata: {
           gender: gender || null,
@@ -324,6 +390,8 @@ export class AuthHandler extends DxlApiHandler {
           registered_at: new Date().toISOString(),
         },
       });
+
+      const emailVerified = ref_code || emailVerificationMode === "NO" || emailVerificationMode === "BEFORE";
 
       return this.successResponse(
         "auth.register",
@@ -336,9 +404,15 @@ export class AuthHandler extends DxlApiHandler {
           username,
           gender,
           ref_code,
-          message: "Registration successful. You can now login.",
+          validCode: ref_code ? true : undefined,
+          emailVerified,
+          message: ref_code
+            ? "We are good to go"
+            : "Registration successful. You can now login.",
         },
-        "Registration successful. You can now login."
+        ref_code
+          ? "We are good to go"
+          : "Registration successful. You can now login."
       );
     } catch (error: any) {
       return this.errorResponse(
@@ -439,9 +513,9 @@ export class AuthHandler extends DxlApiHandler {
 
       // Update user as verified
       await db
-        .update(user)
-        .set({ emailVerified: true })
-        .where(eq(user.email, email.toLowerCase()));
+        .update(users)
+        .set({ emailVerified: true, updatedAt: new Date() })
+        .where(eq(users.email, email.toLowerCase()));
 
       return this.successResponse(
         "auth.verify_email",
@@ -458,6 +532,66 @@ export class AuthHandler extends DxlApiHandler {
         "auth.verify_email",
         "auth",
         error.message || "Email verification failed",
+        500,
+        "InternalError"
+      );
+    }
+  }
+
+  /**
+   * Verify PIN for password reset
+   */
+  private async verifyPin(request: NextRequest): Promise<DxlApiResponse> {
+    try {
+      const body = await request.json();
+      const { email, pin } = body;
+
+      if (!email || !pin) {
+        return this.errorResponse(
+          "auth.verify_pin",
+          "auth",
+          "Email and PIN are required",
+          400,
+          "BadRequest",
+          { required: ["email", "pin"] }
+        );
+      }
+
+      // Use pin-service to verify PIN for reset
+      const { verifyPin } = await import("@/lib/pin-service");
+      const result = await verifyPin({
+        email: email.toLowerCase(),
+        pin,
+        type: "reset",
+      });
+
+      if (result.valid) {
+        return this.successResponse(
+          "auth.verify_pin",
+          "auth",
+          {
+            email,
+            verified: true,
+            message: "PIN verified successfully",
+          },
+          "PIN verified successfully"
+        );
+      } else {
+        return this.errorResponse(
+          "auth.verify_pin",
+          "auth",
+          result.error || "Invalid or expired PIN",
+          422,
+          "ValidationError",
+          { field: "pin" }
+        );
+      }
+    } catch (error: any) {
+      console.error("[AUTH] Error verifying PIN:", error);
+      return this.errorResponse(
+        "auth.verify_pin",
+        "auth",
+        error.message || "PIN verification failed",
         500,
         "InternalError"
       );
@@ -484,9 +618,9 @@ export class AuthHandler extends DxlApiHandler {
 
       // Check if user exists
       const existingUser = await db
-        .select({ id: user.id, emailVerified: user.emailVerified })
-        .from(user)
-        .where(eq(user.email, email.toLowerCase()))
+        .select({ id: users.id, emailVerified: users.emailVerified })
+        .from(users)
+        .where(eq(users.email, email.toLowerCase()))
         .limit(1);
 
       if (existingUser.length === 0) {
@@ -527,6 +661,65 @@ export class AuthHandler extends DxlApiHandler {
         "auth.resend_code",
         "auth",
         error.message || "Failed to resend verification code",
+        500,
+        "InternalError"
+      );
+    }
+  }
+
+  /**
+   * Resend password reset PIN
+   */
+  private async resendResetPin(request: NextRequest): Promise<DxlApiResponse> {
+    try {
+      const body = await request.json();
+      const { email } = body;
+
+      if (!email) {
+        return this.errorResponse(
+          "auth.resend_reset_pin",
+          "auth",
+          "Email is required",
+          400,
+          "BadRequest"
+        );
+      }
+
+      // Check if user exists
+      const existingUser = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.email, email.toLowerCase()))
+        .limit(1);
+
+      if (existingUser.length === 0) {
+        return this.errorResponse(
+          "auth.resend_reset_pin",
+          "auth",
+          "User not found",
+          404,
+          "NotFound"
+        );
+      }
+
+      // Send new password reset PIN
+      await createAndSendPin({ email: email.toLowerCase(), type: "reset" });
+
+      return this.successResponse(
+        "auth.resend_reset_pin",
+        "auth",
+        {
+          email,
+          pin_sent: true,
+          expires_in: "10 minutes",
+        },
+        "New password reset PIN sent to your email"
+      );
+    } catch (error: any) {
+      return this.errorResponse(
+        "auth.resend_reset_pin",
+        "auth",
+        error.message || "Failed to resend reset PIN",
         500,
         "InternalError"
       );

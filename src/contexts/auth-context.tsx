@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 const DEFAULT_TENANT = process.env.NEXT_PUBLIC_TENANT || process.env.TENANT || "mstudios";
-import { ROLES, ROLE_PERMISSIONS, UserRole ,User } from "@/db/schema";
+import { ROLES, ROLE_PERMISSIONS, UserRole ,User } from "@/db/schema/user.schema";
 import { DxlApiClient, initDxlApiClient, getDxlApiClient } from "@/lib/dxl-api-client";
 
 export interface Uxxser {

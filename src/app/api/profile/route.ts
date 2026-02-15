@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { db } from "@/db";
-import { user, userVerification } from "@/db/schema";
+import { users, usersVerification } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getUserVerification, updateVerificationDocuments, createUserVerification } from "@/lib/user-verification";
-
+//const user =users;
 // GET - Fetch user profile
 export async function GET(request: NextRequest) {
   try {
@@ -19,27 +19,27 @@ export async function GET(request: NextRequest) {
 
     const userData = await db
       .select({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        username: user.username,
-        image: user.image,
-        thumbnail: user.thumbnail,
-        profilePicture: user.profilePicture,
-        headerBackground: user.headerBackground,
-        phone: user.phone,
-        whatsapp: user.whatsapp,
-        dateOfBirth: user.dateOfBirth,
-        address: user.address,
-        recordLabel: user.recordLabel,
-        socialMedia: user.socialMedia,
-        bankDetails: user.bankDetails,
-        settings: user.settings,
-        role: user.role,
-        createdAt: user.createdAt,
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        username: users.username,
+        image: users.image,
+        thumbnail: users.thumbnail,
+        profilePicture: users.profilePicture,
+        headerBackground: users.headerBackground,
+        phone: users.phone,
+        whatsapp: users.whatsapp,
+        dateOfBirth: users.dateOfBirth,
+        address: users.address,
+        recordLabel: users.recordLabel,
+        socialMedia: users.socialMedia,
+        bankDetails: users.bankDetails,
+        settings: users.settings,
+        role: users.role,
+        createdAt: users.createdAt,
       })
-      .from(user)
-      .where(eq(user.id, session.user.id))
+      .from(users)
+      .where(eq(users.id, session.user.id))
       .limit(1);
 
     if (!userData || userData.length === 0) {
@@ -126,8 +126,8 @@ export async function PUT(request: NextRequest) {
     if (username) {
       const existingUser = await db
         .select()
-        .from(user)
-        .where(eq(user.username, username))
+        .from(users)
+        .where(eq(users.username, username))
         .limit(1);
 
       if (existingUser.length > 0 && existingUser[0].id !== session.user.id) {
@@ -197,9 +197,9 @@ export async function PUT(request: NextRequest) {
     }
 
     await db
-      .update(user)
+      .update(users)
       .set(updateData)
-      .where(eq(user.id, session.user.id));
+      .where(eq(users.id, session.user.id));
 
     // Handle verification documents (government ID and signature)
     if (governmentid !== undefined || signature !== undefined) {
@@ -224,27 +224,27 @@ export async function PUT(request: NextRequest) {
     // Fetch updated user data
     const updatedUser = await db
       .select({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        username: user.username,
-        image: user.image,
-        thumbnail: user.thumbnail,
-        profilePicture: user.profilePicture,
-        headerBackground: user.headerBackground,
-        phone: user.phone,
-        whatsapp: user.whatsapp,
-        dateOfBirth: user.dateOfBirth,
-        address: user.address,
-        recordLabel: user.recordLabel,
-        socialMedia: user.socialMedia,
-        bankDetails: user.bankDetails,
-        settings: user.settings,
-        role: user.role,
-        createdAt: user.createdAt,
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        username: users.username,
+        image: users.image,
+        thumbnail: users.thumbnail,  
+        profilePicture: users.profilePicture,
+        headerBackground: users.headerBackground,
+        phone: users.phone,
+        whatsapp: users.whatsapp,
+        dateOfBirth: users.dateOfBirth,
+        address: users.address,
+        recordLabel: users.recordLabel,
+        socialMedia: users.socialMedia,
+        bankDetails: users.bankDetails,
+        settings: users.settings,
+        role: users.role,
+        createdAt: users.createdAt,
       })
-      .from(user)
-      .where(eq(user.id, session.user.id))
+      .from(users)
+      .where(eq(users.id, session.user.id))
       .limit(1);
 
     // Fetch updated verification documents

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { db } from "@/db";
-import { user, userVerification } from "@/db/schema";
+import { users, usersVerification } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getUserVerification, createUserVerification } from "@/lib/user-verification";
 import { sendEmail } from "@/lib/email";
@@ -21,8 +21,8 @@ export async function POST(request: NextRequest) {
     // Get user data
     const userData = await db
       .select()
-      .from(user)
-      .where(eq(user.id, session.user.id))
+      .from(users)
+      .where(eq(users.id, session.user.id))
       .limit(1);
 
     if (!userData || userData.length === 0) {
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     // Update verification status to 'submitted'
     await db
-      .update(userVerification)
+      .update(usersVerification)
       .set({
         status: "submitted",
         submittedAt: new Date(),

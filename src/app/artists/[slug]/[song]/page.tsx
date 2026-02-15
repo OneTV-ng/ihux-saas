@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/db";
-import { artists, artistProfiles,Song, songs as songsTable, tracks } from "@/db/music-schema";
+import { artists, artistProfiles,Song, songs as songsTable, tracks } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import Navbar from "@/components/landing/navbar";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";

@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { user as userTable, account as accountTable, session as sessionTable, userVerification, User } from "@/db/schema";
+import { users as userTable, account as accountTable, sessions as sessionTable, verification as userVerification, User } from "@/db/schema";
 import { eq, like, or, sql, desc, asc, and, inArray } from "drizzle-orm";
 
 export interface UserWithDetails {

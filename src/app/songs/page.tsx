@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/db";
-import { songs, Song, artists, artistProfiles } from "@/db/music-schema";
+import { songs, Song, artists, artistProfiles } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import Navbar from "@/components/landing/navbar";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";

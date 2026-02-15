@@ -8,7 +8,7 @@ import PasswordInput from "./password-input";
 import { useAlert } from "@/contexts/alert-context";
 import { Check, X, Loader2 } from "lucide-react";
 
-type Step = "firstname" | "lastname" | "username" | "email" | "verify_email" | "gender" | "refcode" | "password" | "complete";
+type Step = "firstname" | "lastname" | "refcode" | "username" | "email" | "verify_email" | "gender" | "password" | "complete";
 
 const IncrementalRegisterForm = () => {
   const { showAlert } = useAlert();
@@ -25,64 +25,82 @@ const IncrementalRegisterForm = () => {
   const [refCode, setRefCode] = useState("");
   const [password, setPassword] = useState("");
 
-  // Username availability
-  const [usernameChecking, setUsernameChecking] = useState(false);
-  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
-  const usernameTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   // Email verification
   const [emailChecking, setEmailChecking] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
   const [verifying, setVerifying] = useState(false);
 
-  // Check username availability with debounce
+  // Background validation states
+  const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [checkingEmailAvailability, setCheckingEmailAvailability] = useState(false);
+  const [checkingUsernameAvailability, setCheckingUsernameAvailability] = useState(false);
+
+
+  // Background check for email availability
   useEffect(() => {
-    if (step === "username" && username.length >= 5) {
-      // Clear existing timeout
-      if (usernameTimeoutRef.current) {
-        clearTimeout(usernameTimeoutRef.current);
+    const checkEmail = async () => {
+      if (!email || email.length < 5) {
+        setEmailAvailable(null);
+        return;
       }
 
-      // Set new timeout for 4 seconds
-      usernameTimeoutRef.current = setTimeout(async () => {
-        setUsernameChecking(true);
-        setUsernameAvailable(null);
-
-        try {
-          const res = await fetch(
-            `/api/dxl/v3?@=auth.check.username&username=${encodeURIComponent(username)}`
-          );
-          const data = await res.json();
-
-          if (data.status) {
-            setUsernameAvailable(data.data?.available ?? null);
-            if (data.data?.available) {
-              showAlert("Username is available!", "success");
-            } else {
-              showAlert("Username is already taken", "error");
-            }
-          } else {
-            showAlert(data.message || "Failed to check username", "error");
-          }
-        } catch (error) {
-          showAlert("Error checking username availability", "error");
-        } finally {
-          setUsernameChecking(false);
-        }
-      }, 4000);
-    } else {
-      setUsernameAvailable(null);
-      if (usernameTimeoutRef.current) {
-        clearTimeout(usernameTimeoutRef.current);
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setEmailAvailable(null);
+        return;
       }
-    }
 
-    return () => {
-      if (usernameTimeoutRef.current) {
-        clearTimeout(usernameTimeoutRef.current);
+      setCheckingEmailAvailability(true);
+      try {
+        const res = await fetch(
+          `/api/dxl/v3?@=auth.check.email&email=${encodeURIComponent(email)}`
+        );
+        const data = await res.json();
+        setEmailAvailable(data.data?.available ?? false);
+      } catch (error) {
+        console.error("Email availability check error:", error);
+        setEmailAvailable(null);
+      } finally {
+        setCheckingEmailAvailability(false);
       }
     };
-  }, [username, step, showAlert]);
+
+    const timer = setTimeout(checkEmail, 600);
+    return () => clearTimeout(timer);
+  }, [email]);
+
+  // Background check for username availability
+  useEffect(() => {
+    const checkUsername = async () => {
+      if (!username || username.length < 3) {
+        setUsernameAvailable(null);
+        return;
+      }
+
+      const cleanedUsername = username.trim().replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+      if (cleanedUsername.length < 3 || cleanedUsername.length > 20) {
+        setUsernameAvailable(null);
+        return;
+      }
+
+      setCheckingUsernameAvailability(true);
+      try {
+        const res = await fetch(
+          `/api/dxl/v3?@=auth.check.username&username=${encodeURIComponent(cleanedUsername)}`
+        );
+        const data = await res.json();
+        setUsernameAvailable(data.data?.available ?? false);
+      } catch (error) {
+        console.error("Username availability check error:", error);
+        setUsernameAvailable(null);
+      } finally {
+        setCheckingUsernameAvailability(false);
+      }
+    };
+
+    const timer = setTimeout(checkUsername, 600);
+    return () => clearTimeout(timer);
+  }, [username]);
 
   const handleFirstnameNext = () => {
     const trimmedFirstname = firstname.trim();
@@ -106,22 +124,30 @@ const IncrementalRegisterForm = () => {
     // Format: trim, lowercase, capitalize first letter
     const formattedLastname = trimmedLastname.charAt(0).toUpperCase() + trimmedLastname.slice(1).toLowerCase();
     setLastname(formattedLastname);
-    setStep("username");
+    setStep("refcode");
     showAlert(`Perfect, ${firstname}!`, "success");
   };
 
+  const handleRefCodeNext = () => {
+    // Ref code is optional, so we can skip validation
+    setStep("username");
+    if (refCode) {
+      showAlert("Great! Now choose your username", "info");
+    } else {
+      showAlert("No problem! Choose your username", "info");
+    }
+  };
+
   const handleUsernameNext = () => {
-    // Trim and remove special characters, keep only alphanumeric, underscores, and hyphens
-    const cleanedUsername = username.trim().replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
-    
-    if (!cleanedUsername) {
-      showAlert(`${firstname}, please choose a username`, "error");
+    // Username is required
+    if (!username.trim()) {
+      showAlert("Please enter a username", "error");
       return;
     }
-    
-    // Update username with cleaned version
-    setUsername(cleanedUsername);
-    
+
+    // Clean and validate username
+    const cleanedUsername = username.trim().replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+
     if (cleanedUsername.length < 3) {
       showAlert("Username must be at least 3 characters", "error");
       return;
@@ -130,13 +156,16 @@ const IncrementalRegisterForm = () => {
       showAlert("Username must be less than 20 characters", "error");
       return;
     }
-    if (usernameAvailable === false) {
-      showAlert("This username is already taken", "error");
-      return;
-    }
+    setUsername(cleanedUsername);
+    // Always go to email, but skip verification if ref_code is provided
     setStep("email");
-    showAlert("Now let's set up your account", "info");
+    if (refCode) {
+      showAlert("Great! Now provide your email (verification skipped with referral code)", "info");
+    } else {
+      showAlert("Now let's verify your email", "info");
+    }
   };
+
 
   const handleEmailNext = async () => {
     if (!email.trim()) {
@@ -172,29 +201,36 @@ const IncrementalRegisterForm = () => {
 
       if (data.status) {
         if (data.data?.available) {
-          // Step 2: Email is available, send verification code
-          console.log("[SIGNUP] Email is available, sending verification code");
-          
-          const sendRes = await fetch("/api/dxl/v3?@=auth.send_verification_code", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email }),
-          });
-          
-          if (!sendRes.ok) {
-            showAlert("Failed to send verification code", "error");
-            return;
-          }
-          
-          const sendData = await sendRes.json();
-          console.log("[SIGNUP] Verification code send result:", sendData);
-
-          if (sendData.status) {
-            setVerificationSent(true);
-            setStep("verify_email");
-            showAlert("Verification code sent to your email!", "success");
+          // If ref_code is provided, skip email verification
+          if (refCode) {
+            console.log("[SIGNUP] Email is available and ref_code provided, skipping verification");
+            setStep("gender");
+            showAlert("Email verified with referral code!", "success");
           } else {
-            showAlert(sendData.message || "Failed to send verification code", "error");
+            // Step 2: Email is available, send verification code
+            console.log("[SIGNUP] Email is available, sending verification code");
+
+            const sendRes = await fetch("/api/dxl/v3?@=auth.send_verification_code", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email }),
+            });
+
+            if (!sendRes.ok) {
+              showAlert("Failed to send verification code", "error");
+              return;
+            }
+
+            const sendData = await sendRes.json();
+            console.log("[SIGNUP] Verification code send result:", sendData);
+
+            if (sendData.status) {
+              setVerificationSent(true);
+              setStep("verify_email");
+              showAlert("Verification code sent to your email!", "success");
+            } else {
+              showAlert(sendData.message || "Failed to send verification code", "error");
+            }
           }
         } else {
           // Email already registered
@@ -264,22 +300,12 @@ const IncrementalRegisterForm = () => {
       showAlert(`${firstname}, please select your gender`, "error");
       return;
     }
-    setStep("refcode");
+    setStep("password");
     showAlert("Almost done!", "info");
   };
 
-  const handleRefCodeNext = () => {
-    // Ref code is optional, so we can skip validation
-    setStep("password");
-    if (refCode) {
-      showAlert("Great! Last step now", "info");
-    } else {
-      showAlert("Last step, create your password", "info");
-    }
-  };
-
   const handleBack = () => {
-    const steps: Step[] = ["firstname", "lastname", "username", "email", "verify_email", "gender", "refcode", "password"];
+    const steps: Step[] = ["firstname", "lastname", "refcode", "username", "email", "verify_email", "gender", "password"];
     const currentIndex = steps.indexOf(step);
     if (currentIndex > 0) {
       setStep(steps[currentIndex - 1]);
@@ -307,7 +333,7 @@ const IncrementalRegisterForm = () => {
         body: JSON.stringify({
           firstname,
           lastname,
-          username,
+          username: username || undefined, // Send empty string or undefined if not provided
           email,
           password,
           gender,
@@ -361,8 +387,8 @@ const IncrementalRegisterForm = () => {
     <form onSubmit={handleSubmit} className="flex w-full flex-col gap-6">
       {/* Progress indicator */}
       <div className="flex gap-2 mb-2">
-        {["firstname", "lastname", "username", "email", "verify_email", "gender", "refcode", "password"].map((s, i) => {
-          const currentStepIndex = ["firstname", "lastname", "username", "email", "verify_email", "gender", "refcode", "password"].indexOf(step);
+        {["firstname", "lastname", "refcode", "username", "email", "verify_email", "gender", "password"].map((s, i) => {
+          const currentStepIndex = ["firstname", "lastname", "refcode", "username", "email", "verify_email", "gender", "password"].indexOf(step);
           return (
             <div
               key={s}
@@ -377,7 +403,7 @@ const IncrementalRegisterForm = () => {
       {step === "firstname" && (
         <div className="flex flex-col gap-4">
           <div>
-            <h3 className="text-xl font-semibold mb-1">Welcome to DXL Music HUB!</h3>
+            <h3 className="text-xl font-semibold mb-1">Welcome to SingFLEX Global Distributions!</h3>
             <p className="text-sm text-muted-foreground">Let's get started. What's your first name?</p>
           </div>
           <div className="flex flex-col gap-2">
@@ -427,6 +453,38 @@ const IncrementalRegisterForm = () => {
         </div>
       )}
 
+      {step === "refcode" && (
+        <div className="flex flex-col gap-4">
+          <div>
+            <h3 className="text-xl font-semibold mb-1">Got a referral code, {firstname}?</h3>
+            <p className="text-sm text-muted-foreground">Enter it below or skip if you don't have one</p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="refcode">Referral Code (Optional)</Label>
+            <Input
+              id="refcode"
+              type="text"
+              placeholder="ABC123"
+              value={refCode}
+              onChange={(e) => setRefCode(e.target.value.toUpperCase())}
+              onKeyDown={(e) => e.key === "Enter" && handleRefCodeNext()}
+              autoFocus
+            />
+            <p className="text-xs text-muted-foreground">
+              If someone referred you, enter their code here
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={handleBack} className="flex-1">
+              Back
+            </Button>
+            <Button type="button" onClick={handleRefCodeNext} className="flex-1">
+              {refCode ? "Continue" : "Skip"}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {step === "username" && (
         <div className="flex flex-col gap-4">
           <div>
@@ -434,37 +492,38 @@ const IncrementalRegisterForm = () => {
             <p className="text-sm text-muted-foreground">Choose a unique username</p>
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="username">Username</Label>
-            <div className="relative">
-              <Input
-                id="username"
-                type="text"
-                placeholder="johndoe"
-                value={username}
-                onChange={(e) => setUsername(e.target.value.toLowerCase())}
-                onKeyDown={(e) => e.key === "Enter" && handleUsernameNext()}
-                autoFocus
-                className="pr-10"
-              />
-              {username.length >= 5 && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  {usernameChecking ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                  ) : usernameAvailable === true ? (
-                    <Check className="h-5 w-5 text-green-500" />
-                  ) : usernameAvailable === false ? (
-                    <X className="h-5 w-5 text-red-500" />
-                  ) : null}
+            <div className="flex items-center justify-between">
+              <Label htmlFor="username">Username</Label>
+              {checkingUsernameAvailability && (
+                <div className="flex items-center gap-1">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <span className="text-xs text-muted-foreground">Checking...</span>
+                </div>
+              )}
+              {!checkingUsernameAvailability && usernameAvailable === true && username.length >= 3 && (
+                <div className="flex items-center gap-1 text-green-600">
+                  <Check className="h-3 w-3" />
+                  <span className="text-xs">Available</span>
+                </div>
+              )}
+              {!checkingUsernameAvailability && usernameAvailable === false && username.length >= 3 && (
+                <div className="flex items-center gap-1 text-red-600">
+                  <X className="h-3 w-3" />
+                  <span className="text-xs">Taken</span>
                 </div>
               )}
             </div>
+            <Input
+              id="username"
+              type="text"
+              placeholder="johndoe"
+              value={username}
+              onChange={(e) => setUsername(e.target.value.toLowerCase())}
+              onKeyDown={(e) => e.key === "Enter" && usernameAvailable && handleUsernameNext()}
+              autoFocus
+            />
             <p className="text-xs text-muted-foreground">
               3-20 characters, letters, numbers, underscores, and hyphens only
-              {username.length >= 5 && (
-                <span className="ml-2 text-blue-500">
-                  (checking availability in 4 seconds...)
-                </span>
-              )}
             </p>
           </div>
           <div className="flex gap-2">
@@ -475,7 +534,7 @@ const IncrementalRegisterForm = () => {
               type="button"
               onClick={handleUsernameNext}
               className="flex-1"
-              disabled={usernameChecking || usernameAvailable === false}
+              disabled={!username.trim() || usernameAvailable !== true}
             >
               Continue
             </Button>
@@ -490,27 +549,46 @@ const IncrementalRegisterForm = () => {
             <p className="text-sm text-muted-foreground">What's your email address?</p>
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="email">Email</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="email">Email</Label>
+              {checkingEmailAvailability && (
+                <div className="flex items-center gap-1">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <span className="text-xs text-muted-foreground">Checking...</span>
+                </div>
+              )}
+              {!checkingEmailAvailability && emailAvailable === true && email.length >= 5 && (
+                <div className="flex items-center gap-1 text-green-600">
+                  <Check className="h-3 w-3" />
+                  <span className="text-xs">Available</span>
+                </div>
+              )}
+              {!checkingEmailAvailability && emailAvailable === false && email.length >= 5 && (
+                <div className="flex items-center gap-1 text-red-600">
+                  <X className="h-3 w-3" />
+                  <span className="text-xs">Already registered</span>
+                </div>
+              )}
+            </div>
             <Input
               id="email"
               type="email"
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && !emailChecking && handleEmailNext()}
+              onKeyDown={(e) => e.key === "Enter" && emailAvailable && handleEmailNext()}
               autoFocus
-              disabled={emailChecking}
             />
           </div>
           <div className="flex gap-2">
             <Button type="button" variant="outline" onClick={handleBack} className="flex-1">
               Back
             </Button>
-            <Button 
-              type="button" 
-              onClick={handleEmailNext} 
+            <Button
+              type="button"
+              onClick={handleEmailNext}
               className="flex-1"
-              disabled={emailChecking}
+              disabled={emailChecking || (email.length >= 5 && emailAvailable !== true)}
             >
               {emailChecking ? (
                 <>
@@ -624,38 +702,6 @@ const IncrementalRegisterForm = () => {
               disabled={!gender}
             >
               Continue
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {step === "refcode" && (
-        <div className="flex flex-col gap-4">
-          <div>
-            <h3 className="text-xl font-semibold mb-1">Got a referral code, {firstname}?</h3>
-            <p className="text-sm text-muted-foreground">Enter it below or skip if you don't have one</p>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="refcode">Referral Code (Optional)</Label>
-            <Input
-              id="refcode"
-              type="text"
-              placeholder="ABC123"
-              value={refCode}
-              onChange={(e) => setRefCode(e.target.value.toUpperCase())}
-              onKeyDown={(e) => e.key === "Enter" && handleRefCodeNext()}
-              autoFocus
-            />
-            <p className="text-xs text-muted-foreground">
-              If someone referred you, enter their code here
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button type="button" variant="outline" onClick={handleBack} className="flex-1">
-              Back
-            </Button>
-            <Button type="button" onClick={handleRefCodeNext} className="flex-1">
-              {refCode ? "Continue" : "Skip"}
             </Button>
           </div>
         </div>

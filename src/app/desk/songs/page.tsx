@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useUserSongs } from "@/hooks/useSongs";
-import { Song} from "@/db/music-schema";
+import { Song} from "@/db/schema";
 import Navbar from "@/components/landing/navbar";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 

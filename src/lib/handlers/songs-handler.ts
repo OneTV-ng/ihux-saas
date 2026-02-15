@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { randomUUID } from "crypto";
 import { db } from "@/db";
-import { songs, tracks } from "@/db/music-schema";
+import { songs, tracks } from "@/db/schema";
 import { eq, and, desc, sql, like, or, isNull } from "drizzle-orm";
 import { DxlApiHandler, DxlApiContext, DxlApiResponse } from "@/lib/dxl-api-handler";
 

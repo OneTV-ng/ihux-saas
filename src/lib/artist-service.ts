@@ -6,7 +6,7 @@
 
 import { randomUUID } from "crypto";
 import { db } from "@/db";
-import { artists, artistProfiles, userProfiles } from "@/db/music-schema";
+import { artists, artistProfiles, userProfiles } from "@/db/schema";
 import { eq, desc, like, or, sql } from "drizzle-orm";
 
 // Artist interface - Private business information
@@ -474,7 +474,7 @@ export async function deleteArtist(artistId: string, userId: string): Promise<bo
 export async function getUserSelectedArtist(userId: string): Promise<CombinedArtist | null> {
   const [profile] = await db
     .select()
-    .from(userProfiles)
+    .from(usersProfiles)
     .where(eq(userProfiles.userId, userId))
     .limit(1);
 
@@ -501,13 +501,13 @@ export async function setUserSelectedArtist(
   // Check if user profile exists
   const [existing] = await db
     .select()
-    .from(userProfiles)
+    .from(usersProfiles)
     .where(eq(userProfiles.userId, userId))
     .limit(1);
 
   if (existing) {
     await db
-      .update(userProfiles)
+      .update(usersProfiles)
       .set({
         selectedArtistId: artistId,
         updatedAt: new Date(),
@@ -529,7 +529,7 @@ export async function setUserSelectedArtist(
  */
 export async function clearUserSelectedArtist(userId: string): Promise<void> {
   await db
-    .update(userProfiles)
+    .update(usersProfiles)
     .set({
       selectedArtistId: null,
       updatedAt: new Date(),

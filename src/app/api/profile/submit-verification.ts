@@ -16,12 +16,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user_verification status to 'submitted'
-    await db.update(userVerification)
+    await db.update(usersVerification)
       .set({ status: "submitted", submittedAt: new Date() })
       .where(eq(userVerification.userId, session.user.id));
 
     // Optionally, update user table if you want to reflect verification status
-    // await db.update(user).set({ verification: "submitted" }).where(eq(user.id, session.user.id));
+    // await db.update(users).set({ verification: "submitted" }).where(eq(users.id, session.user.id));
 
     return NextResponse.json({ success: true, message: "Profile submitted for verification." });
   } catch (error) {

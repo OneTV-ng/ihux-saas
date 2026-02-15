@@ -1,6 +1,4 @@
-import 'dotenv/config';
 import { defineConfig } from 'drizzle-kit';
-
 // Normalize dialect for Drizzle
 function normalizeDrizzleDialect(env: string | undefined): 'mysql' | 'postgresql' | 'sqlite' {
   if (!env) return 'mysql';
@@ -13,10 +11,13 @@ function normalizeDrizzleDialect(env: string | undefined): 'mysql' | 'postgresql
 const drizzleDialect = normalizeDrizzleDialect(process.env.DB_DIALECT);
 
 export default defineConfig({
-  out: './drizzle',
-  schema: ['./src/db/schema.ts', './src/db/music-schema.ts', './src/db/upload-jobs-schema.ts'],
-  dialect: drizzleDialect,
+  out: './src/db/drizzle',
+  schema: [
+    './src/db/schema/*.ts',
+  ],
+  dialect: 'mysql',
+  //dialect: drizzleDialect,
   dbCredentials: {
-    url: process.env.DATABASE_URL!,
+    url: process.env.DATABASE_URL!||"mysql://dxl:lJj4xVUo(znpLh]j@onetv.ng:3306/dxl",
   },
 });

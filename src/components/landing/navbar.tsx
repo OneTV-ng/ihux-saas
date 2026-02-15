@@ -33,7 +33,7 @@ const Navbar = () => {
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Logo/Brand */}
+        {/* Logo/Brand - Branded for SingFLEX */}
         <div className="flex items-center gap-2 md:gap-6">
           {/* Mobile Menu Toggle */}
           {isAuthenticated && (
@@ -97,18 +97,18 @@ const Navbar = () => {
           )}
 
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white border border-primary">
               <Image
-                src="/logo.png"
-                alt="Zexa Logo"
-                width={24}
-                height={24}
+                src="/images/tenant/sflogo.png"
+                alt="SingFLEX Logo"
+                width={32}
+                height={32}
                 loading="eager"
-                className="h-6 w-6 object-contain"
+                className="h-8 w-8 object-contain"
               />
             </div>
-            <span className="font-bold text-base md:text-xl hidden sm:inline">DXL Music HUB</span>
-            <span className="font-bold text-base md:text-xl sm:hidden">DXL</span>
+            <span className="font-bold text-base md:text-xl hidden sm:inline text-primary">SingFLEX Global Distributions</span>
+            <span className="font-bold text-base md:text-xl sm:hidden text-primary">SingFLEX</span>
           </Link>
 
           {/* Navigation Links */}

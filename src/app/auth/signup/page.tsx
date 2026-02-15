@@ -28,11 +28,12 @@ const RegisterPage = () => {
         <ThemeToggle />
       </div>
       <div className="flex flex-col items-center w-full max-w-md gap-6">
-        <a href="#" className="flex items-center gap-2 self-center font-medium">
-          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <GalleryVerticalEnd className="size-4" />
+        <a href="/" className="flex flex-col items-center gap-2 self-center font-medium">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white border border-primary">
+            <img src="/images/tenant/sflogo.png" alt="SingFLEX Logo" className="h-10 w-10 object-contain" />
           </div>
-          DXL Music HUB
+          <span className="font-bold text-lg text-primary">SingFLEX Global Distributions</span>
+          <span className="text-xs text-muted-foreground text-center max-w-xs">Global simless Media distribution company focused on delivering high-quality content to audiences worldwide.</span>
         </a>
         <Card className="w-full">
           <CardContent className="flex flex-col gap-4 pt-6">

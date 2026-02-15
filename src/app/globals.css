@@ -58,6 +58,9 @@
 
 :root {
   --radius: 0.625rem;
+  /* SingFLEX Branding: Primary color (blue) */
+  --primary: #1e40af;
+  --primary-foreground: #fff;
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);

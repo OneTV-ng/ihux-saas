@@ -1,4 +1,4 @@
-import { user as userTable, ROLES, ROLE_PERMISSIONS, UserRole } from "@/db/schema";
+import { users, ROLES, ROLE_PERMISSIONS, UserRole } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { db } from "@/db";
@@ -91,8 +91,8 @@ export async function getServerUserProfile(): Promise<ServerUser | null> {
 
     const userData = await db
       .select()
-      .from(userTable)
-      .where(eq(userTable.id, session.user.id))
+      .from(users)
+      .where(eq(users.id, session.user.id))
       .limit(1);
 
     if (!userData || userData.length === 0) {

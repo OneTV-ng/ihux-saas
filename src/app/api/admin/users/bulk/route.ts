@@ -1,7 +1,7 @@
 import type { User } from "@/db/schema";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { user as userTable, session as sessionTable } from "@/db/schema";
+import { users as userTable, sessions as sessionTable } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import { requireAdmin } from "@/lib/auth-server";
 import { isRoleHigher, canTransitionRole } from "@/lib/role-utils";

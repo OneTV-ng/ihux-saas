@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { songs } from "@/db/music-schema";
+import { songs } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 
 // Helper to generate UUID

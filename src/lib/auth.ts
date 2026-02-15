@@ -1,9 +1,10 @@
 import { db } from "@/db";
-import * as schema from "@/db/schema";
+import * as schema from "@/db/index";
 import { getAuthProvider } from "@/db/dialect";
 import { sendEmail } from "@/lib/email";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import bcrypt from "bcrypt";
 
 import { admin } from "better-auth/plugins";
 import { createAccessControl } from "better-auth/plugins/access";
@@ -25,10 +26,13 @@ const sadminRole = ac.newRole({
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
-    provider: getAuthProvider(),
+    provider: 'mysql',
     schema: {
       ...schema,
-      user: schema.user,
+      user: schema.users,
+      session: schema.sessions,
+      account: schema.account,
+      verification: schema.verification,
     },
   }),
   account: {
@@ -46,6 +50,14 @@ export const auth = betterAuth({
         subject: "Reset your password",
         text: `Click the link to reset your password: ${url}`,
       });
+    },
+    password: {
+      hash: async (password) => {
+        return await bcrypt.hash(password, 10);
+      },
+      verify: async ({ hash, password }) => {
+        return await bcrypt.compare(password, hash);
+      },
     },
   },
   emailVerification: {

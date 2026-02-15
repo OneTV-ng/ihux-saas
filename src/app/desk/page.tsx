@@ -24,7 +24,7 @@ import { motion } from "framer-motion";
 
 const DeskPage = () => {
   const menus = [
-    { title: "📤 New Upload", icon: Upload, link: "/desk/upload", badge: "NEW", badgeColor: "bg-green-500" },
+    { title: "📤 New Upload", icon: Upload, link: "/desk/artist/upload/now", badge: "NEW", badgeColor: "bg-green-500" },
     { title: "Upload Music", icon: Upload, link: "/desk/artist/upload" },
     { title: "Artist Songs", icon: Music, link: "/desk/artist/songs" }, // current artist songs
     { title: "User Songs", icon: Album, link: "/desk/songs" }, // all my artist songs

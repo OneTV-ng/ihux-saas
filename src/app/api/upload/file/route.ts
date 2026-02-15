@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { uploads } from "@/db/music-schema";
-import { user as userTable } from "@/db/schema";
+import { uploads, users as userTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import * as fs from "fs";
 import * as path from "path";
