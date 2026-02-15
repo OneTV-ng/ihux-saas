@@ -388,6 +388,9 @@ const UserProfilePage = () => {
       setIsUpdatingField(true);
       const updatePayload: any = {};
 
+      // Always include name to satisfy API validation
+      updatePayload.name = formData.name || userData?.name || '';
+
       // Handle different field types
       if (field === 'socialMedia') {
         // For social media, we need to update the entire object
@@ -606,12 +609,16 @@ const UserProfilePage = () => {
                 </Avatar>
                 {isEditing && (
                   <>
-                    <input name="file" label="Upload Profile Picture"
-                      type="file"
+                    <input
+                      name={"file"}
+                  
+                  type="file"
                       ref={fileInputRef}
                       onChange={handleFileUpload}
                       accept="image/*"
                       className="hidden"
+                      title="Upload Profile Picture"
+                      placeholder="Choose profile picture"
                     />
                     <Button
                       size="sm"
@@ -756,7 +763,6 @@ const UserProfilePage = () => {
                                     </Button>
                                     {!isFileField && (
                                       <Button
-                                      name={item.field};
                                         size="sm"
                                         variant="ghost"
                                         className="h-7 w-7 p-0 text-green-600"
@@ -799,7 +805,7 @@ const UserProfilePage = () => {
                                 ) : item.field === 'dateOfBirth' ? (
                                   <Input
                                     type="date"
-                                    value={editValue ? new Date(editValue).toISOString().split('T')[0] : ''}
+                                    value={editValue ? (editValue.includes('T') ? editValue.split('T')[0] : editValue) : ''}
                                     onChange={(e) => setEditValue(e.target.value)}
                                     onClick={(e) => e.stopPropagation()}
                                     placeholder={`Enter ${item.label.toLowerCase()}`}
