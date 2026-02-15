@@ -5,7 +5,7 @@ import { APIError } from "better-auth/api";
 import { ActionResult } from "@/lib/schemas";
 import { createAndSendPin, verifyPin } from "@/lib/pin-service";
 import { db } from "@/db";
-import { user } from "@/db/schema";
+import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function resendVerificationEmail(

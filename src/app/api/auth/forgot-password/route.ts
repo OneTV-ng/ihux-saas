@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { sendPasswordResetEmail } from '@/lib/email';
-import { randomUUID } from 'crypto';
+import { sendPinEmail } from '@/lib/email';
 
 /**
  * POST /api/auth/forgot-password
@@ -41,8 +40,12 @@ export async function POST(request: NextRequest) {
     // TODO: Store PIN in database with expiration (15 minutes)
     // For now, we'll just send it via email
 
-    // Send reset email
-    await sendPasswordResetEmail(user[0].email, resetPin);
+    // Send reset PIN email
+    await sendPinEmail({
+      email: user[0].email,
+      pin: resetPin,
+      purpose: 'password-reset'
+    });
 
     return NextResponse.json({
       success: true,

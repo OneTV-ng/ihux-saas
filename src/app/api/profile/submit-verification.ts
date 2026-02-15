@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { db } from "@/db";
-import { user, userVerification } from "@/db/schema";
+import { users, usersVerification } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 // POST - Submit profile for verification
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     // Update user_verification status to 'submitted'
     await db.update(usersVerification)
       .set({ status: "submitted", submittedAt: new Date() })
-      .where(eq(userVerification.userId, session.user.id));
+      .where(eq(usersVerification.userId, session.user.id));
 
     // Optionally, update user table if you want to reflect verification status
     // await db.update(users).set({ verification: "submitted" }).where(eq(users.id, session.user.id));
