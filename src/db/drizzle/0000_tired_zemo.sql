@@ -1,8 +1,8 @@
 CREATE TABLE `account` (
-	`id` varchar(36) NOT NULL,
+	`id` varchar(100) NOT NULL,
 	`account_id` varchar(255) NOT NULL,
 	`provider_id` varchar(255) NOT NULL,
-	`user_id` varchar(36) NOT NULL,
+	`user_id` varchar(100) NOT NULL,
 	`access_token` text,
 	`refresh_token` text,
 	`id_token` text,
@@ -24,9 +24,9 @@ CREATE TABLE `admin_alerts` (
 	`entity_id` varchar(36),
 	`status` varchar(32) DEFAULT 'open',
 	`severity` varchar(20) DEFAULT 'info',
-	`matched_by` varchar(36),
+	`matched_by` varchar(100),
 	`approved_by` varchar(100),
-	`resolved_by` varchar(36),
+	`resolved_by` varchar(100),
 	`resolved_at` timestamp,
 	`metadata` json,
 	`created_at` timestamp NOT NULL DEFAULT (now()),
@@ -303,7 +303,7 @@ CREATE TABLE `notifications` (
 );
 --> statement-breakpoint
 CREATE TABLE `sessions` (
-	`id` varchar(36) NOT NULL,
+	`id` varchar(100) NOT NULL,
 	`token` varchar(255) NOT NULL,
 	`expires_at` timestamp NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT (now()),
