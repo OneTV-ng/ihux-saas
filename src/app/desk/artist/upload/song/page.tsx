@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import { Music, Image, Play, CheckCircle2, ShieldCheck, AlertTriangle, Plus, Trash2, X } from "lucide-react";
+import { Music, Image, Play, CheckCircle2, ShieldCheck, AlertTriangle, Plus, Trash2, X, ArrowLeft } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -12,6 +12,7 @@ import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import { PlayerProvider, usePlayer } from "@/contexts/player-context";
 import { ThemeProvider } from "@/components/theme-provider";
 import { useRouter } from "next/navigation";
+import { ArtistBadgeSelector } from "@/components/artist/artist-badge-selector";
 
 type UploadType = "single" | "medley" | "album" | null;
 
@@ -128,9 +129,11 @@ function SongUploadContent() {
   // Tracks
   const [tracks, setTracks] = useState<Track[]>([]);
   const [selectedArtist, setSelectedArtist] = useState<any>(null);
+  const [allArtists, setAllArtists] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [isUserVerified, setIsUserVerified] = useState(false);
 
   // Agreement
   const [agreedOwnership, setAgreedOwnership] = useState(false);
@@ -148,26 +151,45 @@ function SongUploadContent() {
     }
   }, [authLoading, isAuthenticated, forceRefresh, router]);
 
-  // Load artist
+  // Load artist and verify email
   useEffect(() => {
-    const loadArtist = async () => {
+    const loadData = async () => {
       try {
         setIsLoading(true);
-        const res = await fetch("/api/artist?selected=true");
-        const data = await res.json();
-        if (data.success && data.data) {
-          setSelectedArtist(data.data);
-          setArtist(data.data.artistName || data.data.displayName);
-          setArtistId(data.data.id);
+
+        // Check verification status
+        const verRes = await fetch("/api/profile");
+        const verData = await verRes.json();
+        if (verData.success) {
+          setIsUserVerified(verData.data?.verificationStatus === "verified");
+        }
+
+        // Load artists
+        const artistRes = await fetch("/api/artist");
+        const artistData = await artistRes.json();
+        if (artistData.success && artistData.data) {
+          setAllArtists(artistData.data);
+
+          // Load selected artist
+          const selectedRes = await fetch("/api/artist?selected=true");
+          const selectedData = await selectedRes.json();
+          if (selectedData.success && selectedData.data) {
+            setSelectedArtist(selectedData.data);
+            setArtist(selectedData.data.artistName || selectedData.data.displayName);
+            setArtistId(selectedData.data.id);
+          }
         }
       } catch (error) {
-        console.error("Error loading artist:", error);
+        console.error("Error loading data:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    loadArtist();
-  }, []);
+
+    if (isAuthenticated && !authLoading) {
+      loadData();
+    }
+  }, [isAuthenticated, authLoading]);
 
   // Extract title from cover filename
   const handleCoverUpload = (file: File) => {
@@ -265,7 +287,9 @@ function SongUploadContent() {
     userId &&
     uploadType &&
     tracks.length > 0 &&
-    tracks.every(t => t.mp3Url && t.title)
+    tracks.every(t => t.mp3Url && t.title) &&
+    isUserVerified &&
+    selectedArtist
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -333,38 +357,90 @@ function SongUploadContent() {
         }}
       />
 
-      {selectedArtist && (
-        <div className="max-w-4xl mx-auto mb-6 pt-[90px] px-4">
-          <Card className="border border-green-200 dark:border-green-800/50 bg-green-50 dark:bg-green-950/30 shadow-sm">
-            <CardContent className="pt-5 pb-5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  <div>
-                    <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Uploading as</p>
-                    <p className="text-base font-bold text-zinc-900 dark:text-white">{selectedArtist.displayName}</p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" className="rounded-lg text-xs font-semibold" onClick={() => router.push("/desk/artist")}>
-                  Change Artist
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-100 text-zinc-900 dark:from-zinc-950 dark:via-black dark:to-zinc-950 dark:text-white p-4 md:p-8 transition-colors duration-300">
+      <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-100 text-zinc-900 dark:from-zinc-950 dark:via-black dark:to-zinc-950 dark:text-white p-4 md:p-8 pt-[90px] transition-colors duration-300">
         <div className="max-w-4xl mx-auto">
-          <header className="mb-12 text-center">
-            <h1 className="text-4xl font-black text-zinc-900 dark:text-white tracking-tight">
-              Upload <span className="text-green-500 dark:text-green-400">Music</span>
-            </h1>
-            <p className="text-zinc-500 dark:text-zinc-400 mt-3 text-base">Create a {uploadType === "album" ? "complete album" : uploadType === "medley" ? "medley" : uploadType === "single" ? "single" : "new music release"}</p>
-          </header>
+          {/* Navigation Header */}
+          <div className="mb-8 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.back()}
+                className="rounded-lg"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <div>
+                <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">Music Upload</h1>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Create and publish your music</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Artist Selector */}
+          <div className="mb-8">
+            <ArtistBadgeSelector
+              selectedArtist={selectedArtist}
+              artists={allArtists}
+              isLoading={isLoading}
+              onSelectArtist={(artist) => {
+                setSelectedArtist(artist);
+                setArtist(artist.artistName || artist.displayName);
+                setArtistId(artist.id);
+              }}
+              showVerificationWarning={true}
+              isUserVerified={isUserVerified}
+            />
+          </div>
+
+          {/* Verification Check */}
+          {!isUserVerified && (
+            <Card className="mb-8 border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/20">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-bold text-red-900 dark:text-red-100">Email Verification Required</h3>
+                    <p className="text-sm text-red-800 dark:text-red-200 mt-1">
+                      Please verify your email address before uploading music
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => router.push("/desk/settings")}
+                    className="ml-auto bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    Verify Email
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Artist Not Selected */}
+          {!selectedArtist && (
+            <Card className="mb-8 border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/20">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-bold text-amber-900 dark:text-amber-100">No Artist Selected</h3>
+                    <p className="text-sm text-amber-800 dark:text-amber-200 mt-1">
+                      You need to create or select an artist to upload music
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => router.push("/desk/artist")}
+                    className="ml-auto bg-amber-600 hover:bg-amber-700 text-white"
+                  >
+                    Go to Artists
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Progress Steps */}
-          {uploadType && (
+          {uploadType && selectedArtist && isUserVerified && (
             <div className="flex gap-6 justify-center mb-12 flex-wrap">
               <Step number={1} title="Cover" completed={!!coverUrl} />
               <div className="hidden sm:flex items-center"><div className="w-8 h-px bg-zinc-300 dark:bg-zinc-700" /></div>
@@ -376,7 +452,20 @@ function SongUploadContent() {
             </div>
           )}
 
-          <form className="space-y-8" onSubmit={handleSubmit}>
+          {/* Upload disabled message */}
+          {(!selectedArtist || !isUserVerified) && (
+            <div className="text-center py-12">
+              <Music className="h-16 w-16 text-zinc-300 dark:text-zinc-700 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-zinc-600 dark:text-zinc-400 mb-2">Upload Disabled</h3>
+              <p className="text-zinc-500 dark:text-zinc-500">
+                {!selectedArtist
+                  ? "Please select an artist to continue"
+                  : "Please verify your email to continue"}
+              </p>
+            </div>
+          )}
+
+          <form className="space-y-8" onSubmit={handleSubmit} style={{ display: selectedArtist && isUserVerified ? 'block' : 'none' }}>
             {/* Step 1: Cover Upload */}
             {!coverUrl && (
               <Card className="bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 shadow-lg rounded-2xl">
@@ -498,12 +587,14 @@ function SongUploadContent() {
                       />
                     </div>
                     <div>
-                      <label className={labelClass}>Release Date</label>
+                      <label className={labelClass} htmlFor="release-date">Release Date</label>
                       <input
+                        id="release-date"
                         type="date"
                         value={releaseDate}
                         onChange={(e) => setReleaseDate(e.target.value)}
                         className={inputClass}
+                        title="Select release date"
                       />
                     </div>
                   </div>
@@ -554,6 +645,8 @@ function SongUploadContent() {
                               type="button"
                               onClick={() => removeTrack(track.id)}
                               className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 p-2 rounded-lg transition-all"
+                              title="Delete track"
+                              aria-label="Delete track"
                             >
                               <Trash2 className="h-5 w-5" />
                             </button>
