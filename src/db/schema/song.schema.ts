@@ -18,7 +18,7 @@ export const songs = table("songs", {
     .references(() => artists.id, { onDelete: "cascade" }),
 
   artistName: varchar("artist_name", { length: 255 }).notNull().default(""),
-  type: varchar("type", { length: 50 }).notNull(), // e.g., 'single', 'album', 'ep'
+  type: varchar("type", { length: 50 }).notNull().default("single"), // e.g., 'single', 'album', 'ep'
   genre: varchar("genre", { length: 100 }).default("Pop"),
   releaseDate: timestamp("release_date").defaultNow(),
   producer: text("producer"),

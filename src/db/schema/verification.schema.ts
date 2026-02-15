@@ -39,7 +39,7 @@ export const verification = table("verification", {
 // User Verification Table - For account verification workflow
 export const usersVerificationxxxx = table("user_verification", {
   id: varchar("id", { length: 100 }).primaryKey(),
-  userId: varchar("user_id", { length: 36 } )
+  userId: varchar("user_id", { length: 100 } )
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   status: textType("status", { 
@@ -53,7 +53,7 @@ export const usersVerificationxxxx = table("user_verification", {
   remark: textType("remark"),
   rejectionReason: textType("rejection_reason"),
   flagReason: textType("flag_reason"),
-  reviewedBy: varchar("reviewed_by", { length: 36 } ).references(() => user.id),
+  reviewedBy: varchar("reviewed_by", { length: 100 } ).references(() => user.id),
   governmentIdUrl: textType("government_id_url"),
   signatureUrl: textType("signature_url"),
   completionPercentage: textType("completion_percentage").$defaultFn(() => "0"),
@@ -84,7 +84,7 @@ export const usersVerification = table("user_verification", {
   rejectionReason: textType("rejection_reason"),
   flagReason: textType("flag_reason"),
   
-  reviewedBy: varchar("reviewed_by", { length: 36 })
+  reviewedBy: varchar("reviewed_by", { length: 100 })
     .references(() => user.id),
     
   governmentIdUrl: textType("government_id_url"),

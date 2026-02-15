@@ -26,13 +26,13 @@ export const royalties = table("royalties", {
   // Internal Relations
   userId: varchar("user_id", { length: 100 }).notNull().references(() => users.id),
   songId: varchar("song_id", { length: 100 }).references(() => songs.id, { onDelete: "set null" }),
-  trackId: varchar("track_id", { length: 36 }).references(() => tracks.id, { onDelete: "set null" }),
+  trackId: varchar("track_id", { length: 100 }).references(() => tracks.id, { onDelete: "set null" }),
   artistId: varchar("artist_id", { length: 100 }), // Matches the artist table ID
-  managerId: varchar("manager_id", { length: 36 }).references(() => users.id),
+  managerId: varchar("manager_id", { length: 100 }).references(() => users.id),
 
   // Reconciliation Status
   matchStatus: varchar("match_status", { length: 32 }).default("pending"), // pending, matched, manual
-  matchedBy: varchar("matched_by", { length: 36 }).references(() => users.id),
+  matchedBy: varchar("matched_by", { length: 100 }).references(() => users.id),
   matchedAt: timestamp("matched_at"),
   
   // Payment Status

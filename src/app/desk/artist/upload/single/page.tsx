@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import { Music, Image, Play, CheckCircle2, ShieldCheck, AlertTriangle } from "lucide-react";
+import { Music, Image, Play, CheckCircle2, ShieldCheck, AlertTriangle, ArrowLeft } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlbumPreview } from "@/components/album/AlbumPreview";
@@ -13,6 +13,7 @@ import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import { PlayerProvider, usePlayer } from "@/contexts/player-context";
 import { ThemeProvider } from "@/components/theme-provider";
 import { useRouter } from "next/navigation";
+import { useShowMessage } from "@/hooks/use-show-message";
 
 type StepProps = {
   number: number;
@@ -54,6 +55,8 @@ function UploadLayout({ title, description, children }: UploadLayoutProps) {
 
 
 function SingleUploadContent() {
+  const { success, error: showError, info: showInfo } = useShowMessage();
+
   // Info, lyrics, media links
   const [info, setInfo] = useState("");
   const [lyrics, setLyrics] = useState("");
@@ -164,6 +167,8 @@ function SingleUploadContent() {
     if (!file) return;
     setCoverUploading(true);
     setCoverProgress(0);
+    showInfo("Uploading cover art...", `${file.name}`);
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("type", "cover");
@@ -180,9 +185,19 @@ function SingleUploadContent() {
         setCoverDetails(data.imageDetails || null);
         setRejectionFlag(data.rejectionFlag);
         setRejectionReasons(data.rejectionReasons || []);
+        success("Cover uploaded", `${data.imageDetails?.width}x${data.imageDetails?.height}px`);
+
+        if (data.rejectionFlag) {
+          showError("Cover quality issue", data.rejectionReasons?.join(", ") || "Please check your image");
+        }
+      } else {
+        showError("Cover upload failed", "Please try again");
       }
     };
-    xhr.onerror = () => setCoverUploading(false);
+    xhr.onerror = () => {
+      setCoverUploading(false);
+      showError("Cover upload failed", "Network error");
+    };
     xhr.send(formData);
   };
 
@@ -198,8 +213,18 @@ function SingleUploadContent() {
 
   const handleMp3Upload = (file: File) => {
     if (!file) return;
+
+    // Validate file size (10MB max)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      showError("File too large", "Maximum file size is 10MB");
+      return;
+    }
+
     setAudioUploading(true);
     setAudioProgress(0);
+    showInfo("Uploading audio...", `${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("type", "audio");
@@ -214,9 +239,15 @@ function SingleUploadContent() {
         const data = JSON.parse(xhr.responseText);
         setMp3Url(data.url);
         setMp3Details({ size: data.size, type: data.type, filename: data.filename });
+        success("Audio uploaded", `Ready to publish`);
+      } else {
+        showError("Audio upload failed", "Please try again");
       }
     };
-    xhr.onerror = () => setAudioUploading(false);
+    xhr.onerror = () => {
+      setAudioUploading(false);
+      showError("Audio upload failed", "Network error");
+    };
     xhr.send(formData);
   };
 
@@ -266,6 +297,21 @@ function SingleUploadContent() {
     e.preventDefault();
     setSubmitted(false);
     setSubmitError("");
+
+    // Validate requirements
+    if (!isVerified) {
+      showError("Email not verified", "Please verify your email before uploading");
+      return;
+    }
+
+    if (!selectedArtist) {
+      showError("No artist selected", "Please select an artist to upload for");
+      return;
+    }
+
+    // Show info about submission
+    showInfo("Uploading your song...", "Please wait while we process your submission");
+
     const songData = {
       artistId,
       userId,
@@ -292,24 +338,71 @@ function SingleUploadContent() {
       lyrics,
       mediaLinks,
     };
-    const res = await fetch("/api/song-upload", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(songData),
-    });
-    const data = await res.json();
-    if (data.success) {
-      setSubmitted(true);
-      // Update artist.uploadSetting with the latest choices
-      await fetch(`/api/artist/upload-setting`, {
+
+    try {
+      const res = await fetch("/api/song-upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ artistId, uploadSetting: {
-          producer, songwriter, studio, language, country, city, genre, subGenre, recordLabel, explicit, upc, writer, releaseDate, info, lyrics, mediaLinks
-        } }),
+        body: JSON.stringify(songData),
       });
-    } else {
-      setSubmitError(data.error || "Failed to submit");
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to submit song");
+      }
+
+      const data = await res.json();
+
+      if (data.success) {
+        setSubmitted(true);
+        success(
+          "Song uploaded successfully!",
+          `"${songTitle}" is now being processed`
+        );
+
+        // Update artist.uploadSetting with the latest choices
+        try {
+          await fetch(`/api/artist/upload-setting`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              artistId,
+              uploadSetting: {
+                producer,
+                songwriter,
+                studio,
+                language,
+                country,
+                city,
+                genre,
+                subGenre,
+                recordLabel,
+                explicit,
+                upc,
+                writer,
+                releaseDate,
+                info,
+                lyrics,
+                mediaLinks,
+              },
+            }),
+          });
+        } catch (settingError) {
+          console.error("Error saving upload settings:", settingError);
+          // Don't fail the upload if settings don't save
+        }
+
+        // Redirect after success
+        setTimeout(() => {
+          router.push("/desk/artist?tab=uploads");
+        }, 2000);
+      } else {
+        throw new Error(data.error || "Failed to submit song");
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to submit song";
+      setSubmitError(errorMessage);
+      showError("Upload failed", errorMessage);
     }
   };
 
@@ -344,6 +437,33 @@ function SingleUploadContent() {
 
   return (
     <>
+      {/* Verification Status */}
+      {!isVerified && (
+        <div className="max-w-2xl mx-auto mb-6 pt-[90px] px-4">
+          <Card className="border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/20 shadow-sm">
+            <CardContent className="pt-5 pb-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                  <div>
+                    <p className="text-xs font-medium text-red-600 dark:text-red-400 uppercase tracking-wide">Email Not Verified</p>
+                    <p className="text-sm text-red-700 dark:text-red-300">Please verify your email before uploading songs</p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  className="rounded-lg text-xs font-semibold bg-red-600 hover:bg-red-700 text-white"
+                  onClick={() => router.push("/desk/settings")}
+                >
+                  Verify Email
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Artist Selection */}
       {selectedArtist && (
         <div className="max-w-2xl mx-auto mb-6 pt-[90px] px-4">
           <Card className="border border-green-200 dark:border-green-800/50 bg-green-50 dark:bg-green-950/30 shadow-sm">
@@ -356,7 +476,12 @@ function SingleUploadContent() {
                     <p className="text-base font-bold text-zinc-900 dark:text-white">{selectedArtist.displayName}</p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" className="rounded-lg text-xs font-semibold" onClick={() => router.push("/desk/artist")}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-lg text-xs font-semibold"
+                  onClick={() => router.push("/desk/artist")}
+                >
                   Change
                 </Button>
               </div>
@@ -364,10 +489,70 @@ function SingleUploadContent() {
           </Card>
         </div>
       )}
-      <UploadLayout
-        title="Upload Music Single"
-        description="Distribute one track worldwide in 3 easy steps"
-      >
+
+      {/* No Artist Selected */}
+      {!selectedArtist && (
+        <div className="max-w-2xl mx-auto mb-6 pt-[90px] px-4">
+          <Card className="border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/20 shadow-sm">
+            <CardContent className="pt-5 pb-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  <div>
+                    <p className="text-xs font-medium text-amber-700 dark:text-amber-300 uppercase tracking-wide">No Artist Selected</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-300">Create or select an artist to start uploading</p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  className="rounded-lg text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white"
+                  onClick={() => router.push("/desk/artist")}
+                >
+                  Select Artist
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+      {!isVerified || !selectedArtist ? (
+        <UploadLayout
+          title="Upload Music Single"
+          description="Complete the requirements above to get started"
+        >
+          <Card className="bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 shadow-lg rounded-2xl">
+            <CardContent className="p-12 text-center space-y-4">
+              <AlertTriangle className="h-12 w-12 text-amber-600 dark:text-amber-400 mx-auto" />
+              <div>
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-2">
+                  {!isVerified ? "Email Verification Required" : "Artist Selection Required"}
+                </h3>
+                <p className="text-zinc-600 dark:text-zinc-400">
+                  {!isVerified
+                    ? "Please verify your email address before uploading songs."
+                    : "Please select or create an artist profile before uploading."}
+                </p>
+              </div>
+              <Button
+                className="bg-green-600 hover:bg-green-700 text-white mt-4"
+                onClick={() => {
+                  if (!isVerified) {
+                    router.push("/desk/settings");
+                  } else {
+                    router.push("/desk/artist");
+                  }
+                }}
+              >
+                {!isVerified ? "Verify Email" : "Select Artist"}
+              </Button>
+            </CardContent>
+          </Card>
+        </UploadLayout>
+      ) : (
+        <UploadLayout
+          title="Upload Music Single"
+          description="Distribute one track worldwide in 3 easy steps"
+        >
         <div className="flex gap-6 justify-center mb-10">
           <Step number={1} title="Audio & Cover" active completed={!!mp3Url && !!coverUrl} />
           <div className="hidden sm:flex items-center"><div className="w-8 h-px bg-zinc-300 dark:bg-zinc-700" /></div>
@@ -584,11 +769,22 @@ function SingleUploadContent() {
           {/* Actions */}
           <div className="flex flex-wrap justify-between items-center gap-4 pb-8">
             <div className="flex gap-3">
-              <button type="button" className="px-6 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-semibold text-sm border border-zinc-200 dark:border-zinc-700 transition-all duration-200" onClick={() => router.back()}>
+              <button
+                type="button"
+                className="px-6 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-semibold text-sm border border-zinc-200 dark:border-zinc-700 transition-all duration-200 flex items-center gap-2"
+                onClick={() => router.back()}
+              >
+                <ArrowLeft className="h-4 w-4" />
                 Back
               </button>
-              <button type="button" className="px-6 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-semibold text-sm border border-zinc-200 dark:border-zinc-700 transition-all duration-200" onClick={() => router.push("/desk")}>
-                Home
+              <button
+                type="button"
+                className="px-6 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-semibold text-sm border border-zinc-200 dark:border-zinc-700 transition-all duration-200"
+                onClick={() => {
+                  router.push("/desk/artist");
+                }}
+              >
+                Change Artist
               </button>
             </div>
             <div className="flex gap-3">
@@ -624,6 +820,7 @@ function SingleUploadContent() {
           )}
         </form>
       </UploadLayout>
+      )}
     </>
   );
 }

@@ -1,0 +1,43 @@
+{
+  "artistId": "2f953c2f-b79a-4b13-8bb3-adc39d658747",
+  "userId": "DD3WVKtaFUeifDxgFjTOwntbDIXeqiMa",
+  "tracks": [
+    {
+      "title": "Today Na Today",
+      "artist": "Dr El Hassan",
+      "isrc": "",
+      "artistId": "2f953c2f-b79a-4b13-8bb3-adc39d658747",
+      "track_number": 1
+    }
+  ],
+  "coverUrl": "http://localhost:3000/uploads/renny/cover/1771173935071.jpg",
+  "mp3Url": "http://localhost:3000/uploads/renny/audio/1771173930145.mp3",
+  "rejectionFlag": false,
+  "rejectionReasons": [],
+  "producer": "Dr. EL",
+  "songwriter": "Reginald Richmen",
+  "studio": "",
+  "language": "English",
+  "country": "Nigeria",
+  "city": "Port Harcourt ",
+  "genre": "Hipop, Reggea",
+  "subGenre": "Pop",
+  "recordLabel": "mstudios",
+  "explicit": "no",
+  "upc": "",
+  "writer": "",
+  "releaseDate": "2026-02-15",
+  "info": "",
+  "lyrics": "",
+  "mediaLinks": {
+    "appleMusic": "",
+    "spotify": "",
+    "youtube": "",
+    "soundcloud": "",
+    "tidal": "",
+    "deezer": "",
+    "amazonMusic": ""
+  },
+  "songId": 5789,
+  "productCode": "2026005789"
+}

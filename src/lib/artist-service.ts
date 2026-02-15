@@ -97,6 +97,67 @@ export interface CombinedArtist extends Artist {
 }
 
 /**
+ * Check if a slug is available for a new artist
+ * Returns detailed availability information for real-time validation
+ */
+export async function checkSlugAvailability(
+  slugInput: string
+): Promise<{
+  available: boolean;
+  suggestedSlug?: string;
+  message: string;
+}> {
+  if (!slugInput || slugInput.trim().length === 0) {
+    return {
+      available: false,
+      message: "Artist name is required",
+    };
+  }
+
+  // Generate normalized slug
+  const slug = slugInput
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  if (slug.length === 0) {
+    return {
+      available: false,
+      message: "Artist name must contain at least one valid character",
+    };
+  }
+
+  // Check if slug is already taken
+  const existing = await getArtistBySlug(slug);
+
+  if (existing) {
+    // Generate alternative suggestions
+    const suggestions = [];
+    for (let i = 1; i <= 3; i++) {
+      const suggested = `${slug}${i}`;
+      const existingSuggestion = await getArtistBySlug(suggested);
+      if (!existingSuggestion) {
+        suggestions.push(suggested);
+        break;
+      }
+    }
+
+    return {
+      available: false,
+      suggestedSlug: suggestions[0],
+      message: "Artist name is already taken",
+    };
+  }
+
+  return {
+    available: true,
+    message: "Artist name is available",
+  };
+}
+
+/**
  * Get maximum number of artists a user can create based on their role
  */
 export function getMaxArtistsForRole(role: string): number {
@@ -331,19 +392,22 @@ export async function createArtist(
     mediaPlatform?: ArtistProfile["mediaPlatform"];
   }
 ): Promise<CombinedArtist> {
-  // Generate URL slug
+  // Generate URL slug and check availability
+  const slugCheck = await checkSlugAvailability(data.artistName);
+  if (!slugCheck.available) {
+    throw new Error(
+      slugCheck.suggestedSlug
+        ? `Artist name is already taken. Try "${slugCheck.suggestedSlug}" instead.`
+        : slugCheck.message
+    );
+  }
+
   const slug = data.artistName
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9-]/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
-
-  // Check if slug is already taken
-  const existing = await getArtistBySlug(slug);
-  if (existing) {
-    throw new Error("Artist name is already taken. Please choose a different name.");
-  }
 
   // Create artist record
   const artistId = randomUUID();
@@ -378,6 +442,7 @@ export async function createArtist(
     .insert(artistProfiles)
     .values({
       id: profileId,
+      userId: userId,
       artistId: artist.id,
       picture: data.picture || null,
       thumbnails: null,
@@ -474,7 +539,7 @@ export async function deleteArtist(artistId: string, userId: string): Promise<bo
 export async function getUserSelectedArtist(userId: string): Promise<CombinedArtist | null> {
   const [profile] = await db
     .select()
-    .from(usersProfiles)
+    .from(userProfiles)
     .where(eq(userProfiles.userId, userId))
     .limit(1);
 
@@ -501,13 +566,13 @@ export async function setUserSelectedArtist(
   // Check if user profile exists
   const [existing] = await db
     .select()
-    .from(usersProfiles)
+    .from(userProfiles)
     .where(eq(userProfiles.userId, userId))
     .limit(1);
 
   if (existing) {
     await db
-      .update(usersProfiles)
+      .update(userProfiles)
       .set({
         selectedArtistId: artistId,
         updatedAt: new Date(),
@@ -529,7 +594,7 @@ export async function setUserSelectedArtist(
  */
 export async function clearUserSelectedArtist(userId: string): Promise<void> {
   await db
-    .update(usersProfiles)
+    .update(userProfiles)  
     .set({
       selectedArtistId: null,
       updatedAt: new Date(),

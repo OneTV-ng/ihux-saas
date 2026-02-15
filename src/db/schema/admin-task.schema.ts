@@ -42,16 +42,16 @@ export const adminAlerts = table("admin_alerts", {
   
   // Dynamic Linking (What is this alert about?)
   entityType: varchar("entity_type", { length: 50 }), // 'song', 'artist', 'royalty'
-  entityId: varchar("entity_id", { length: 36 }),
+  entityId: varchar("entity_id", { length: 100 }),
   
   // Moderation State
   status: varchar("status", { length: 32 }).default("open"), // open, investigation, resolved, dismissed
   severity: varchar("severity", { length: 20 }).default("info"), // info, warning, critical
   
   // Audit Trail
-  matchedBy: varchar("matched_by", { length: 36 }).references(() => users.id),
+  matchedBy: varchar("matched_by", { length: 100 }).references(() => users.id),
   approvedBy: varchar("approved_by", { length: 100 }).references(() => users.id),
-  resolvedBy: varchar("resolved_by", { length: 36 }).references(() => users.id),
+  resolvedBy: varchar("resolved_by", { length: 100 }).references(() => users.id),
   resolvedAt: timestamp("resolved_at"),
   
   metadata: json("metadata"),
