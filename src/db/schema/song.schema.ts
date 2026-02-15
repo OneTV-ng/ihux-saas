@@ -1,7 +1,9 @@
 import { mysqlTable as table, text, timestamp, boolean, int as integer, varchar, index } from 'drizzle-orm/mysql-core';
+import { relations } from 'drizzle-orm';
 
 // --- SONGS TABLE (The Release/Album) ---
 // SUBMISSION REQUIRED FIELDS: title, userId, artistId, artistName, type, genre, releaseDate, cover, language
+// NOTE: No foreign key constraints - relationships managed at application level
 export const songs = table("songs", {
   id: varchar("id", { length: 100 }).primaryKey(),
 
@@ -84,6 +86,18 @@ export const tracks = table("tracks", {
 }, (t) => ({
   songIdx: index("tracks_song_idx").on(t.songId),
   isrcIdx: index("tracks_isrc_idx").on(t.isrc),
+}));
+
+// --- Relationships (No DB Constraints - App Level Management) ---
+export const songsRelations = relations(songs, ({ many }) => ({
+  tracks: many(tracks),
+}));
+
+export const tracksRelations = relations(tracks, ({ one }) => ({
+  song: one(songs, {
+    fields: [tracks.songId],
+    references: [songs.id],
+  }),
 }));
 
 // --- Infer Types ---
