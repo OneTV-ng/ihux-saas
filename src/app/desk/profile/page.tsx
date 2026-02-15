@@ -1563,9 +1563,10 @@ const UserProfilePage = () => {
 
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="accountName">Account Name</Label>
+                    <Label htmlFor="accountName">Account Holder Name</Label>
                     <Input
                       id="accountName"
+                      type="text"
                       value={formData.bankDetails.accountName}
                       onChange={(e) =>
                         setFormData({
@@ -1574,7 +1575,7 @@ const UserProfilePage = () => {
                         })
                       }
                       disabled={!isEditing}
-                      placeholder="Account holder name"
+                      placeholder="Your full name as shown on bank account"
                     />
                   </div>
 
@@ -1582,6 +1583,7 @@ const UserProfilePage = () => {
                     <Label htmlFor="accountNumber">Account Number</Label>
                     <Input
                       id="accountNumber"
+                      type="text"
                       value={formData.bankDetails.accountNumber}
                       onChange={(e) =>
                         setFormData({
@@ -1591,7 +1593,6 @@ const UserProfilePage = () => {
                       }
                       disabled={!isEditing}
                       placeholder="Enter account number"
-                      type="password"
                     />
                   </div>
                 </div>

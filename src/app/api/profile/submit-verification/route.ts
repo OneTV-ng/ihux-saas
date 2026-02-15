@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
         submittedAt: new Date(),
         updatedAt: new Date()
       })
-      .where(eq(userVerification.userId, session.user.id));
+      .where(eq(usersVerification.userId, session.user.id));
 
     // Send email notification to user
     try {
