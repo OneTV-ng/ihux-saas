@@ -2,8 +2,8 @@ import { mysqlTable as table, text, timestamp, varchar, json, index, int as inte
 import { users } from './user.schema';
 
 export const uploads = table("uploads", {
-  id: varchar("id", { length: 36 }).primaryKey(),
-  userId: varchar("user_id", { length: 36 })
+  id: varchar("id", { length: 100 }).primaryKey(),
+  userId: varchar("user_id", { length: 100 })
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   

@@ -13,8 +13,8 @@ import { sql } from 'drizzle-orm';
 
 // --- Artist Table (Core Identity & Legal) ---
 export const artists = table("artists", {
-    id: varchar("id", { length: 36 }).primaryKey(),
-    userId: varchar("user_id", { length: 36 }).notNull(),
+    id: varchar("id", { length: 100 }).primaryKey(),
+    userId: varchar("user_id", { length: 100 }).notNull(),
     // Changed to varchar(255) because MySQL 'text' cannot be UNIQUE
     artistName: varchar("artist_name", { length: 255 }).notNull(), 
     displayName: varchar("display_name", { length: 255 }).notNull(),
@@ -40,11 +40,11 @@ export const artists = table("artists", {
 
 // --- Artist Profile Table (Public Metadata & Stats) ---
 export const artistProfiles = table("artist_profiles", {
-    id: varchar("id", { length: 36 }).primaryKey(),
-    artistId: varchar("artist_id", { length: 36 })
+    id: varchar("id", { length: 100 }).primaryKey(),
+    artistId: varchar("artist_id", { length: 100 })
         .notNull()
         .references(() => artists.id, { onDelete: "cascade" }),
-    userId: varchar("user_id", { length: 36 }).notNull(),
+    userId: varchar("user_id", { length: 100 }).notNull(),
     picture: text("picture"),
     thumbnails: json("thumbnails"),
     gallery: json("gallery"),

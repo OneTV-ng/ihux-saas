@@ -1,8 +1,8 @@
 import { mysqlTable as table, text, timestamp, boolean, varchar, json, index } from 'drizzle-orm/mysql-core';
 
 export const notifications = table("notifications", {
-  id: varchar("id", { length: 36 }).primaryKey(),
-  userId: varchar("user_id", { length: 36 }).notNull(),
+  id: varchar("id", { length: 100 }).primaryKey(),
+  userId: varchar("user_id", { length: 100 }).notNull(),
   // Changed to varchar to allow for specific category filtering
   type: varchar("type", { length: 50 }).notNull(), 
   title: varchar("title", { length: 255 }).notNull(),

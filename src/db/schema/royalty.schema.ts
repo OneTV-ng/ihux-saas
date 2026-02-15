@@ -3,7 +3,7 @@ import { users } from './user.schema';
 import { songs, tracks } from './song.schema';
 
 export const royalties = table("royalties", {
-  id: varchar("id", { length: 36 }).primaryKey(),
+  id: varchar("id", { length: 100 }).primaryKey(),
   
   // Period tracking (e.g., "2024-Q1" or "2024-05")
   period: varchar("period", { length: 32 }).notNull(),
@@ -24,10 +24,10 @@ export const royalties = table("royalties", {
   netAmountUsd: decimal("net_amount_usd", { precision: 12, scale: 4 }).notNull().default("0.0000"),
 
   // Internal Relations
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
-  songId: varchar("song_id", { length: 36 }).references(() => songs.id, { onDelete: "set null" }),
+  userId: varchar("user_id", { length: 100 }).notNull().references(() => users.id),
+  songId: varchar("song_id", { length: 100 }).references(() => songs.id, { onDelete: "set null" }),
   trackId: varchar("track_id", { length: 36 }).references(() => tracks.id, { onDelete: "set null" }),
-  artistId: varchar("artist_id", { length: 36 }), // Matches the artist table ID
+  artistId: varchar("artist_id", { length: 100 }), // Matches the artist table ID
   managerId: varchar("manager_id", { length: 36 }).references(() => users.id),
 
   // Reconciliation Status
@@ -36,7 +36,7 @@ export const royalties = table("royalties", {
   matchedAt: timestamp("matched_at"),
   
   // Payment Status
-  approvedBy: varchar("approved_by", { length: 36 }).references(() => users.id),
+  approvedBy: varchar("approved_by", { length: 100 }).references(() => users.id),
   approvedAt: timestamp("approved_at"),
   paidAt: timestamp("paid_at"),
   paymentStatus: varchar("payment_status", { length: 32 }).default("unpaid"), // unpaid, processing, paid

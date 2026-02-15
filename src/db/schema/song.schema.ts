@@ -52,8 +52,8 @@ export const songs = table("songs", {
 
 // --- TRACKS TABLE (The Audio Files) ---
 export const tracks = table("tracks", {
-  id: varchar("id", { length: 36 }).primaryKey(),
-  songId: varchar("song_id", { length: 36 })
+  id: varchar("id", { length: 100 }).primaryKey(),
+  songId: varchar("song_id", { length: 100 })
     .notNull()
     .references(() => songs.id, { onDelete: "cascade" }),
   trackNumber: integer("track_number").default(1),

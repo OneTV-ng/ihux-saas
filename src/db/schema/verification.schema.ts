@@ -4,7 +4,7 @@ import { users as user } from "./user.schema";
 
 //export
  const xxaccount = table("account", {
-  id: varchar("id", { length: 36 }).primaryKey(),
+  id: varchar("id", { length: 100 }).primaryKey(),
   accountId: textType("account_id").notNull(),
   providerId: textType("provider_id").notNull(),
   userId: textType("user_id")
@@ -23,7 +23,7 @@ import { users as user } from "./user.schema";
 
 
 export const verification = table("verification", {
-  id: varchar("id", { length: 36 }).primaryKey(),
+  id: varchar("id", { length: 100 }).primaryKey(),
   identifier: textType("identifier").notNull(),
   value: textType("value").notNull(),
   expiresAt: timestampType("expires_at").notNull(),
@@ -38,7 +38,7 @@ export const verification = table("verification", {
 
 // User Verification Table - For account verification workflow
 export const usersVerificationxxxx = table("user_verification", {
-  id: varchar("id", { length: 36 }).primaryKey(),
+  id: varchar("id", { length: 100 }).primaryKey(),
   userId: varchar("user_id", { length: 36 } )
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
@@ -67,8 +67,8 @@ export const usersVerificationxxxx = table("user_verification", {
 
 
 export const usersVerification = table("user_verification", {
-  id: varchar("id", { length: 36 }).primaryKey(),
-  userId: varchar("user_id", { length: 36 })
+  id: varchar("id", { length: 100 }).primaryKey(),
+  userId: varchar("user_id", { length: 100 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   

@@ -2,8 +2,8 @@ import { mysqlTable as table, text, timestamp, boolean, int as integer, varchar,
 import { users } from './user.schema'; // Ensure this matches your export name
 
 export const admin = table("admin", {
- id: varchar("id", { length: 36 }).primaryKey(),
-  userId: varchar("user_id", { length: 36 }), // Foreign key to your user table
+ id: varchar("id", { length: 100 }).primaryKey(),
+  userId: varchar("user_id", { length: 100 }), // Foreign key to your user table
   to: varchar("to", { length: 255 }).notNull(), // Varchar is better for 'to' addresses
   subject: varchar("subject", { length: 255 }).notNull(),
   body: text("body").notNull(), // Text is perfect here for long content

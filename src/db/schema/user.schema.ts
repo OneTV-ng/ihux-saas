@@ -242,7 +242,7 @@ export type ApiClass = typeof API_CLASSES[keyof typeof API_CLASSES];
 
 // --- Users Table (Auth & Core Identity) ---
 export const users = table("users", {
-  id: varchar("id", { length: 36 }).primaryKey(),
+  id: varchar("id", { length: 100 }).primaryKey(),
   username: varchar("username", { length: 255 }).default(""),
   email: varchar("email", { length: 255 }).notNull(),
   name: varchar("name", { length: 255 }),
@@ -285,7 +285,7 @@ export type NewUser = typeof users.$inferInsert;
 
 // --- Users Table (Auth & Core Identity) ---
 export const usersxx = table("users", {
-  id: varchar("id", { length: 36 }).primaryKey(),
+  id: varchar("id", { length: 100 }).primaryKey(),
   username: varchar("username", { length: 255 }).default(""),
   email: varchar("email", { length: 255 }).notNull(),
   name: varchar("name", { length: 255 }),
@@ -304,8 +304,8 @@ export const usersxx = table("users", {
 
 // --- User Profiles Table (Extended Metadata) ---
 export const userProfilesxxx = table("user_profiles", {
-  id: varchar("id", { length: 36 }).primaryKey(),
-  userId: varchar("user_id", { length: 36 })
+  id: varchar("id", { length: 100 }).primaryKey(),
+  userId: varchar("user_id", { length: 100 })
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   username: varchar("username", { length: 255 }), // Sync or override username
@@ -327,8 +327,8 @@ export const userProfilesxxx = table("user_profiles", {
 
 // --- User Profiles Table (Extended Metadata) ---
 export const userProfiles = table("user_profiles", {
-  id: varchar("id", { length: 36 }).primaryKey(),
-  userId: varchar("user_id", { length: 36 })
+  id: varchar("id", { length: 100 }).primaryKey(),
+  userId: varchar("user_id", { length: 100 })
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   username: varchar("username", { length: 255 }),

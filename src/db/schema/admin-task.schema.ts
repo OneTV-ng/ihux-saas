@@ -4,7 +4,7 @@ import { artists } from './artist.schema';
 
 // --- ADMIN TASKS (Internal Workflow) ---
 export const adminTasks = table("admin_tasks", {
-  id: varchar("id", { length: 36 }).primaryKey(),
+  id: varchar("id", { length: 100 }).primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   
@@ -13,8 +13,8 @@ export const adminTasks = table("admin_tasks", {
   status: varchar("status", { length: 32 }).notNull().default("todo"), // todo, in_progress, review, done
   
   // Assignments
-  assignedTo: varchar("assigned_to", { length: 36 }).references(() => users.id),
-  createdBy: varchar("created_by", { length: 36 }).notNull().references(() => users.id),
+  assignedTo: varchar("assigned_to", { length: 100 }).references(() => users.id),
+  createdBy: varchar("created_by", { length: 100 }).notNull().references(() => users.id),
   
   // Scheduling
   dueDate: timestamp("due_date"),
@@ -22,8 +22,8 @@ export const adminTasks = table("admin_tasks", {
   
   // Contextual Relations
   metadata: json("metadata"),
-  artistId: varchar("artist_id", { length: 36 }).references(() => artists.id),
-  userId: varchar("user_id", { length: 36 }).references(() => users.id),
+  artistId: varchar("artist_id", { length: 100 }).references(() => artists.id),
+  userId: varchar("user_id", { length: 100 }).references(() => users.id),
   
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
@@ -35,7 +35,7 @@ export const adminTasks = table("admin_tasks", {
 
 // --- ADMIN ALERTS (System/Moderation Flags) ---
 export const adminAlerts = table("admin_alerts", {
-  id: varchar("id", { length: 36 }).primaryKey(),
+  id: varchar("id", { length: 100 }).primaryKey(),
   type: varchar("type", { length: 50 }).notNull(), // e.g., 'copyright_claim', 'payment_failure'
   title: varchar("title", { length: 255 }).notNull(),
   message: text("message").notNull(),
@@ -50,7 +50,7 @@ export const adminAlerts = table("admin_alerts", {
   
   // Audit Trail
   matchedBy: varchar("matched_by", { length: 36 }).references(() => users.id),
-  approvedBy: varchar("approved_by", { length: 36 }).references(() => users.id),
+  approvedBy: varchar("approved_by", { length: 100 }).references(() => users.id),
   resolvedBy: varchar("resolved_by", { length: 36 }).references(() => users.id),
   resolvedAt: timestamp("resolved_at"),
   
