@@ -6,7 +6,7 @@ export const songs = table("songs", {
   id: varchar("id", { length: 36 }).primaryKey(),
   title: varchar("title", { length: 255 }).notNull().default(""),
   // Linked to the user who owns the content
-  artistId: varchar("artist_id", { length: 36 })
+  artistId: varchar("artist_id", { length: 100 })
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   artistName: varchar("artist_name", { length: 255 }).notNull().default(""),

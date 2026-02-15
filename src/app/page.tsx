@@ -77,4 +77,99 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+const FEATURE_CARDS = [
+  {
+    title: "Creator tools",
+    description: "Launch releases faster with smart metadata, scheduling, and analytics.",
+  },
+  {
+    title: "Audience growth",
+    description: "Build loyalty with curated playlists, drops, and cross-platform sharing.",
+  },
+  {
+    title: "Revenue insights",
+    description: "Track performance, royalties, and campaign impact in one place.",
+  },
+];
+
+export default function PublicHome() {
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-white">
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=2200&q=80')",
+        }}
+        aria-hidden
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/95 via-slate-950/70 to-slate-950/95" aria-hidden />
+
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center gap-10 px-6 py-16 text-center md:py-24">
+        <div className="flex flex-col items-center gap-6">
+          <p className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
+            SingFLEX Music Platform
+          </p>
+          <h1 className="text-4xl font-semibold leading-tight text-white sm:text-5xl md:text-6xl">
+            Elevate your sound.
+            <span className="block text-indigo-300">Connect, stream, and grow.</span>
+          </h1>
+          <p className="max-w-2xl text-base text-slate-200/90 sm:text-lg">
+            SingFLEX is a modern music ecosystem for artists, labels, and listeners—stream high-quality audio, manage releases, and unlock new opportunities.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href="/auth/signin"
+              className="rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-white/30 transition hover:-translate-y-0.5 hover:shadow-white/50"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/auth/signup"
+              className="rounded-full border border-white/30 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:-translate-y-0.5 hover:border-white/60 hover:bg-white/20"
+            >
+              Sign Up
+            </Link>
+            <Link
+              href="#learn-more"
+              className="rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white/80 transition hover:-translate-y-0.5 hover:border-white/50 hover:text-white"
+            >
+              Learn More
+            </Link>
+          </div>
+        </div>
+
+        <div
+          id="learn-more"
+          className="grid w-full gap-6 rounded-3xl border border-white/10 bg-white/5 p-6 text-left text-sm text-slate-200/90 backdrop-blur sm:p-8 md:grid-cols-3"
+        >
+          <div>
+            <h3 className="text-base font-semibold text-white">For Artists</h3>
+            <p className="mt-2">Upload releases, track performance, and engage your audience with smart insights.</p>
+          </div>
+          <div>
+            <h3 className="text-base font-semibold text-white">For Labels</h3>
+            <p className="mt-2">Manage catalogs, distribute globally, and collaborate securely with your roster.</p>
+          </div>
+          <div>
+            <h3 className="text-base font-semibold text-white">For Fans</h3>
+            <p className="mt-2">Discover curated playlists, follow creators, and enjoy premium playback features.</p>
+          </div>
+        </div>
+
+        <div className="grid w-full gap-4 text-left text-sm text-slate-200/80 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURE_CARDS.map((feature) => (
+            <div
+              key={feature.title}
+              className="rounded-2xl border border-white/10 bg-slate-950/60 p-5 shadow-lg shadow-black/20"
+            >
+              <h3 className="text-base font-semibold text-white">{feature.title}</h3>
+              <p className="mt-2 text-slate-200/80">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
