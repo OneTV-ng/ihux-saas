@@ -225,6 +225,17 @@ const UserProfilePage = () => {
       }
 
       setUserData(result.data);
+      // Helper to format date for date input (YYYY-MM-DD)
+      const formatDateForInput = (dateStr: string | null | undefined) => {
+        if (!dateStr) return "";
+        try {
+          const date = new Date(dateStr);
+          if (isNaN(date.getTime())) return "";
+          return date.toISOString().split('T')[0];
+        } catch {
+          return "";
+        }
+      };
       setFormData({
         name: result.data.name || "",
         username: result.data.username || "",
@@ -234,7 +245,7 @@ const UserProfilePage = () => {
         headerBackground: result.data.headerBackground || "",
         phone: result.data.phone || "",
         whatsapp: result.data.whatsapp || "",
-        dateOfBirth: result.data.dateOfBirth || "",
+        dateOfBirth: formatDateForInput(result.data.dateOfBirth),
         address: result.data.address || "",
         recordLabel: result.data.recordLabel || "",
         governmentid: result.data.governmentid || "",
@@ -805,7 +816,7 @@ const UserProfilePage = () => {
                                 ) : item.field === 'dateOfBirth' ? (
                                   <Input
                                     type="date"
-                                    value={editValue ? (editValue.includes('T') ? editValue.split('T')[0] : editValue) : ''}
+                                    value={editValue || ''}
                                     onChange={(e) => setEditValue(e.target.value)}
                                     onClick={(e) => e.stopPropagation()}
                                     placeholder={`Enter ${item.label.toLowerCase()}`}

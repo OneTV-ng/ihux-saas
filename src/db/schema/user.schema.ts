@@ -258,7 +258,7 @@ export const users = table("users", {
   // Contact & Personal
   phone: varchar("phone", { length: 20 }),
   whatsapp: varchar("whatsapp", { length: 20 }),
-  dateOfBirth: timestamp("date_of_birth"),
+  dateOfBirth: varchar("date_of_birth", { length: 10 }), // Store as YYYY-MM-DD
   address: text("address"),
   
   // Professional & Metadata

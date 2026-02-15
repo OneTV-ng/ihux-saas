@@ -100,18 +100,24 @@ export async function PUT(request: NextRequest) {
       signature,
     } = body;
 
-    // Fix MySQL date format: convert ISO string to 'YYYY-MM-DD' if needed
-    if (dateOfBirth && typeof dateOfBirth === 'string' && dateOfBirth.includes('T')) {
+    // Format dateOfBirth as YYYY-MM-DD string for database
+    if (dateOfBirth && typeof dateOfBirth === 'string') {
       try {
-        const d = new Date(dateOfBirth);
-        if (!isNaN(d.getTime())) {
-          // Format as YYYY-MM-DD
-          const yyyy = d.getFullYear();
-          const mm = String(d.getMonth() + 1).padStart(2, '0');
-          const dd = String(d.getDate()).padStart(2, '0');
-          dateOfBirth = `${yyyy}-${mm}-${dd}`;
+        let formattedDate = dateOfBirth;
+        // If it's an ISO string with time component, extract just the date part
+        if (dateOfBirth.includes('T')) {
+          formattedDate = dateOfBirth.split('T')[0];
         }
-      } catch {}
+        // Validate format is YYYY-MM-DD
+        if (formattedDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          dateOfBirth = formattedDate;
+        } else {
+          dateOfBirth = undefined;
+        }
+      } catch (e) {
+        console.error("Error parsing dateOfBirth:", e);
+        dateOfBirth = undefined;
+      }
     }
 
     // Validate input
