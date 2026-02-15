@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { users as userTable, account as accountTable, sessions as sessionTable, verification as userVerification, User } from "@/db/schema";
+import { users as userTable, account as accountTable, sessions as sessionTable, usersVerification, User } from "@/db/schema";
 import { eq, like, or, sql, desc, asc, and, inArray } from "drizzle-orm";
 
 export interface UserWithDetails {
@@ -116,9 +116,9 @@ export async function getUsers(
 
   // Fetch verification status per user
   const verificationResult = await db
-    .select({ userId: userVerification.userId, status: userVerification.status })
-    .from(userVerification)
-    .where(inArray(userVerification.userId, userIds));
+    .select({ userId: usersVerification.userId, status: usersVerification.status })
+    .from(usersVerification)
+    .where(inArray(usersVerification.userId, userIds));
 
   // Group accounts by user
   const accountsByUser: Record<string, string[]> = {};
