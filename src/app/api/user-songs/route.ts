@@ -16,18 +16,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
 
-    // Get all artist IDs for this user
-    type ArtistRow = { id: string };
-    const userArtists: ArtistRow[] = await db
-      .select({ id: artists.id })
-      .from(artists)
-      .where(eq(artists.userId, user.id));
-    const artistIds = userArtists.map((a: { id: string }) => a.id);
-    if (!artistIds.length) {
-      return NextResponse.json({ songs: [], total: 0 });
-    }
-
-    // Query songs for these artists
+    // Query songs directly by userId (simpler and more efficient)
     let query = db
       .select({
         id: songs.id,
@@ -41,12 +30,13 @@ export async function GET(request: NextRequest) {
         artistId: songs.artistId,
         artistName: songs.artistName,
         status: songs.status,
+        userId: songs.userId,
       })
       .from(songs)
       .where(
         and(
+          eq(songs.userId, user.id),
           eq(songs.status, "approved"),
-          sql`${songs.artistId} IN (${artistIds.map((id: string) => `'${id}'`).join(",")})`,
           search
             ? or(
                 sql`LOWER(${songs.title}) LIKE ${`%${search.toLowerCase()}%`}`,

@@ -95,6 +95,7 @@ export async function POST(req: NextRequest) {
     const songData: any = {
       id: songId,
       title,
+      userId,
       artistId,
       artistName,
       type,
@@ -102,7 +103,6 @@ export async function POST(req: NextRequest) {
       isFeatured: false,
       plays: 0,
       status: "checking",
-      createdBy: userId,
       createdAt: now,
       updatedAt: now,
     };
