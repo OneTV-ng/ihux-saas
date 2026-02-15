@@ -1,20 +1,23 @@
-import { 
-  mysqlTable as table, 
-  text, 
-  timestamp, 
-  boolean, 
-  int as integer, 
-  json, 
-  varchar, 
-  index, 
-  uniqueIndex 
+import {
+  mysqlTable as table,
+  text,
+  timestamp,
+  boolean,
+  int as integer,
+  json,
+  varchar,
+  index,
+  uniqueIndex
 } from 'drizzle-orm/mysql-core';
 import { sql } from 'drizzle-orm';
+import { users } from './user.schema';
 
 // --- Artist Table (Core Identity & Legal) ---
 export const artists = table("artists", {
     id: varchar("id", { length: 100 }).primaryKey(),
-    userId: varchar("user_id", { length: 100 }).notNull(),
+    userId: varchar("user_id", { length: 100 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
     // Changed to varchar(255) because MySQL 'text' cannot be UNIQUE
     artistName: varchar("artist_name", { length: 255 }).notNull(), 
     displayName: varchar("display_name", { length: 255 }).notNull(),
@@ -44,7 +47,9 @@ export const artistProfiles = table("artist_profiles", {
     artistId: varchar("artist_id", { length: 100 })
         .notNull()
         .references(() => artists.id, { onDelete: "cascade" }),
-    userId: varchar("user_id", { length: 100 }).notNull(),
+    userId: varchar("user_id", { length: 100 })
+        .notNull()
+        .references(() => users.id, { onDelete: "cascade" }),
     picture: text("picture"),
     thumbnails: json("thumbnails"),
     gallery: json("gallery"),

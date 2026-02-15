@@ -284,47 +284,6 @@ export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 
 // --- Users Table (Auth & Core Identity) ---
-export const usersxx = table("users", {
-  id: varchar("id", { length: 100 }).primaryKey(),
-  username: varchar("username", { length: 255 }).default(""),
-  email: varchar("email", { length: 255 }).notNull(),
-  name: varchar("name", { length: 255 }),
-  emailVerified: boolean("email_verified").default(false).notNull(),
-  passwordHash: text("password_hash").notNull().default(""), // Text is fine for hashes
-  image: text("image"),
-  role: varchar("role", { length: 50 }).notNull().default("user"),
-  banned: boolean("banned").default(false).notNull(), // Better Auth required field
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
-  deletedAt: timestamp("deleted_at"),
-}, (t) => ({
-  usernameUnique: uniqueIndex("users_username_unique").on(t.username),
-  emailUnique: uniqueIndex("users_email_unique").on(t.email),
-}));
-
-// --- User Profiles Table (Extended Metadata) ---
-export const userProfilesxxx = table("user_profiles", {
-  id: varchar("id", { length: 100 }).primaryKey(),
-  userId: varchar("user_id", { length: 100 })
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  username: varchar("username", { length: 255 }), // Sync or override username
-  firstname: varchar("firstname", { length: 100 }),
-  lastname: varchar("lastname", { length: 100 }),
-  bio: text("bio"),
-  platform: varchar("platform", { length: 50 }).default("web"),
-  socials: json("socials"),
-  preferences: json("preferences"),
-  metadata: json("metadata"),
-  selectedArtistId: varchar("selected_artist_id", { length: 36 }),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
-}, (t) => ({
-  userIdUnique: uniqueIndex("user_profiles_user_id_unique").on(t.userId),
-  usernameIdx: index("user_profiles_username_idx").on(t.username),
-}));
-
-
 // --- User Profiles Table (Extended Metadata) ---
 export const userProfiles = table("user_profiles", {
   id: varchar("id", { length: 100 }).primaryKey(),
@@ -339,16 +298,15 @@ export const userProfiles = table("user_profiles", {
   socials: json("socials"),
   preferences: json("preferences"),
   metadata: json("metadata"),
-  selectedArtistId: varchar("selected_artist_id", { length: 36 }),
+  selectedArtistId: varchar("selected_artist_id", { length: 100 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 }, (t) => ({
   userIdUnique: uniqueIndex("user_profiles_user_id_unique").on(t.userId),
   usernameIdx: index("user_profiles_username_idx").on(t.username),
 }));
+
 // --- Infer Types ---
-//export type User = typeof users.$inferSelect;
-//export type NewUser = typeof users.$inferInsert;
 export type UserProfile = typeof userProfiles.$inferSelect;
 export type NewUserProfile = typeof userProfiles.$inferInsert;
 
