@@ -57,6 +57,20 @@
       "when": 1771144517817,
       "tag": "0007_rapid_mulholland_black",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1771161052181,
+      "tag": "0008_solid_azazel",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1771161753858,
+      "tag": "0009_rich_silver_samurai",
+      "breakpoints": true
     }
   ]
 }

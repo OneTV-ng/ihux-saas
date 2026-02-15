@@ -1,0 +1,1 @@
+ALTER TABLE `songs` MODIFY COLUMN `artist_id` varchar(100) NOT NULL;

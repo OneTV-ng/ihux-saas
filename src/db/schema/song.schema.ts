@@ -1,14 +1,22 @@
 import { mysqlTable as table, text, timestamp, boolean, int as integer, varchar, index } from 'drizzle-orm/mysql-core';
-import { users } from './user.schema'; // Ensure this matches your export name
+import { users } from './user.schema';
+import { artists } from './artist.schema';
 
 // --- SONGS TABLE (The Release/Album) ---
 export const songs = table("songs", {
   id: varchar("id", { length: 36 }).primaryKey(),
   title: varchar("title", { length: 255 }).notNull().default(""),
-  // Linked to the user who owns the content
-  artistId: varchar("artist_id", { length: 100 })
+
+  // User who owns the account publishing this song
+  userId: varchar("user_id", { length: 36 })
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+
+  // Artist profile used to publish this song (can be different artists per user)
+  artistId: varchar("artist_id", { length: 36 })
+    .notNull()
+    .references(() => artists.id, { onDelete: "cascade" }),
+
   artistName: varchar("artist_name", { length: 255 }).notNull().default(""),
   type: varchar("type", { length: 50 }).notNull(), // e.g., 'single', 'album', 'ep'
   genre: varchar("genre", { length: 100 }).default("Pop"),
@@ -31,14 +39,11 @@ export const songs = table("songs", {
   flaggedBy: varchar("flagged_by", { length: 36 }).references(() => users.id),
   approvedBy: varchar("approved_by", { length: 36 }).references(() => users.id),
   approvedAt: timestamp("approved_at"),
-  createdBy: varchar("created_by", { length: 36 })
-    .notNull()
-    .references(() => users.id),
-  managedBy: varchar("managed_by", { length: 36 }).references(() => users.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
   deletedAt: timestamp("deleted_at"),
 }, (t) => ({
+  userIdx: index("songs_user_idx").on(t.userId),
   artistIdx: index("songs_artist_idx").on(t.artistId),
   statusIdx: index("songs_status_idx").on(t.status),
   typeIdx: index("songs_type_idx").on(t.type),

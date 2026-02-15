@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { songs } from "@/db/schema";
+import { songs, users } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
+import { eq } from "drizzle-orm";
 
 // Helper to generate UUID
 function generateId(): string {
@@ -24,14 +25,14 @@ export async function POST(req: NextRequest) {
     console.log("\n👤 [STAGE 1] Authenticating user...");
     const session = await getServerSession();
 
-    if (!session?.user?.email) {
+    if (!session?.user?.id || !session?.user?.email) {
       console.error("❌ [STAGE 1] User not authenticated");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // For now, using email as userId - in production, fetch actual user record
-    const userId = session.user.email;
-    console.log("✅ [STAGE 1] User authenticated:", userId);
+    const userId = session.user.id;
+    const userEmail = session.user.email;
+    console.log("✅ [STAGE 1] User authenticated:", userEmail, "ID:", userId);
 
     // Stage 2: Parse request
     console.log("\n📥 [STAGE 2] Parsing request body...");
@@ -137,6 +138,7 @@ export async function POST(req: NextRequest) {
         .values({
           id: songId,
           title: title.trim(),
+          userId: userId,
           artistId,
           artistName: artistName.trim(),
           type,
@@ -147,7 +149,6 @@ export async function POST(req: NextRequest) {
           numberOfTracks: 0,
           isFeatured: false,
           status: "new",
-          createdBy: userId,
           createdAt: now,
           updatedAt: now,
         });
