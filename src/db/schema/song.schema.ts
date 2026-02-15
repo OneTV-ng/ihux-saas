@@ -4,16 +4,16 @@ import { artists } from './artist.schema';
 
 // --- SONGS TABLE (The Release/Album) ---
 export const songs = table("songs", {
-  id: varchar("id", { length: 36 }).primaryKey(),
+  id: varchar("id", { length: 100 }).primaryKey(),
   title: varchar("title", { length: 255 }).notNull().default(""),
 
   // User who owns the account publishing this song
-  userId: varchar("user_id", { length: 36 })
+  userId: varchar("user_id", { length: 100 })
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
 
   // Artist profile used to publish this song (can be different artists per user)
-  artistId: varchar("artist_id", { length: 36 })
+  artistId: varchar("artist_id", { length: 100 })
     .notNull()
     .references(() => artists.id, { onDelete: "cascade" }),
 
@@ -36,8 +36,8 @@ export const songs = table("songs", {
   flagType: varchar("flag_type", { length: 32 }),
   flagReason: text("flag_reason"),
   flaggedAt: timestamp("flagged_at"),
-  flaggedBy: varchar("flagged_by", { length: 36 }).references(() => users.id),
-  approvedBy: varchar("approved_by", { length: 36 }).references(() => users.id),
+  flaggedBy: varchar("flagged_by", { length: 100 }).references(() => users.id),
+  approvedBy: varchar("approved_by", { length: 100 }).references(() => users.id),
   approvedAt: timestamp("approved_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
