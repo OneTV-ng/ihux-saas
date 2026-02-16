@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -76,13 +76,13 @@ const STEPS: UploadStep[] = [
   { step: "complete", label: "Complete" },
 ];
 
-const IncrementalMusicUpload = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { user, defaultArtist, isLoading: authLoading } = useAuth();
+interface IncrementalMusicUploadProps {
+  typeParam: "single" | "album" | "medley";
+}
 
-  // Get type from query parameter (from selector page)
-  const typeParam = (searchParams.get("type") || "single") as "single" | "album" | "medley";
+const IncrementalMusicUpload = ({ typeParam }: IncrementalMusicUploadProps) => {
+  const router = useRouter();
+  const { user, defaultArtist, isLoading: authLoading } = useAuth();
 
   // State
   const [currentStep, setCurrentStep] = useState<"cover" | "typeSelect" | "metadata" | "tracks" | "submit" | "complete">(
@@ -95,14 +95,14 @@ const IncrementalMusicUpload = () => {
     type: typeParam,
     artistId: defaultArtist?.id || "",
     artistName: defaultArtist?.name || user?.email || "",
-    genre: defaultArtist?.genre || "",
+    genre: (defaultArtist as any)?.genre || "",
     language: "English",
     copyrightAcknowledged: false,
     releaseDate: new Date().toISOString().slice(0, 10),
-    producer: defaultArtist?.producer || "",
-    writer: defaultArtist?.writer || "",
-    recordLabel: defaultArtist?.recordLabel || "",
-    featured: defaultArtist?.featured || "",
+    producer: (defaultArtist as any)?.producer || "",
+    writer: (defaultArtist as any)?.writer || "",
+    recordLabel: (defaultArtist as any)?.recordLabel || "",
+    featured: (defaultArtist as any)?.featured || "",
   });
 
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -144,15 +144,16 @@ const IncrementalMusicUpload = () => {
       return;
     }
     // Set artist info and prefill fields from artist
+    const artist = defaultArtist as any;
     setMetadata((prev) => ({
       ...prev,
       artistId: defaultArtist.id,
       artistName: defaultArtist.name || user.email,
-      genre: defaultArtist.genre || prev.genre,
-      producer: defaultArtist.producer || prev.producer,
-      writer: defaultArtist.writer || prev.writer,
-      recordLabel: defaultArtist.recordLabel || prev.recordLabel,
-      featured: defaultArtist.featured || prev.featured,
+      genre: artist.genre || prev.genre,
+      producer: artist.producer || prev.producer,
+      writer: artist.writer || prev.writer,
+      recordLabel: artist.recordLabel || prev.recordLabel,
+      featured: artist.featured || prev.featured,
     }));
   }, [user, defaultArtist, authLoading, router]);
 
@@ -962,37 +963,11 @@ const IncrementalMusicUpload = () => {
                   ← Back
                 </Button>
                 <Button
-                  onClick={() => setCurrentStep("review")}
+                  onClick={() => setCurrentStep("submit")}
                   disabled={tracks.length === 0}
                   className="flex-1"
                 >
                   Next: Review →
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        );
-
-      case "review":
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Review Your Song</CardTitle>
-              <CardDescription>Make sure everything looks correct</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {songId && <SongDisplay songId={songId} playbackMode="direct" />}
-
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setCurrentStep("tracks")}
-                  className="flex-1"
-                >
-                  ← Back to Tracks
-                </Button>
-                <Button onClick={() => setCurrentStep("submit")} className="flex-1">
-                  Submit for Review →
                 </Button>
               </div>
             </CardContent>
@@ -1042,7 +1017,7 @@ const IncrementalMusicUpload = () => {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => setCurrentStep("review")}
+                  onClick={() => setCurrentStep("submit")}
                   className="flex-1"
                   disabled={submitting}
                 >
@@ -1160,4 +1135,16 @@ const IncrementalMusicUpload = () => {
   );
 };
 
-export default IncrementalMusicUpload;
+function SearchParamsHandler() {
+  const searchParams = useSearchParams();
+  const typeParam = (searchParams.get("type") || "single") as "single" | "album" | "medley";
+  return <IncrementalMusicUpload typeParam={typeParam} />;
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Loader className="w-8 h-8 animate-spin" /></div>}>
+      <SearchParamsHandler />
+    </Suspense>
+  );
+}

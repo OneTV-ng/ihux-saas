@@ -15,8 +15,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "DXL Music HUB",
-  description: "A Next.js boilerplate for building web applications",
+  title: "SingFLEX Global Music HUB",
+  description: "Global Music Distribution",
 };
 
 export default function RootLayout({

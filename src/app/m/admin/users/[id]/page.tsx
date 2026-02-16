@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,7 +27,7 @@ interface UserDetail {
   phone?: string;
   role?: string;
   banned?: boolean;
-  banReason?: string;
+  banReason?: string | null;
   address?: string;
   createdAt?: string;
 }
@@ -53,7 +54,7 @@ export default function MobileAdminUserDetail() {
       const response = await mobileApi.admin.getUserById(userId);
 
       if (response.success) {
-        setUser(response.data);
+        setUser(response.data as UserDetail);
       } else {
         setError(response.error || 'Failed to load user');
       }

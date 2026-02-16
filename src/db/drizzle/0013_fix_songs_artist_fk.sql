@@ -1,24 +1,17 @@
--- Migration: Fix songs.artist_id foreign key constraint
--- Issue: artist_id was incorrectly referencing users.id instead of artists.id
--- This migration fixes the constraint
+-- Migration: songs.artist_id FK constraint removal
+-- Per requirements: foreign key constraints are NOT used - relationships managed at application level
+-- Previous migrations incorrectly added FK constraints that need to be removed
 
--- Disable foreign key checks temporarily
 SET FOREIGN_KEY_CHECKS=0;
 
--- Drop the incorrect foreign key constraint
-ALTER TABLE `songs` DROP FOREIGN KEY `songs_artist_id_users_id_fk`;
+-- Drop any FK constraints on artist_id and user_id (relationships managed at application level)
+ALTER TABLE `songs` DROP FOREIGN KEY IF EXISTS `songs_artist_id_users_id_fk`;
+ALTER TABLE `songs` DROP FOREIGN KEY IF EXISTS `songs_artist_id_artists_id_fk`;
+ALTER TABLE `songs` DROP FOREIGN KEY IF EXISTS `songs_user_id_users_id_fk`;
 
--- Add the correct foreign key constraint
-ALTER TABLE `songs`
-ADD CONSTRAINT `songs_artist_id_artists_id_fk`
-FOREIGN KEY (`artist_id`)
-REFERENCES `artists`(`id`)
-ON DELETE CASCADE;
-
--- Re-enable foreign key checks
-SET FOREIGN_KEY_CHECKS=1;
-
--- Verify the constraint is correct
-SELECT CONSTRAINT_NAME, TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
+-- Verify constraints are removed
+SELECT CONSTRAINT_NAME, TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME
 FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-WHERE TABLE_NAME = 'songs' AND COLUMN_NAME = 'artist_id';
+WHERE TABLE_NAME = 'songs' AND (COLUMN_NAME = 'artist_id' OR COLUMN_NAME = 'user_id') AND REFERENCED_TABLE_NAME IS NOT NULL;
+
+SET FOREIGN_KEY_CHECKS=1;

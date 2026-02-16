@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { users, adminAlerts, artists, adminTasks, artistProfiles, royalties, songs, tracks, sessions, uploads, userProfiles, userVerification } from "./schema";
+import { users, adminAlerts, artists, adminTasks, artistProfiles, royalties, songs, tracks, sessions, uploads, userProfiles, usersVerification } from "../schema";
 
 export const adminAlertsRelations = relations(adminAlerts, ({one}) => ({
 	user_approvedBy: one(users, {
@@ -68,11 +68,11 @@ export const usersRelations = relations(users, ({many}) => ({
 	}),
 	uploads: many(uploads),
 	userProfiles: many(userProfiles),
-	userVerifications_reviewedBy: many(userVerification, {
-		relationName: "userVerification_reviewedBy_users_id"
+	usersVerifications_reviewedBy: many(usersVerification, {
+		relationName: "usersVerification_reviewedBy_users_id"
 	}),
-	userVerifications_userId: many(userVerification, {
-		relationName: "userVerification_userId_users_id"
+	usersVerifications_userId: many(usersVerification, {
+		relationName: "usersVerification_userId_users_id"
 	}),
 }));
 
@@ -148,25 +148,10 @@ export const songsRelations = relations(songs, ({one, many}) => ({
 		references: [users.id],
 		relationName: "songs_approvedBy_users_id"
 	}),
-	user_artistId: one(users, {
-		fields: [songs.artistId],
-		references: [users.id],
-		relationName: "songs_artistId_users_id"
-	}),
-	user_createdBy: one(users, {
-		fields: [songs.createdBy],
-		references: [users.id],
-		relationName: "songs_createdBy_users_id"
-	}),
 	user_flaggedBy: one(users, {
 		fields: [songs.flaggedBy],
 		references: [users.id],
 		relationName: "songs_flaggedBy_users_id"
-	}),
-	user_managedBy: one(users, {
-		fields: [songs.managedBy],
-		references: [users.id],
-		relationName: "songs_managedBy_users_id"
 	}),
 	tracks: many(tracks),
 }));
@@ -200,15 +185,15 @@ export const userProfilesRelations = relations(userProfiles, ({one}) => ({
 	}),
 }));
 
-export const userVerificationRelations = relations(userVerification, ({one}) => ({
+export const usersVerificationRelations = relations(usersVerification, ({one}) => ({
 	user_reviewedBy: one(users, {
-		fields: [userVerification.reviewedBy],
+		fields: [usersVerification.reviewedBy],
 		references: [users.id],
-		relationName: "userVerification_reviewedBy_users_id"
+		relationName: "usersVerification_reviewedBy_users_id"
 	}),
 	user_userId: one(users, {
-		fields: [userVerification.userId],
+		fields: [usersVerification.userId],
 		references: [users.id],
-		relationName: "userVerification_userId_users_id"
+		relationName: "usersVerification_userId_users_id"
 	}),
 }));

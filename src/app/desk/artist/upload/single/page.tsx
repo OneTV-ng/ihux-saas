@@ -5,6 +5,7 @@ import { Music, Image, Play, CheckCircle2, ShieldCheck, AlertTriangle, ArrowLeft
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlbumPreview } from "@/components/album/AlbumPreview";
+import { UploadPreview, UploadPreviewImage } from "@/components/album/upload-preview";
 import { Progress } from "@/components/ui/progress";
 import Navbar from "@/components/landing/navbar";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
@@ -14,6 +15,8 @@ import { PlayerProvider, usePlayer } from "@/contexts/player-context";
 import { ThemeProvider } from "@/components/theme-provider";
 import { useRouter } from "next/navigation";
 import { useShowMessage } from "@/hooks/use-show-message";
+import { useProfileDefaults } from "@/hooks/use-profile-defaults";
+import { LoadingPage } from "@/components/ui/spinner";
 
 type StepProps = {
   number: number;
@@ -31,6 +34,11 @@ function Step({ number, title, active = false, completed = false }: StepProps) {
       <p className={`font-medium tracking-wide ${completed ? "text-green-600 dark:text-green-400" : active ? "text-zinc-900 dark:text-white" : "text-zinc-400 dark:text-zinc-500"}`}>{title}</p>
     </div>
   );
+}
+
+// Utility function to extract file name without extension
+function getFileNameWithoutExtension(filename: string): string {
+  return filename.replace(/\.[^.]+$/, '');
 }
 
 type UploadLayoutProps = {
@@ -100,11 +108,21 @@ function SingleUploadContent() {
 
   const { user, defaultArtist, isLoading: authLoading, isAuthenticated, forceRefresh } = useAuth();
   const player = usePlayer();
+
+  // Profile defaults - will be fetched based on userId and artistId
+  const { defaults: profileDefaults, isLoading: defaultsLoading } = useProfileDefaults({
+    userId: user?.id,
+    artistId: defaultArtist?.id,
+  });
+
   const [coverUrl, setCoverUrl] = useState("");
   const [coverDetails, setCoverDetails] = useState<any>(null);
+  const [coverFileName, setCoverFileName] = useState("");
   const [mp3Url, setMp3Url] = useState("");
   const [mp3Details, setMp3Details] = useState<any>(null);
+  const [mp3FileName, setMp3FileName] = useState("");
   const [songTitle, setSongTitle] = useState("");
+  const [trackTitle, setTrackTitle] = useState("");
   const [artist, setArtist] = useState(defaultArtist?.name || "");
   const [artistId, setArtistId] = useState(defaultArtist?.id || "");
   const [userId, setUserId] = useState(user?.id || "");
@@ -169,6 +187,12 @@ function SingleUploadContent() {
     setCoverProgress(0);
     showInfo("Uploading cover art...", `${file.name}`);
 
+    // Extract song title from cover file name if not already set
+    if (!songTitle) {
+      const extractedTitle = getFileNameWithoutExtension(file.name);
+      setSongTitle(extractedTitle);
+    }
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("type", "cover");
@@ -183,6 +207,7 @@ function SingleUploadContent() {
         const data = JSON.parse(xhr.responseText);
         setCoverUrl(data.url);
         setCoverDetails(data.imageDetails || null);
+        setCoverFileName(file.name);
         setRejectionFlag(data.rejectionFlag);
         setRejectionReasons(data.rejectionReasons || []);
         success("Cover uploaded", `${data.imageDetails?.width}x${data.imageDetails?.height}px`);
@@ -225,6 +250,9 @@ function SingleUploadContent() {
     setAudioProgress(0);
     showInfo("Uploading audio...", `${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
 
+    // Note: Track title extraction would typically use the songTitle field
+    // MP3 filename can be logged for reference but songTitle is used in the form
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("type", "audio");
@@ -239,6 +267,7 @@ function SingleUploadContent() {
         const data = JSON.parse(xhr.responseText);
         setMp3Url(data.url);
         setMp3Details({ size: data.size, type: data.type, filename: data.filename });
+        setMp3FileName(file.name);
         success("Audio uploaded", `Ready to publish`);
       } else {
         showError("Audio upload failed", "Please try again");
@@ -290,8 +319,24 @@ function SingleUploadContent() {
     // Add more fields as needed
   }, [user, defaultArtist, selectedArtist, uploadSetting, team]);
 
+  // Apply profile defaults when loaded
+  useEffect(() => {
+    if (!profileDefaults) return;
+
+    // Only apply if fields are empty (user hasn't entered anything)
+    if (!producer && profileDefaults.producer) setProducer(profileDefaults.producer);
+    if (!songwriter && profileDefaults.songwriter) setSongwriter(profileDefaults.songwriter);
+    if (!studio && profileDefaults.studio) setStudio(profileDefaults.studio);
+    if (!genre && profileDefaults.genre) setGenre(profileDefaults.genre);
+    if (!subGenre && profileDefaults.subGenre) setSubGenre(profileDefaults.subGenre);
+    if (!recordLabel && profileDefaults.recordLabel) setRecordLabel(profileDefaults.recordLabel);
+    if (!country && profileDefaults.country) setCountry(profileDefaults.country);
+    if (!city && profileDefaults.city) setCity(profileDefaults.city);
+    if (!language && profileDefaults.language) setLanguage(profileDefaults.language);
+  }, [profileDefaults]);
+
   // Enforce required fields
-  const canSubmit = !!mp3Url && !!coverUrl && !!songTitle && !!artist && !!artistId && !!userId && !!producer && !!songwriter && !!language && !!country && !audioUploading && !coverUploading && agreedOwnership && agreedTerms;
+  const canSubmit = !!mp3Url && !!coverUrl && !!songTitle && !!trackTitle && !!artist && !!artistId && !!userId && !!producer && !!songwriter && !!language && !!country && !audioUploading && !coverUploading && agreedOwnership && agreedTerms;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -315,7 +360,8 @@ function SingleUploadContent() {
     const songData = {
       artistId,
       userId,
-      tracks: [{ title: songTitle, artist, isrc }],
+      title: songTitle,  // Album/Song title
+      tracks: [{ title: trackTitle || songTitle, artist, isrc }],  // Track title (fallback to songTitle if not set)
       coverUrl,
       mp3Url,
       rejectionFlag,
@@ -357,7 +403,7 @@ function SingleUploadContent() {
         setSubmitted(true);
         success(
           "Song uploaded successfully!",
-          `"${songTitle}" is now being processed`
+          `"${trackTitle || songTitle}" is now being processed`
         );
 
         // Update artist.uploadSetting with the latest choices
@@ -434,6 +480,11 @@ function SingleUploadContent() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedArtist, producer, songwriter, studio, recordLabel, genre, subGenre, country, city]);
+
+  // Show loading page while checking requirements
+  if (isLoading) {
+    return <LoadingPage title="Preparing Upload" description="Checking your account requirements..." />;
+  }
 
   return (
     <>
@@ -561,7 +612,7 @@ function SingleUploadContent() {
           <Step number={3} title="Submit" active={canSubmit} completed={submitted} />
         </div>
         <form className="space-y-8" onSubmit={handleSubmit}>
-          {/* Audio & Cover */}
+          {/* Upload Dropzones */}
           <Card className="bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 shadow-lg rounded-2xl">
             <CardContent className="p-8 grid md:grid-cols-2 gap-8">
               <div
@@ -635,12 +686,49 @@ function SingleUploadContent() {
             </CardContent>
           </Card>
 
+          {/* Preview with Player */}
+          {(coverUrl || mp3Url) && (
+            <div className="space-y-3">
+              <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 tracking-tight">Media Preview</h3>
+              <Card className="bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 shadow-lg rounded-2xl">
+                <CardContent className="p-8 flex items-center justify-center">
+                  {mp3Url && coverUrl ? (
+                    <UploadPreview
+                      coverUrl={coverUrl}
+                      title={trackTitle || songTitle || "Untitled"}
+                      artist={artist || "Unknown Artist"}
+                      audioUrl={mp3Url}
+                      size="large"
+                    />
+                  ) : coverUrl ? (
+                    <UploadPreviewImage
+                      coverUrl={coverUrl}
+                      title={trackTitle || songTitle || "Untitled"}
+                      artist={artist || "Unknown Artist"}
+                      size="large"
+                    />
+                  ) : mp3Url ? (
+                    <div className="text-center py-8">
+                      <Music className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                      <p className="text-zinc-600 dark:text-zinc-400 font-medium">Cover art not uploaded</p>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-500">Upload cover art to see preview with player</p>
+                    </div>
+                  ) : null}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
           {/* Song Details */}
           <Card className="bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 shadow-lg rounded-2xl">
             <CardContent className="p-8 grid gap-6">
               <div>
-                <label className={labelClass}>Song Title</label>
-                <input type="text" value={songTitle} onChange={e => setSongTitle(e.target.value)} className={inputClass} placeholder="Enter song title" />
+                <label className={labelClass}>Album / Song Title</label>
+                <input type="text" value={songTitle} onChange={e => setSongTitle(e.target.value)} className={inputClass} placeholder="Album or single title" />
+              </div>
+              <div>
+                <label className={labelClass}>Track Title</label>
+                <input type="text" value={trackTitle} onChange={e => setTrackTitle(e.target.value)} className={inputClass} placeholder="Individual track name" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -792,7 +880,7 @@ function SingleUploadContent() {
                 type="button"
                 className="px-6 py-2.5 rounded-xl bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-700 dark:text-green-400 font-semibold text-sm border border-green-200 dark:border-green-800/50 transition-all duration-200 flex items-center gap-2 disabled:opacity-40"
                 disabled={!mp3Url}
-                onClick={() => mp3Url && player.play({ mp3: mp3Url, cover: coverUrl, title: songTitle, artist })}
+                onClick={() => mp3Url && player.play({ mp3: mp3Url, cover: coverUrl, title: trackTitle || songTitle, artist })}
               >
                 <Play className="h-4 w-4" />
                 Preview
@@ -810,7 +898,7 @@ function SingleUploadContent() {
             <div className="text-center py-6 px-4 rounded-2xl bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800/50 mb-8">
               <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400 mx-auto mb-2" />
               <p className="text-green-700 dark:text-green-400 font-bold text-lg">Song uploaded successfully!</p>
-              <button className="mt-2 text-sm text-green-600 dark:text-green-400 underline hover:text-green-500 transition font-medium" onClick={() => mp3Url && player.play({ mp3: mp3Url, cover: coverUrl, title: songTitle, artist })}>Play now</button>
+              <button className="mt-2 text-sm text-green-600 dark:text-green-400 underline hover:text-green-500 transition font-medium" onClick={() => mp3Url && player.play({ mp3: mp3Url, cover: coverUrl, title: trackTitle || songTitle, artist })}>Play now</button>
             </div>
           )}
           {submitError && (

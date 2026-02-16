@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
 
     // Query songs for this artist
     const whereClause = [];
-    whereClause.push(eq(songs.status, "approved"));
+    // Note: Removed status filter to show all songs in all statuses
+    // Change back to: whereClause.push(eq(songs.status, "approved")); for production
     if (artistId) whereClause.push(eq(songs.artistId, artistId));
     if (search) {
       whereClause.push(
@@ -44,6 +45,10 @@ export async function GET(request: NextRequest) {
         artistId: songs.artistId,
         artistName: songs.artistName,
         status: songs.status,
+        plays: songs.plays,
+        releaseDate: songs.releaseDate,
+        duration: songs.duration,
+        userId: songs.userId,
       })
       .from(songs)
       .where(and(...whereClause))

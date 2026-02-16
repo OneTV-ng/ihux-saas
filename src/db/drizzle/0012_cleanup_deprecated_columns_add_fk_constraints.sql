@@ -28,17 +28,14 @@ ALTER TABLE songs
   ADD CONSTRAINT songs_approved_by_users_id_fk
     FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL;
 
--- Step 4: Ensure songs.user_id has proper constraint
-ALTER TABLE songs
-  DROP FOREIGN KEY IF EXISTS songs_user_id_users_id_fk,
-  ADD CONSTRAINT songs_user_id_users_id_fk
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+-- Step 4: Songs.user_id does NOT have FK constraint (managed at application level per requirements)
 
--- Step 5: Ensure songs.artist_id has proper constraint
+-- Step 5: Songs.artist_id does NOT have FK constraint (managed at application level per requirements)
+-- Drop any existing incorrect FK constraints
 ALTER TABLE songs
+  DROP FOREIGN KEY IF EXISTS songs_artist_id_users_id_fk,
   DROP FOREIGN KEY IF EXISTS songs_artist_id_artists_id_fk,
-  ADD CONSTRAINT songs_artist_id_artists_id_fk
-    FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE CASCADE;
+  DROP FOREIGN KEY IF EXISTS songs_user_id_users_id_fk;
 
 -- Step 6: Remove deprecated columns from songs table if they exist
 -- Check if columns exist before dropping (safe approach)

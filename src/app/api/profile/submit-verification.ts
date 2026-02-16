@@ -15,15 +15,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const now = new Date();
+
     // Update user_verification status to 'submitted'
     await db.update(usersVerification)
-      .set({ status: "submitted", submittedAt: new Date() })
+      .set({ status: "submitted", submittedAt: now })
       .where(eq(usersVerification.userId, session.user.id));
 
-    // Optionally, update user table if you want to reflect verification status
-    // await db.update(users).set({ verification: "submitted" }).where(eq(users.id, session.user.id));
+    // Update user role from 'new' to 'member' upon verification submission
+    await db.update(users)
+      .set({ role: "member" })
+      .where(eq(users.id, session.user.id));
 
-    return NextResponse.json({ success: true, message: "Profile submitted for verification." });
+    return NextResponse.json({
+      success: true,
+      message: "Profile submitted for verification. Your role has been updated to member."
+    });
   } catch (error) {
     console.error("Error submitting for verification:", error);
     return NextResponse.json({ error: "Failed to submit for verification" }, { status: 500 });

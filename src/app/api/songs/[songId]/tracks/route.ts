@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 
 // Helper to generate UUID
 function generateId(): string {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c: string) {
     const r = (Math.random() * 16) | 0;
     const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
@@ -16,11 +16,12 @@ function generateId(): string {
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { songId: string } }
+  { params }: { params: Promise<{ songId: string }> }
 ) {
+  const resolvedParams = await params;
   console.log("\n" + "=".repeat(80));
   console.log("🎵 [ADD TRACK] Endpoint called");
-  console.log(`📌 Song ID: ${params.songId}`);
+  console.log(`📌 Song ID: ${resolvedParams.songId}`);
 
   try {
     // Get authenticated user
@@ -70,11 +71,11 @@ export async function POST(
     const songRecords = await db
       .select()
       .from(songs)
-      .where(eq(songs.id, params.songId))
+      .where(eq(songs.id, resolvedParams.songId))
       .limit(1);
 
     if (!songRecords || songRecords.length === 0) {
-      console.error("❌ [ADD TRACK] Song not found:", params.songId);
+      console.error("❌ [ADD TRACK] Song not found:", resolvedParams.songId);
       return NextResponse.json({ error: "Song not found" }, { status: 404 });
     }
 
@@ -116,11 +117,11 @@ export async function POST(
         maxTrackNumber: tracks.trackNumber,
       })
       .from(tracks)
-      .where(eq(tracks.songId, params.songId));
+      .where(eq(tracks.songId, resolvedParams.songId));
 
     const maxTrackNumber =
       maxTrackResult && maxTrackResult.length > 0
-        ? Math.max(...maxTrackResult.map((r) => r.maxTrackNumber || 0))
+        ? Math.max(...maxTrackResult.map((r: any) => r.maxTrackNumber || 0))
         : 0;
 
     const nextTrackNumber = maxTrackNumber + 1;
@@ -133,7 +134,7 @@ export async function POST(
     try {
       await db.insert(tracks).values({
         id: trackId,
-        songId: params.songId,
+        songId: resolvedParams.songId,
         trackNumber: nextTrackNumber,
         title: title.trim(),
         mp3: upload.url || "",
@@ -166,7 +167,7 @@ export async function POST(
           numberOfTracks: song.numberOfTracks + 1,
           updatedAt: now,
         })
-        .where(eq(songs.id, params.songId));
+        .where(eq(songs.id, resolvedParams.songId));
 
       console.log("✅ [ADD TRACK] Song updated with new track count");
     } catch (updateError) {
@@ -181,7 +182,7 @@ export async function POST(
     const updatedSongRecords = await db
       .select()
       .from(songs)
-      .where(eq(songs.id, params.songId))
+      .where(eq(songs.id, resolvedParams.songId))
       .limit(1);
 
     const updatedSong = updatedSongRecords[0];
@@ -189,7 +190,7 @@ export async function POST(
     const allTracks = await db
       .select()
       .from(tracks)
-      .where(eq(tracks.songId, params.songId));
+      .where(eq(tracks.songId, resolvedParams.songId));
 
     console.log("\n" + "=".repeat(80));
     console.log("✨ [SUCCESS] Track added successfully");
@@ -201,7 +202,7 @@ export async function POST(
       success: true,
       track: {
         id: trackId,
-        songId: params.songId,
+        songId: resolvedParams.songId,
         trackNumber: nextTrackNumber,
         title: title.trim(),
         mp3: upload.url,

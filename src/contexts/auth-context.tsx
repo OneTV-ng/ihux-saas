@@ -168,21 +168,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setDefaultArtist(null);
         return;
       }
-      setSession(data as Session);
-      const user = data.user as unknown as User;
-      setUser({
-        ...user,
-        isUserVerified:
-          typeof user.isVerified === "boolean"
-            ? user?.isVerified 
-            : !!(user.isVerified || user.isVerified),
-        emailVerified:
-          typeof user.emailVerified === "boolean"
-            ? user.emailVerified
-            : !!(user.emailVerified || user.emailVerified),
-        tenant:
-          user.tenant || DEFAULT_TENANT,
-      });
+      const sessionData = data as unknown as Session;
+      setSession(sessionData);
+      const user = sessionData.user as unknown as User;
+      setUser(user);
       if (user) {
         await fetchDefaultArtist(user.id);
       }

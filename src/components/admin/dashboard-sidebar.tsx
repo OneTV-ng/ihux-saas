@@ -12,6 +12,9 @@ import {
   LayoutDashboard,
   Home,
   BarChart3,
+  Music,
+  Upload,
+  Flag,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
@@ -42,6 +45,24 @@ const adminNavItems = [
     icon: Users,
     label: "User Management",
     description: "Manage users, roles, permissions",
+  },
+  {
+    href: "/admin/songs",
+    icon: Music,
+    label: "Songs Management",
+    description: "View and manage songs",
+  },
+  {
+    href: "/admin/upload",
+    icon: Upload,
+    label: "Upload Songs",
+    description: "Upload new music",
+  },
+  {
+    href: "/admin/moderation",
+    icon: Flag,
+    label: "Moderation",
+    description: "Review flagged content",
   },
   {
     href: "/admin/reports",

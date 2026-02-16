@@ -2,6 +2,8 @@ import { ReactNode } from 'react';
 import MobileAdminNav from '@/components/m-admin/mobile-admin-nav';
 import { requireAdmin } from '@/lib/auth-server';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Admin - Mobile',
   description: 'Mobile admin dashboard',

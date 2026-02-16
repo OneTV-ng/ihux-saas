@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -39,7 +40,8 @@ export default function MobileAdminVerification() {
       const response = await mobileApi.admin.getUsers(1, 100);
 
       if (response.success) {
-        const users = response.data?.users || response.data || [];
+        const data = response.data as any[] | { users: any[] };
+        const users = Array.isArray(data) ? data : data?.users || [];
         // Fetch verification data for each user
         const verificationsData: VerificationWithUser[] = [];
 
@@ -49,7 +51,7 @@ export default function MobileAdminVerification() {
           );
           if (verifResponse.success) {
             verificationsData.push({
-              ...verifResponse.data,
+              ...(verifResponse.data as any),
               userId: user.id,
               userName: user.name,
               userEmail: user.email,

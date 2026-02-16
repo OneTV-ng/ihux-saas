@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,9 +48,11 @@ export default function MobileAdminKPI() {
       const songsResponse = await mobileApi.songs.getPublicSongs(1, 1000);
 
       if (usersResponse.success && songsResponse.success) {
+        const usersData = usersResponse.data as any;
+        const songsData = songsResponse.data as any;
         setMetrics({
-          totalUsers: usersResponse.data?.totalUsers || 0,
-          totalSongs: songsResponse.data?.total || 0,
+          totalUsers: usersData?.totalUsers || 0,
+          totalSongs: songsData?.total || 0,
           platformHealth: 94.2,
           avgRating: 4.8,
         });

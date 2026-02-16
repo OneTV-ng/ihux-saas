@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { verification, users } from "@/db/schema";
-import { eq, and, gt } from "drizzle-orm";
+import { eq, and, gt, lt } from "drizzle-orm";
 import { generatePin, sendPinEmail } from "./email";
 
 /**
@@ -81,13 +81,15 @@ export async function verifyPin({
         userId = user[0].id;
 
         // Mark email as verified
-        await db
-          .update(users)
-          .set({
-            emailVerified: true,
-            updatedAt: new Date(),
-          })
-          .where(eq(users.id, userId));
+        if (userId) {
+          await db
+            .update(users)
+            .set({
+              emailVerified: true,
+              updatedAt: new Date(),
+            })
+            .where(eq(users.id, userId));
+        }
       }
     }
 
@@ -138,7 +140,7 @@ export async function verifyPinByUserId({
           eq(verification.identifier, email),
           eq(verification.value, pin),
           eq(verification.type, `pin-${type}`),
-          gt(verification.expiresAt, new Date())
+          gt(verification.expiresAt as any, new Date() as any)
         )
       )
       .limit(1);
@@ -264,7 +266,7 @@ export async function clearExpiredPins(): Promise<{ cleared: number }> {
   try {
     const result = await db
       .delete(verification)
-      .where(gt(new Date(), verification.expiresAt));
+      .where(lt(verification.expiresAt as any, new Date() as any));
 
     return { cleared: result.rowsAffected ?? 0 };
   } catch (error) {

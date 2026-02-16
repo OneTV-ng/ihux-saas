@@ -42,9 +42,9 @@ export async function POST(request: NextRequest) {
 
     // Send reset PIN email
     await sendPinEmail({
-      email: user[0].email,
+      to: user[0].email,
       pin: resetPin,
-      purpose: 'password-reset'
+      type: 'reset'
     });
 
     return NextResponse.json({

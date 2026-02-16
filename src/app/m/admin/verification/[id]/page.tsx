@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,7 +50,7 @@ export default function MobileAdminVerificationDetail() {
       const response = await mobileApi.admin.getUserVerification(verificationId);
 
       if (response.success) {
-        setVerification(response.data);
+        setVerification(response.data as VerificationDetail);
       } else {
         setError(response.error || 'Failed to load verification');
       }

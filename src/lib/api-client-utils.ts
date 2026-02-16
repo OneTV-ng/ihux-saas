@@ -34,6 +34,7 @@ export interface StorageAdapter {
   setItem(key: string, value: string): Promise<void>;
   removeItem(key: string): Promise<void>;
   clear(): Promise<void>;
+  _store?: Record<string, string>;
 }
 
 /**
@@ -71,15 +72,15 @@ export const memoryStorageAdapter: StorageAdapter = {
   _store: {} as Record<string, string>,
 
   getItem: async function (key: string) {
-    return this._store[key] || null;
+    return this._store![key] || null;
   },
 
   setItem: async function (key: string, value: string) {
-    this._store[key] = value;
+    this._store![key] = value;
   },
 
   removeItem: async function (key: string) {
-    delete this._store[key];
+    delete this._store![key];
   },
 
   clear: async function () {

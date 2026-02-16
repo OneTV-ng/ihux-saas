@@ -36,7 +36,8 @@ export async function GET(request: NextRequest) {
       .where(
         and(
           eq(songs.userId, user.id),
-          eq(songs.status, "approved"),
+          // Note: Removed status filter to show songs in all statuses
+          // In production, add: eq(songs.status, "approved"), back here
           search
             ? or(
                 sql`LOWER(${songs.title}) LIKE ${`%${search.toLowerCase()}%`}`,

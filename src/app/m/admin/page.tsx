@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,9 +13,15 @@ import {
   Settings,
   MoreVertical,
   AlertCircle,
+  Menu,
+  X,
+  Home,
+  LogOut,
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { mobileApi } from '@/lib/mobile-api-client';
+import { useAuth } from '@/contexts/auth-context';
 
 interface DashboardStats {
   totalUsers: number;
@@ -31,6 +38,8 @@ interface RecentActivity {
 }
 
 export default function MobileAdminDashboard() {
+  const { signOut } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     pendingVerifications: 0,
@@ -56,12 +65,14 @@ export default function MobileAdminDashboard() {
 
       if (usersResponse.success && verificationResponse.success) {
         // Count pending verifications
-        const pendingCount = verificationResponse.data?.filter(
+        const verificationData = verificationResponse.data as any;
+        const usersData = usersResponse.data as any;
+        const pendingCount = verificationData?.filter?.(
           (u: any) => u.verificationStatus === 'pending'
         ).length || 0;
 
         setStats({
-          totalUsers: usersResponse.data?.totalUsers || 0,
+          totalUsers: usersData?.totalUsers || 0,
           pendingVerifications: pendingCount,
           songsPublished: 0, // TODO: get from song API
           platformHealth: 94.2,
@@ -184,21 +195,125 @@ export default function MobileAdminDashboard() {
   return (
     <div className="w-full">
       {/* Header */}
-      <div className="sticky top-0 bg-background border-b p-4 z-10">
+      <div className="sticky top-0 bg-background border-b p-4 z-20">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-primary">Admin Hub</h1>
-            <p className="text-sm text-muted-foreground">
-              {loading ? 'Loading...' : 'Live Dashboard'}
-            </p>
+          <div className="flex items-center gap-3">
+            {/* SingFLEX Logo */}
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white border border-primary">
+              <Image
+                src="/images/tenant/sflogo.png"
+                alt="SingFLEX Logo"
+                width={32}
+                height={32}
+                className="h-8 w-8 object-contain"
+              />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-primary">Admin Hub</h1>
+              <p className="text-xs text-muted-foreground">
+                {loading ? 'Loading...' : 'Live Dashboard'}
+              </p>
+            </div>
           </div>
-          <Link href="/m/admin/more">
-            <Button variant="ghost" size="icon">
-              <MoreVertical className="w-5 h-5" />
-            </Button>
-          </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
+          </Button>
         </div>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 bg-black/50 z-10" onClick={() => setMobileMenuOpen(false)} />
+      )}
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="fixed top-0 right-0 h-screen w-64 bg-background border-l shadow-lg z-30 overflow-y-auto">
+          <div className="p-4 space-y-2">
+            <Link href="/m/admin">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Home className="mr-2 h-4 w-4" />
+                Dashboard
+              </Button>
+            </Link>
+            <Link href="/m/admin/users">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Users className="mr-2 h-4 w-4" />
+                User Management
+              </Button>
+            </Link>
+            <Link href="/m/admin/verification">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <ShieldCheck className="mr-2 h-4 w-4" />
+                Verification
+              </Button>
+            </Link>
+            <Link href="/m/admin/songs">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Music className="mr-2 h-4 w-4" />
+                Songs Publishing
+              </Button>
+            </Link>
+            <Link href="/m/admin/kpi">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <TrendingUp className="mr-2 h-4 w-4" />
+                KPI & Reports
+              </Button>
+            </Link>
+            <Link href="/m/admin/settings">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </Button>
+            </Link>
+            <div className="border-t pt-2 mt-2">
+              <Button
+                onClick={() => {
+                  signOut();
+                  setMobileMenuOpen(false);
+                }}
+                variant="ghost"
+                className="w-full justify-start text-destructive hover:text-destructive"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Content */}
       <div className="p-4 space-y-6">

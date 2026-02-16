@@ -4,13 +4,13 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import LoginForm from "@/components/auth/login-form";
 import { Card, CardContent } from "@/components/ui/card";
-import { GoogleIcon, GithubIcon } from "@/components/ui/icons";
-import { signInWithGithub, signInWithGoogle } from "@/lib/auth-client";
+import { GoogleIcon, GithubIcon, SpotifyIcon, FacebookIcon } from "@/components/ui/icons";
+import { signInWithGithub, signInWithGoogle, signInWithSpotify, signInWithFacebook } from "@/lib/auth-client";
 import { GalleryVerticalEnd } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 
 const LoginPage = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -36,7 +36,9 @@ const LoginPage = () => {
         </a>
         <Card className="w-full">
           <CardContent className="flex flex-col gap-4 pt-6">
-            <LoginForm />
+            <Suspense fallback={<div className="h-10 bg-muted animate-pulse rounded" />}>
+              <LoginForm />
+            </Suspense>
             <div className="flex items-center my-2">
               <div className="flex-1 h-px bg-muted-foreground/30" />
               <span className="mx-3 text-muted-foreground text-xs font-medium">
@@ -47,7 +49,7 @@ const LoginPage = () => {
             <div className="flex flex-row gap-2 w-full">
               <Button
                 variant="outline"
-                className="w-1/2 flex items-center justify-center cursor-pointer"
+                className="w-1/4 flex items-center justify-center cursor-pointer"
                 type="button"
                 onClick={signInWithGoogle}
               >
@@ -56,12 +58,30 @@ const LoginPage = () => {
               </Button>
               <Button
                 variant="outline"
-                className="w-1/2 flex items-center justify-center cursor-pointer"
+                className="w-1/4 flex items-center justify-center cursor-pointer"
                 type="button"
                 onClick={signInWithGithub}
               >
                 <GithubIcon className="mr-2" />
                 GitHub
+              </Button>
+              <Button
+                variant="outline"
+                className="w-1/4 flex items-center justify-center cursor-pointer"
+                type="button"
+                onClick={signInWithSpotify}
+              >
+                <SpotifyIcon className="mr-2" />
+                Spotify
+              </Button>
+              <Button
+                variant="outline"
+                className="w-1/4 flex items-center justify-center cursor-pointer"
+                type="button"
+                onClick={signInWithFacebook}
+              >
+                <FacebookIcon className="mr-2" />
+                Facebook
               </Button>
             </div>
             <div className="text-center text-sm mt-4">

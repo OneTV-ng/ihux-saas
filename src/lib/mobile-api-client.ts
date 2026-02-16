@@ -378,6 +378,26 @@ export class MobileApiClient {
       return this.request(`/api/songs/${id}/tracks`);
     },
 
+    getSong: async (id: string) => {
+      // Fetch both song and tracks in parallel
+      const [songResponse, tracksResponse] = await Promise.all([
+        this.request<Song>(`/api/songs/${id}`),
+        this.request<any>(`/api/songs/${id}/tracks`),
+      ]);
+
+      if (songResponse.success && tracksResponse.success) {
+        return {
+          success: true,
+          data: {
+            ...songResponse.data,
+            tracks: tracksResponse.data?.tracks || [],
+          } as any,
+        };
+      }
+
+      return { success: false, error: 'Failed to fetch song details' };
+    },
+
     searchSongs: async (query: string, page: number = 1) => {
       return this.request(`/api/songs/search?q=${query}&page=${page}`);
     },
@@ -409,7 +429,7 @@ export class MobileApiClient {
       const isReactNative = typeof fetch !== 'undefined' && !globalThis.document;
 
       if (isReactNative) {
-        return this.uploadFileReactNative(file, fileType);
+        return this.uploads.uploadFileReactNative(file, fileType);
       }
 
       return new Promise((resolve) => {
@@ -547,6 +567,167 @@ export class MobileApiClient {
       return this.request(`/api/admin/users/${id}`, {
         method: 'PATCH',
         body: { banned: false, banReason: null },
+      });
+    },
+
+    // ===== SONG PUBLISHING =====
+
+    publishSong: async (songId: string) => {
+      return this.request(`/api/admin/songs/${songId}/publish`, {
+        method: 'POST',
+      });
+    },
+
+    getPublishingDetails: async (songId: string) => {
+      return this.request(`/api/admin/publishing/${songId}`);
+    },
+
+    getPublishingRecords: async (page: number = 1, limit: number = 20, status?: string) => {
+      let url = `/api/admin/publishing?page=${page}&limit=${limit}`;
+      if (status) {
+        url += `&status=${status}`;
+      }
+      return this.request(url);
+    },
+
+    updateSongField: async (songId: string, field: string, value: any) => {
+      return this.request(`/api/admin/songs/${songId}`, {
+        method: 'PATCH',
+        body: { [field]: value },
+      });
+    },
+
+    updateTrackField: async (songId: string, trackId: string, field: string, value: any) => {
+      return this.request(`/api/admin/songs/${songId}/tracks/${trackId}`, {
+        method: 'PATCH',
+        body: { [field]: value },
+      });
+    },
+
+    // ===== SONG FLAGGING & REJECTION =====
+
+    flagSong: async (songId: string, categories: string[], reason: string) => {
+      return this.request(`/api/admin/songs/${songId}/flag`, {
+        method: 'POST',
+        body: { categories, reason, sendNotification: true },
+      });
+    },
+
+    rejectSong: async (songId: string, reason: string) => {
+      return this.request(`/api/admin/songs/${songId}/reject`, {
+        method: 'POST',
+        body: { reason, sendNotification: true },
+      });
+    },
+
+    ignoreSong: async (songId: string, reason?: string) => {
+      return this.request(`/api/admin/songs/${songId}/ignore`, {
+        method: 'POST',
+        body: { reason },
+      });
+    },
+
+    // ===== FEATURED SONGS =====
+
+    featureSong: async (songId: string, featured: boolean, reason?: string) => {
+      return this.request(`/api/admin/songs/${songId}/feature`, {
+        method: 'POST',
+        body: { featured, reason },
+      });
+    },
+
+    getFeaturedSongs: async (page: number = 1, limit: number = 20) => {
+      return this.request(`/api/songs/featured?page=${page}&limit=${limit}`);
+    },
+
+    // ===== BULK OPERATIONS =====
+
+    bulkAction: async (data: {
+      action: 'flag' | 'reject' | 'ignore' | 'feature';
+      songIds?: string[];
+      filter?: any;
+      actionData?: any;
+    }) => {
+      return this.request('/api/admin/songs/bulk-action', {
+        method: 'POST',
+        body: data,
+      });
+    },
+
+    // ===== ADMIN MESSAGING =====
+
+    sendAdminMessage: async (data: {
+      recipientType: 'individual' | 'role' | 'status' | 'bulk';
+      recipientFilter: any;
+      subject: string;
+      message: string;
+      sendEmails?: boolean;
+    }) => {
+      return this.request('/api/admin/messages/send', {
+        method: 'POST',
+        body: data,
+      });
+    },
+
+    getAdminMessages: async (page: number = 1, limit: number = 20, senderId?: string) => {
+      let url = `/api/admin/messages?page=${page}&limit=${limit}`;
+      if (senderId) {
+        url += `&senderId=${senderId}`;
+      }
+      return this.request(url);
+    },
+
+    // ===== NOTIFICATIONS =====
+
+    getNotifications: async (page: number = 1, limit: number = 20, status?: string) => {
+      let url = `/api/notifications?page=${page}&limit=${limit}`;
+      if (status) {
+        url += `&status=${status}`;
+      }
+      return this.request(url);
+    },
+
+    markNotificationAsRead: async (notificationId: string) => {
+      return this.request(`/api/notifications/${notificationId}`, {
+        method: 'PATCH',
+        body: { status: 'read', read: true },
+      });
+    },
+
+    updateNotification: async (notificationId: string, data: { status?: string; read?: boolean }) => {
+      return this.request(`/api/notifications/${notificationId}`, {
+        method: 'PATCH',
+        body: data,
+      });
+    },
+
+    // ===== ADMIN SONG MANAGEMENT =====
+
+    getSongs: async (page: number = 1, limit: number = 20) => {
+      return this.request(`/api/admin/songs?page=${page}&limit=${limit}`);
+    },
+
+    uploadSong: async (data: {
+      title: string;
+      type: string;
+      artistId: string;
+      artistName: string;
+      genre?: string;
+      language?: string;
+      upc?: string;
+      cover?: string;
+      copyrightAcknowledged: boolean;
+    }) => {
+      return this.request('/api/songs/create', {
+        method: 'POST',
+        body: data,
+      });
+    },
+
+    updateSongStatus: async (songId: string, data: { status: string }) => {
+      return this.request(`/api/admin/songs/${songId}`, {
+        method: 'PATCH',
+        body: data,
       });
     },
   };

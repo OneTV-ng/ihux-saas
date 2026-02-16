@@ -36,65 +36,93 @@ const Navbar = () => {
         {/* Logo/Brand - Branded for SingFLEX */}
         <div className="flex items-center gap-2 md:gap-6">
           {/* Mobile Menu Toggle */}
-          {isAuthenticated && (
-            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-72">
-                <SheetHeader>
-                  <SheetTitle>Menu</SheetTitle>
-                  <SheetDescription>
-                    Navigate to different sections
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="mt-6 flex flex-col gap-2">
-                  <Link href="/desk" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start">
-                      <Home className="mr-2 h-4 w-4" />
-                      Dashboard
-                    </Button>
-                  </Link>
-                  <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start">
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                      Home
-                    </Button>
-                  </Link>
-                  <Link href="/desk/profile" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start">
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
-                    </Button>
-                  </Link>
-                  <Link href="/desk/settings" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start">
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
-                    </Button>
-                  </Link>
-                  {defaultArtist && (
-                    <Link href="/desk/artist" onClick={() => setMobileMenuOpen(false)}>
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="lg:hidden">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-72">
+              <SheetHeader>
+                <SheetTitle>Menu</SheetTitle>
+                <SheetDescription>
+                  Navigate to different sections
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-6 flex flex-col gap-2">
+                {isAuthenticated ? (
+                  <>
+                    <Link href="/desk" onClick={() => setMobileMenuOpen(false)}>
                       <Button variant="ghost" className="w-full justify-start">
-                        <Music className="mr-2 h-4 w-4" />
-                        Artist Portal
+                        <Home className="mr-2 h-4 w-4" />
+                        Dashboard
                       </Button>
                     </Link>
-                  )}
-                  {isAdmin && (
-                    <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
+                    <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                       <Button variant="ghost" className="w-full justify-start">
-                        <Shield className="mr-2 h-4 w-4" />
-                        Admin Panel
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        Home
                       </Button>
                     </Link>
-                  )}
-                </div>
-              </SheetContent>
-            </Sheet>
-          )}
+                    <Link href="/desk/profile" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start">
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
+                      </Button>
+                    </Link>
+                    <Link href="/desk/settings" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Settings
+                      </Button>
+                    </Link>
+                    {defaultArtist && (
+                      <Link href="/desk/artist" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="ghost" className="w-full justify-start">
+                          <Music className="mr-2 h-4 w-4" />
+                          Artist Portal
+                        </Button>
+                      </Link>
+                    )}
+                    {isAdmin && (
+                      <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="ghost" className="w-full justify-start">
+                          <Shield className="mr-2 h-4 w-4" />
+                          Admin Panel
+                        </Button>
+                      </Link>
+                    )}
+                    <div className="border-t pt-2 mt-2">
+                      <Button
+                        onClick={() => {
+                          signOut();
+                          setMobileMenuOpen(false);
+                        }}
+                        variant="ghost"
+                        className="w-full justify-start text-destructive hover:text-destructive"
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sign Out
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/auth/signup" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start">
+                        Sign Up
+                      </Button>
+                    </Link>
+                    <Link href="/auth/signin" onClick={() => setMobileMenuOpen(false)}>
+                      <Button className="w-full justify-start">
+                        Sign In
+                      </Button>
+                    </Link>
+                  </>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
 
           <Link href="/" className="flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white border border-primary">

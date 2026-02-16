@@ -7,11 +7,12 @@ import { eq } from "drizzle-orm";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { songId: string } }
+  { params }: { params: Promise<{ songId: string }> }
 ) {
+  const resolvedParams = await params;
   console.log("\n" + "=".repeat(80));
   console.log("📤 [SUBMIT SONG] Endpoint called");
-  console.log(`📌 Song ID: ${params.songId}`);
+  console.log(`📌 Song ID: ${resolvedParams.songId}`);
 
   try {
     // Get authenticated user
@@ -31,11 +32,11 @@ export async function POST(
     const songRecords = await db
       .select()
       .from(songs)
-      .where(eq(songs.id, params.songId))
+      .where(eq(songs.id, resolvedParams.songId))
       .limit(1);
 
     if (!songRecords || songRecords.length === 0) {
-      console.error("❌ [SUBMIT SONG] Song not found:", params.songId);
+      console.error("❌ [SUBMIT SONG] Song not found:", resolvedParams.songId);
       return NextResponse.json({ error: "Song not found" }, { status: 404 });
     }
 
@@ -99,7 +100,7 @@ export async function POST(
           status: "submitted",
           updatedAt: now,
         })
-        .where(eq(songs.id, params.songId));
+        .where(eq(songs.id, resolvedParams.songId));
 
       console.log("✅ [SUBMIT SONG] Song status updated to 'submitted'");
     } catch (dbError) {
@@ -114,7 +115,7 @@ export async function POST(
     const updatedSongRecords = await db
       .select()
       .from(songs)
-      .where(eq(songs.id, params.songId))
+      .where(eq(songs.id, resolvedParams.songId))
       .limit(1);
 
     const updatedSong = updatedSongRecords[0];
@@ -122,11 +123,11 @@ export async function POST(
     const allTracks = await db
       .select()
       .from(tracks)
-      .where(eq(tracks.songId, params.songId));
+      .where(eq(tracks.songId, resolvedParams.songId));
 
     console.log("\n" + "=".repeat(80));
     console.log("✨ [SUCCESS] Song submitted successfully");
-    console.log("📌 [RESULT] Song ID:", params.songId);
+    console.log("📌 [RESULT] Song ID:", resolvedParams.songId);
     console.log("📌 [RESULT] Status:", updatedSong.status);
     console.log("=".repeat(80) + "\n");
 

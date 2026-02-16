@@ -87,12 +87,34 @@ const UserProfilePage = () => {
   // Tab state logic
   const tabNames = [
     { value: "personal", label: "Profile" },
+    { value: "template", label: "Template Settings" },
     { value: "social", label: "Social Media" },
     { value: "banking", label: "Banking" },
     { value: "files", label: "Files" },
     { value: "security", label: "Security" },
     { value: "verification", label: "Verification" },
   ];
+    // Template selection state
+    const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+    const [customTemplates, setCustomTemplates] = useState<string[]>(["", ""]);
+    const systemTemplates = [
+      "System Template 1",
+      "System Template 2",
+      "System Template 3",
+      "System Template 4",
+      "System Template 5",
+      "System Template 6",
+      "System Template 7",
+      "System Template 8",
+      "System Template 9",
+      "System Template 10",
+      "System Template 11",
+      "System Template 12",
+    ];
+    // TODO: Fetch system default and override info from admin API
+    const [systemDefaultTemplate, setSystemDefaultTemplate] = useState<string>(systemTemplates[0]);
+    const [overrideType, setOverrideType] = useState<"none"|"day"|"week"|"month">("none");
+    const [overrideTemplate, setOverrideTemplate] = useState<string>("");
   const [activeTab, setActiveTab] = useState("personal");
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -696,6 +718,78 @@ const UserProfilePage = () => {
               )
             )}
           </TabsList>
+          {/* Template Settings Tab */}
+          <TabsContent value="template">
+            <Card>
+              <CardHeader>
+                <CardTitle>Template Settings</CardTitle>
+                <CardDescription>
+                  Select your template. Admin may override your selection for a day, week, or month.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="systemTemplate">System Templates</Label>
+                  <select
+                    id="systemTemplate"
+                    value={selectedTemplate}
+                    onChange={e => setSelectedTemplate(e.target.value)}
+                    className="w-full border rounded p-2"
+                  >
+                    <option value="">Select a template</option>
+                    {systemTemplates.map((tpl, idx) => (
+                      <option key={idx} value={tpl}>{tpl}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label>User Custom Templates (max 2)</Label>
+                  {customTemplates.map((tpl, idx) => (
+                    <Input
+                      key={idx}
+                      value={tpl}
+                      onChange={e => {
+                        const newTemplates = [...customTemplates];
+                        newTemplates[idx] = e.target.value;
+                        setCustomTemplates(newTemplates);
+                      }}
+                      placeholder={`Custom Template ${idx+1}`}
+                      className="mb-2"
+                    />
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <Label>System Default Template</Label>
+                  <Input value={systemDefaultTemplate} disabled className="mb-2" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Admin Override</Label>
+                  <select
+                    value={overrideType}
+                    onChange={e => setOverrideType(e.target.value as any)}
+                    className="w-full border rounded p-2 mb-2"
+                  >
+                    <option value="none">No override</option>
+                    <option value="day">Override for a day</option>
+                    <option value="week">Override for a week</option>
+                    <option value="month">Override for a month</option>
+                  </select>
+                  {overrideType !== "none" && (
+                    <select
+                      value={overrideTemplate}
+                      onChange={e => setOverrideTemplate(e.target.value)}
+                      className="w-full border rounded p-2"
+                    >
+                      <option value="">Select override template</option>
+                      {systemTemplates.map((tpl, idx) => (
+                        <option key={idx} value={tpl}>{tpl}</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Verification Tab */}
           <TabsContent value="verification">

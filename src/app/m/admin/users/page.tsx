@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -36,7 +37,8 @@ export default function MobileAdminUsers() {
       const response = await mobileApi.admin.getUsers(page, 20);
 
       if (response.success) {
-        setUsers(response.data?.users || response.data || []);
+        const data = response.data as User[] | { users: User[] };
+        setUsers(Array.isArray(data) ? data : data?.users || []);
       } else {
         setError(response.error || 'Failed to load users');
       }

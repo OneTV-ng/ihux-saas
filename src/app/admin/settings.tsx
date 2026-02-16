@@ -18,7 +18,56 @@ export default function SettingsMock() {
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
+          <TabsTrigger value="template">Template Management</TabsTrigger>
         </TabsList>
+                <TabsContent value="template" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Template Management</CardTitle>
+                      <CardDescription>Set system default, override, instructions, and manage templates.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="systemDefault">System Default Template</Label>
+                        <select id="systemDefault" className="w-full border rounded p-2 mb-2">
+                          <option value="">Select default template</option>
+                          {[...Array(12)].map((_, idx) => (
+                            <option key={idx} value={`System Template ${idx+1}`}>{`System Template ${idx+1}`}</option>
+                          ))}
+                        </select>
+                        <Button variant="outline">Set Default</Button>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Override User Template</Label>
+                        <select className="w-full border rounded p-2 mb-2">
+                          <option value="none">No override</option>
+                          <option value="day">Override for a day</option>
+                          <option value="week">Override for a week</option>
+                          <option value="month">Override for a month</option>
+                        </select>
+                        <select className="w-full border rounded p-2 mb-2">
+                          <option value="">Select override template</option>
+                          {[...Array(12)].map((_, idx) => (
+                            <option key={idx} value={`System Template ${idx+1}`}>{`System Template ${idx+1}`}</option>
+                          ))}
+                        </select>
+                        <Button variant="outline">Apply Override</Button>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Template Instructions</Label>
+                        <Input placeholder="Enter instructions for override template" className="mb-2" />
+                        <Button variant="outline">Save Instructions</Button>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Pre-composed System Templates</Label>
+                        {[...Array(12)].map((_, idx) => (
+                          <Input key={idx} placeholder={`System Template ${idx+1} content`} className="mb-2" />
+                        ))}
+                        <Button variant="outline">Save All Templates</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
         <TabsContent value="general" className="space-y-4">
           <Card>
             <CardHeader>

@@ -1,3 +1,9 @@
+export const signInWithFacebook = async () => {
+  await authClient.signIn.social({
+    provider: "facebook",
+    callbackURL: DEFAULT_LOGIN_REDIRECT,
+  });
+};
 import { createAuthClient } from "better-auth/react";
 import { DEFAULT_LOGIN_REDIRECT } from "@/lib/config";
 import { adminClient } from "better-auth/client/plugins";

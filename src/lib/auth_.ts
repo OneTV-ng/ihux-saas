@@ -28,7 +28,7 @@ export const auth = betterAuth({
     provider: getAuthProvider(),
     schema: {
       ...schema,
-      user: schema.user,
+      user: schema.users,
     },
   }),
   account: {

@@ -34,7 +34,7 @@ export async function GET(
       .where(eq(tracks.songId, songId));
 
     // Calculate total duration
-    const totalDuration = allTracks.reduce((sum, track) => {
+    const totalDuration = allTracks.reduce((sum: number, track: any) => {
       return sum + (track.duration || 0);
     }, 0);
 

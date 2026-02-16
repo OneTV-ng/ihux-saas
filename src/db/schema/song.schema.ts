@@ -40,9 +40,11 @@ export const songs = table("songs", {
   approvedBy: varchar("approved_by", { length: 100 }),
   approvedAt: timestamp("approved_at"),
 
-  // Tracking & Management
-  createdBy: varchar("created_by", { length: 100 }),
-  managedBy: varchar("managed_by", { length: 100 }),
+  // Publishing Information
+  productCode: varchar("product_code", { length: 50 }).unique(),
+  publishedBy: varchar("published_by", { length: 100 }),
+  publishedAt: timestamp("published_at"),
+  processingStartedAt: timestamp("processing_started_at"),
 
   // Timestamps
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -54,6 +56,8 @@ export const songs = table("songs", {
   statusIdx: index("songs_status_idx").on(t.status),
   typeIdx: index("songs_type_idx").on(t.type),
   featuredIdx: index("songs_featured_idx").on(t.isFeatured),
+  productCodeIdx: index("songs_product_code_idx").on(t.productCode),
+  publishedByIdx: index("songs_published_by_idx").on(t.publishedBy),
 }));
 
 // --- TRACKS TABLE (The Audio Files) ---

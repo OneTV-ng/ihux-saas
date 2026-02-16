@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { useArtistSongs } from "@/hooks/useSongs";
+import { Song } from "@/db/schema";
 import Navbar from "@/components/landing/navbar";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
+import { SongDetailsModal } from "@/components/admin/song-details-modal";
 import {
   Card,
   CardContent,
@@ -43,6 +45,15 @@ import {
   Eye,
   Download,
 } from "lucide-react";
+import { mobileApi } from "@/lib/mobile-api-client";
+
+interface Track {
+  id: string;
+  title: string;
+  duration?: number;
+  isrc?: string;
+  explicit?: string;
+}
 
 const ArtistSongsPage = () => {
   const router = useRouter();
@@ -62,13 +73,18 @@ const ArtistSongsPage = () => {
     fetchData,
   } = useArtistSongs(artistId);
 
+  const [selectedSong, setSelectedSong] = useState<Song | null>(null);
+  const [selectedTracks, setSelectedTracks] = useState<Track[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [loadingTracks, setLoadingTracks] = useState(false);
+
   useEffect(() => {
     if (isLoading) return;
     if (!isAuthenticated) {
       router.replace("/login?redirect=/desk/artist/songs");
       return;
     }
-    if (user && user.isUserVerified === false) {
+    if (user && user.emailVerified === false) {
       router.replace("/desk/profile#verification");
       return;
     }
@@ -79,6 +95,30 @@ const ArtistSongsPage = () => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [artistId, search, page, pageSize, isAuthenticated, isLoading, user]);
+
+  const handleViewSongDetails = async (song: Song) => {
+    try {
+      setLoadingTracks(true);
+      setSelectedSong(song);
+
+      // Fetch full song details with tracks
+      const response = await mobileApi.songs.getSong(song.id);
+
+      if (response.success) {
+        const data = response.data as any;
+        setSelectedTracks(data?.tracks || []);
+      } else {
+        setSelectedTracks([]);
+      }
+
+      setModalOpen(true);
+    } catch (err) {
+      console.error("Error loading song details:", err);
+      setModalOpen(true);
+    } finally {
+      setLoadingTracks(false);
+    }
+  };
 
   const totalSongs = total;
   const totalPlays = songs.reduce((sum, s) => sum + (s.plays || 0), 0);
@@ -153,6 +193,7 @@ const ArtistSongsPage = () => {
               <Table className="min-w-[600px]">
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Cover</TableHead>
                     <TableHead>Title</TableHead>
                     <TableHead>Album</TableHead>
                     <TableHead>Release Date</TableHead>
@@ -165,29 +206,46 @@ const ArtistSongsPage = () => {
                 <TableBody>
                   {loading && (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center">Loading...</TableCell>
+                      <TableCell colSpan={8} className="text-center">Loading...</TableCell>
                     </TableRow>
                   )}
                   {error && (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-red-500">{error}</TableCell>
+                      <TableCell colSpan={8} className="text-center text-red-500">{error}</TableCell>
                     </TableRow>
                   )}
                   {!loading && !error && songs.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center">No songs found.</TableCell>
+                      <TableCell colSpan={8} className="text-center">No songs found.</TableCell>
                     </TableRow>
                   )}
                   {songs.map((song) => (
                     <TableRow key={song.id}>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-primary/20 to-primary/5 rounded flex items-center justify-center">
-                            <Music className="h-5 w-5 text-primary" />
-                          </div>
-                          {song.title}
+                      <TableCell>
+                        <div className="relative w-10 h-10 rounded overflow-hidden bg-muted flex-shrink-0">
+                          {(song as any).cover ? (
+                            <img
+                              src={(song as any).cover}
+                              alt={song.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/30 to-primary/10">
+                              <Music className="h-5 w-5 text-primary" />
+                            </div>
+                          )}
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleViewSongDetails(song);
+                            }}
+                            className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 transition flex items-center justify-center"
+                          >
+                            <Eye className="w-4 h-4 text-white" />
+                          </button>
                         </div>
                       </TableCell>
+                      <TableCell className="font-medium">{song.title}</TableCell>
                       <TableCell>{song.album}</TableCell>
                       <TableCell>{song.releaseDate}</TableCell>
                       <TableCell>{song.duration}</TableCell>
@@ -241,6 +299,20 @@ const ArtistSongsPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Song Details Modal */}
+      {selectedSong && (
+        <SongDetailsModal
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+          song={selectedSong as any}
+          tracks={selectedTracks}
+          onCopy={(text, label) => {
+            navigator.clipboard.writeText(text);
+          }}
+        />
+      )}
+
       <MobileBottomNav />
     </div>
   );
