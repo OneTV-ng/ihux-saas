@@ -24,7 +24,8 @@ language: string         // Language (default: 'English')
 producer?: string        // Producer name
 writer?: string         // Writer/composer name
 recordLabel?: string    // Record label name (max 255)
-featured?: text         // Featured artists info
+featured?: text         // Featured artiststive info .env.example with place holders
+//  info
 upc?: string           // Universal Product Code (max 50)
 ```
 

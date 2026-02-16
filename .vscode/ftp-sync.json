@@ -1,0 +1,10 @@
+{
+"remotePath": "/var/app/singft/",
+"host": "imediaport.com",
+"username": "dxl",
+"password": "${env:HOST_PASS}",
+"port": 21,
+"secure": false,
+"protocol": "sftp"
+
+}

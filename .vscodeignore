@@ -1,0 +1,15 @@
+.vscode/**
+typings/**
+test/**
+.gitignore
+jsconfig.json
+vsc-extension-quickstart.md
+.env.local
+package-lock.json
+README.md
+CHANGELOG.md
+LICENSE
+.vscode/ftp-sync.json
+.vscode
+package.json
+.env.production

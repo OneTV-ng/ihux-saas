@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Home, Users, Music, Settings, LayoutGrid } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,7 +29,8 @@ const navItems = [
 ];
 
 export function MobileBottomNav() {
-  const pathname = usePathname();
+  const router = useRouter();
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
 
   return (
     <nav
