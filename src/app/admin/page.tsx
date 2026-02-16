@@ -8,6 +8,7 @@ import {
   Settings,
   MoreHorizontal,
 } from "lucide-react";
+import Navbar from "@/components/admin/navbar";
 
 export default function AdminDashboard() {
   const dashboardSections = [
@@ -57,6 +58,7 @@ export default function AdminDashboard() {
 
   return (
     <section className="flex flex-col items-center justify-center h-full w-full text-center py-12 px-4">
+       <Navbar />
       <h1 className="text-3xl md:text-5xl font-bold text-primary mb-4">
         Admin Dashboard
       </h1>
