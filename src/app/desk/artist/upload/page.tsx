@@ -141,21 +141,21 @@ export default function UploadSelector() {
       description: "Upload and distribute one song",
       icon: Music,
       type: "single",
-      link: "/desk/upload?type=single"
+      link: "/desk/artist/upload/now?type=single"
     },
     {
       title: "Music Medley",
       description: "Multiple songs merged into one release (2-4 tracks)",
       icon: Layers,
       type: "medley",
-      link: "/desk/upload?type=medley"
+      link: "/desk/artist/upload/now?type=medley"
     },
     {
       title: "Multi-Track Album / EP",
       description: "Upload multiple tracks as an album (5+ tracks)",
       icon: Disc3,
       type: "album",
-      link: "/desk/upload?type=album"
+      link: "/desk/artist/upload/now?type=album"
     },
     {
       title: "Music Video",

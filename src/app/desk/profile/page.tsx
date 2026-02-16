@@ -59,6 +59,7 @@ interface UserData {
   recordLabel: string | null;
   governmentid?: string | null;
   signature?: string | null;
+  theme?: string | null;
   verificationStatus?: "updating" | "submitted" | "processing" | "flagged" | "rejected" | "suspended" | "verified";
   verificationSubmittedAt?: Date | null;
   verificationVerifiedAt?: Date | null;
@@ -87,34 +88,23 @@ const UserProfilePage = () => {
   // Tab state logic
   const tabNames = [
     { value: "personal", label: "Profile" },
-    { value: "template", label: "Template Settings" },
+    { value: "template", label: "Theme" },
     { value: "social", label: "Social Media" },
     { value: "banking", label: "Banking" },
     { value: "files", label: "Files" },
     { value: "security", label: "Security" },
     { value: "verification", label: "Verification" },
   ];
-    // Template selection state
-    const [selectedTemplate, setSelectedTemplate] = useState<string>("");
-    const [customTemplates, setCustomTemplates] = useState<string[]>(["", ""]);
-    const systemTemplates = [
-      "System Template 1",
-      "System Template 2",
-      "System Template 3",
-      "System Template 4",
-      "System Template 5",
-      "System Template 6",
-      "System Template 7",
-      "System Template 8",
-      "System Template 9",
-      "System Template 10",
-      "System Template 11",
-      "System Template 12",
-    ];
-    // TODO: Fetch system default and override info from admin API
-    const [systemDefaultTemplate, setSystemDefaultTemplate] = useState<string>(systemTemplates[0]);
-    const [overrideType, setOverrideType] = useState<"none"|"day"|"week"|"month">("none");
-    const [overrideTemplate, setOverrideTemplate] = useState<string>("");
+  // Theme selection state
+  const [selectedTheme, setSelectedTheme] = useState<string>("default");
+  const availableThemes = [
+    { id: "default", name: "Default", description: "Classic light theme with blue accents" },
+    { id: "dark", name: "Dark", description: "Dark mode with gray tones" },
+    { id: "ocean", name: "Ocean", description: "Blue and teal color palette" },
+    { id: "sunset", name: "Sunset", description: "Warm orange and purple gradients" },
+    { id: "forest", name: "Forest", description: "Green nature-inspired theme" },
+    { id: "midnight", name: "Midnight", description: "Deep purple and blue night theme" },
+  ];
   const [activeTab, setActiveTab] = useState("personal");
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -152,6 +142,7 @@ const UserProfilePage = () => {
     recordLabel: "",
     governmentid: "",
     signature: "",
+    theme: "default",
     socialMedia: {
       facebook: "",
       instagram: "",
@@ -258,6 +249,8 @@ const UserProfilePage = () => {
           return "";
         }
       };
+      const userTheme = result.data.theme || "default";
+      setSelectedTheme(userTheme);
       setFormData({
         name: result.data.name || "",
         username: result.data.username || "",
@@ -272,6 +265,7 @@ const UserProfilePage = () => {
         recordLabel: result.data.recordLabel || "",
         governmentid: result.data.governmentid || "",
         signature: result.data.signature || "",
+        theme: userTheme,
         socialMedia: {
           facebook: result.data.socialMedia?.facebook || "",
           instagram: result.data.socialMedia?.instagram || "",
@@ -348,6 +342,8 @@ const UserProfilePage = () => {
 
   const handleCancel = () => {
     if (userData) {
+      const userTheme = userData.theme || "default";
+      setSelectedTheme(userTheme);
       setFormData({
         name: userData.name || "",
         username: userData.username || "",
@@ -362,6 +358,7 @@ const UserProfilePage = () => {
         recordLabel: userData.recordLabel || "",
         governmentid: userData.governmentid || "",
         signature: userData.signature || "",
+        theme: userTheme,
         socialMedia: {
           facebook: userData.socialMedia?.facebook || "",
           instagram: userData.socialMedia?.instagram || "",
@@ -718,74 +715,87 @@ const UserProfilePage = () => {
               )
             )}
           </TabsList>
-          {/* Template Settings Tab */}
+          {/* Theme Tab */}
           <TabsContent value="template">
             <Card>
               <CardHeader>
-                <CardTitle>Template Settings</CardTitle>
+                <CardTitle>Theme Settings</CardTitle>
                 <CardDescription>
-                  Select your template. Admin may override your selection for a day, week, or month.
+                  Choose your preferred theme for the platform
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="systemTemplate">System Templates</Label>
-                  <select
-                    id="systemTemplate"
-                    value={selectedTemplate}
-                    onChange={e => setSelectedTemplate(e.target.value)}
-                    className="w-full border rounded p-2"
-                  >
-                    <option value="">Select a template</option>
-                    {systemTemplates.map((tpl, idx) => (
-                      <option key={idx} value={tpl}>{tpl}</option>
+                <div className="space-y-4">
+                  <Label htmlFor="themeSelect">Select Theme</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {availableThemes.map((theme) => (
+                      <div
+                        key={theme.id}
+                        onClick={() => {
+                          if (isEditing) {
+                            setSelectedTheme(theme.id);
+                            setFormData({ ...formData, theme: theme.id });
+                          }
+                        }}
+                        className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                          selectedTheme === theme.id
+                            ? 'border-primary bg-primary/10'
+                            : 'border-muted hover:border-primary/50'
+                        } ${!isEditing ? 'opacity-60 cursor-not-allowed' : ''}`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg mb-1">{theme.name}</h3>
+                            <p className="text-sm text-muted-foreground">{theme.description}</p>
+                          </div>
+                          {selectedTheme === theme.id && (
+                            <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 ml-2" />
+                          )}
+                        </div>
+                      </div>
                     ))}
-                  </select>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>User Custom Templates (max 2)</Label>
-                  {customTemplates.map((tpl, idx) => (
-                    <Input
-                      key={idx}
-                      value={tpl}
-                      onChange={e => {
-                        const newTemplates = [...customTemplates];
-                        newTemplates[idx] = e.target.value;
-                        setCustomTemplates(newTemplates);
-                      }}
-                      placeholder={`Custom Template ${idx+1}`}
-                      className="mb-2"
-                    />
-                  ))}
+
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    Your selected theme will be applied across the entire platform. Click Edit to change your theme preference.
+                  </p>
                 </div>
-                <div className="space-y-2">
-                  <Label>System Default Template</Label>
-                  <Input value={systemDefaultTemplate} disabled className="mb-2" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Admin Override</Label>
-                  <select
-                    value={overrideType}
-                    onChange={e => setOverrideType(e.target.value as any)}
-                    className="w-full border rounded p-2 mb-2"
-                  >
-                    <option value="none">No override</option>
-                    <option value="day">Override for a day</option>
-                    <option value="week">Override for a week</option>
-                    <option value="month">Override for a month</option>
-                  </select>
-                  {overrideType !== "none" && (
-                    <select
-                      value={overrideTemplate}
-                      onChange={e => setOverrideTemplate(e.target.value)}
-                      className="w-full border rounded p-2"
+
+                {/* Bottom Action Buttons */}
+                <div className="flex justify-end gap-2 pt-6 border-t">
+                  {isEditing && (
+                    <Button
+                      onClick={handleCancel}
+                      variant="outline"
+                      disabled={isSaving}
                     >
-                      <option value="">Select override template</option>
-                      {systemTemplates.map((tpl, idx) => (
-                        <option key={idx} value={tpl}>{tpl}</option>
-                      ))}
-                    </select>
+                      Cancel
+                    </Button>
                   )}
+                  <Button
+                    onClick={isEditing ? handleSave : () => setIsEditing(true)}
+                    variant={isEditing ? "default" : "outline"}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : isEditing ? (
+                      <>
+                        <Save className="mr-2 h-4 w-4" />
+                        Save Changes
+                      </>
+                    ) : (
+                      <>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit Profile
+                      </>
+                    )}
+                  </Button>
                 </div>
               </CardContent>
             </Card>

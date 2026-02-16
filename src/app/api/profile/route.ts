@@ -49,10 +49,15 @@ export async function GET(request: NextRequest) {
     // Fetch verification documents from user_verification table
     const verification = await getUserVerification(session.user.id);
 
+    // Extract theme from settings
+    const userSettings = userData[0].settings as any;
+    const userTheme = userSettings?.theme || "default";
+
     return NextResponse.json({
       success: true,
       data: {
         ...userData[0],
+        theme: userTheme,
         governmentid: verification?.governmentIdUrl || null,
         signature: verification?.signatureUrl || null,
         verificationStatus: verification?.status || "updating",
@@ -96,9 +101,19 @@ export async function PUT(request: NextRequest) {
       socialMedia,
       bankDetails,
       settings,
+      theme,
       governmentid,
       signature,
     } = body;
+
+    // Fetch current user data to get existing settings
+    const currentUser = await db
+      .select({ settings: users.settings })
+      .from(users)
+      .where(eq(users.id, session.user.id))
+      .limit(1);
+
+    const currentSettings = currentUser[0]?.settings as any || {};
 
     // Format dateOfBirth as YYYY-MM-DD string for database
     if (dateOfBirth && typeof dateOfBirth === 'string') {
@@ -202,6 +217,16 @@ export async function PUT(request: NextRequest) {
       updateData.settings = settings || null;
     }
 
+    // Handle theme field - merge into settings
+    if (theme !== undefined) {
+      // Merge with current settings or the new settings if provided
+      const baseSettings = settings !== undefined ? (settings || {}) : currentSettings;
+      updateData.settings = {
+        ...baseSettings,
+        theme: theme || "default",
+      };
+    }
+
     await db
       .update(users)
       .set(updateData)
@@ -256,11 +281,16 @@ export async function PUT(request: NextRequest) {
     // Fetch updated verification documents
     const updatedVerification = await getUserVerification(session.user.id);
 
+    // Extract theme from settings
+    const updatedSettings = updatedUser[0].settings as any;
+    const updatedTheme = updatedSettings?.theme || "default";
+
     return NextResponse.json({
       success: true,
       message: "Profile updated successfully",
       data: {
         ...updatedUser[0],
+        theme: updatedTheme,
         governmentid: updatedVerification?.governmentIdUrl || null,
         signature: updatedVerification?.signatureUrl || null,
         verificationStatus: updatedVerification?.status || "updating",
